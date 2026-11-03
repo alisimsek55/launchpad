@@ -12,13 +12,13 @@ Format:
 
 ## Açık işler
 
-- [ ] **GitHub `launchpad` reposunu aç ve push et** (eklenme: 2026-11-03)
-  - Durum: `gh` kuruldu, git repo `main` dalında başlatıldı, dosyalar stage edildi. `gh auth login` kullanıcı tarafından bekleniyor. `.env.example` izin kuralı nedeniyle oluşturulamadı.
-  - Sonraki adım: Login sonrası git kimliğini ayarla, ilk commit'i at, `gh repo create launchpad --private --source . --push`.
-
 - [ ] **Projeyi kalıcı klasöre taşı** (eklenme: 2026-11-03)
-  - Durum: Tüm dosyalar oturumla birlikte silinecek geçici klasörde. Öneri: OneDrive dışında, örn. `C:\Users\alisi\projects\`.
-  - Sonraki adım: Kullanıcı onay verince klasöre taşı.
+  - Durum: Kod artık GitHub'da (`alisimsek55/launchpad`) güvende, ama yerel çalışma klasörü hâlâ oturumla silinecek geçici klasör. Öneri: OneDrive dışında, örn. `C:\Users\alisi\projects\launchpad`.
+  - Sonraki adım: Kullanıcı onay verince oturumu kalıcı klasöre taşı (veya repoyu oraya clone et).
+
+- [ ] **`.env.example` şablonu** (eklenme: 2026-11-03)
+  - Durum: `~/.claude/settings.json`'daki `Read(**/.env.*)` deny kuralı nedeniyle Claude oluşturamıyor. Kullanıcı kuralı korumayı seçti.
+  - Sonraki adım: Faz 0'da gerçekten gerektiğinde içeriği sohbete yaz, kullanıcı elle oluştursun.
 
 - [ ] **Faz 0 — Kurulum** (eklenme: 2026-11-03)
   - Durum: Başlanmadı; taşıma işine bağlı.

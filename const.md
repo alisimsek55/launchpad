@@ -9,6 +9,13 @@ Durum etiketleri:
 
 ---
 
+## Repo
+
+| Ad | Değer | Durum |
+|---|---|---|
+| GitHub | `https://github.com/alisimsek55/launchpad` (private) | ✅ |
+| Varsayılan dal | `main` | ✅ |
+
 ## Ağ: Robinhood Chain
 
 | Ad | Mainnet | Testnet | Durum |
