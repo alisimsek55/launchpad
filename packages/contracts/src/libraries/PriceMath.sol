@@ -11,6 +11,7 @@ library PriceMath {
         uint256 ratioX192 = tokenIsToken0
             ? Math.mulDiv(Constants.GRADUATION_ETH, 1 << 192, Constants.LP_SUPPLY)
             : Math.mulDiv(Constants.LP_SUPPLY, 1 << 192, Constants.GRADUATION_ETH);
+        // forge-lint: disable-next-line(unsafe-typecast) -- ratio < 2^218 => sqrt < 2^109, uint160'a sığar
         return uint160(Math.sqrt(ratioX192));
     }
 

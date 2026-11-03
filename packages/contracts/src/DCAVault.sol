@@ -4,6 +4,7 @@ pragma solidity ^0.8.28;
 import {Ownable, Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {BondingCurve} from "./BondingCurve.sol";
 import {Constants as C} from "./Constants.sol";
 
@@ -25,6 +26,8 @@ interface ISwapRouter02 {
 /// Token curve'deyse BondingCurve'den, graduate olduysa Uniswap v3'ten alınır; token'lar doğrudan
 /// plan sahibine gider. v1'de execute sadece izinli keeper'lara açıktır (bkz. notes.md §11).
 contract DCAVault is Ownable2Step, ReentrancyGuard {
+    using SafeCast for uint256;
+
     struct Plan {
         address owner;
         address token;
@@ -67,9 +70,12 @@ contract DCAVault is Ownable2Step, ReentrancyGuard {
     error NotOwner();
     error TooEarly();
     error PlanFinished();
-    error PriceTooHigh();
+    error ZeroAddress();
 
     constructor(address owner_, BondingCurve curve_, ISwapRouter02 router_, address weth_) Ownable(owner_) {
+        if (address(curve_) == address(0) || address(router_) == address(0) || weth_ == address(0)) {
+            revert ZeroAddress();
+        }
         curve = curve_;
         router = router_;
         weth = weth_;
@@ -84,6 +90,7 @@ contract DCAVault is Ownable2Step, ReentrancyGuard {
         nonReentrant
         returns (uint256 planId)
     {
+        // forge-lint: disable-next-line(unused-return) -- sadece creator alanı gerekli
         (,,,, address creator,,) = curve.curves(token);
         if (creator == address(0)) revert InvalidPlan(); // sadece launchpad token'ları
         if (ethPerBuy == 0 || count == 0 || count > MAX_BUYS || interval < MIN_INTERVAL) revert InvalidPlan();
@@ -93,8 +100,8 @@ contract DCAVault is Ownable2Step, ReentrancyGuard {
         plans[planId] = Plan({
             owner: msg.sender,
             token: token,
-            ethPerBuy: uint128(ethPerBuy),
-            balance: uint128(msg.value),
+            ethPerBuy: ethPerBuy.toUint128(),
+            balance: msg.value.toUint128(),
             interval: interval,
             lastExecuted: 0,
             executions: 0,
@@ -122,6 +129,7 @@ contract DCAVault is Ownable2Step, ReentrancyGuard {
         Plan storage p = plans[planId];
         if (p.owner == address(0)) revert InvalidPlan();
         if (p.balance == 0) revert PlanFinished();
+        // forge-lint: disable-next-line(block-timestamp) -- saat/gün ölçeğinde aralık; birkaç sn sapma önemsiz
         if (p.lastExecuted != 0 && block.timestamp < uint256(p.lastExecuted) + p.interval) revert TooEarly();
 
         // Son alım: iadelerden kalan küsurat da harcanır
@@ -131,11 +139,12 @@ contract DCAVault is Ownable2Step, ReentrancyGuard {
             if (userMin > minTokensOut) minTokensOut = userMin;
         }
 
-        p.balance -= uint128(ethIn);
-        p.lastExecuted = uint40(block.timestamp);
+        p.balance -= ethIn.toUint128();
+        p.lastExecuted = block.timestamp.toUint40();
         p.executions += 1;
 
         uint256 before = address(this).balance;
+        // forge-lint: disable-next-line(unused-return) -- sadece graduated alanı gerekli
         (,,,,,, bool graduated) = curve.curves(p.token);
         if (graduated) {
             tokensOut = router.exactInputSingle{value: ethIn}(
@@ -154,8 +163,10 @@ contract DCAVault is Ownable2Step, ReentrancyGuard {
         }
         // Curve, eşiği aşan alımda fazla ETH'yi iade eder: plana geri yaz.
         uint256 refunded = address(this).balance - (before - ethIn);
-        if (refunded > 0) p.balance += uint128(refunded);
+        if (refunded > 0) p.balance += refunded.toUint128();
 
+        // Alınan miktar harici çağrının sonucu; execute nonReentrant ve sadece izinli keeper çağırabilir.
+        // forge-lint: disable-next-line(reentrancy-events)
         emit DCAExecuted(planId, ethIn - refunded, tokensOut, graduated);
     }
 
@@ -169,12 +180,14 @@ contract DCAVault is Ownable2Step, ReentrancyGuard {
     function isDue(uint256 planId) external view returns (bool) {
         Plan storage p = plans[planId];
         if (p.owner == address(0) || p.balance == 0) return false;
+        // forge-lint: disable-next-line(block-timestamp)
         return p.lastExecuted == 0 || block.timestamp >= uint256(p.lastExecuted) + p.interval;
     }
 
     // ---------------------------------------------------------------- admin
 
     function setKeeper(address keeper, bool allowed) external onlyOwner {
+        // forge-lint: disable-next-line(missing-events-access-control) -- KeeperSet hemen ardından yayınlanıyor
         isKeeper[keeper] = allowed;
         emit KeeperSet(keeper, allowed);
     }

@@ -36,14 +36,15 @@ contract FeeVault is Ownable2Step, ReentrancyGuard {
         amount = creatorBalance[msg.sender];
         if (amount == 0) revert NothingToClaim();
         creatorBalance[msg.sender] = 0;
-        Address.sendValue(payable(msg.sender), amount);
         emit CreatorFeesClaimed(msg.sender, amount);
+        Address.sendValue(payable(msg.sender), amount);
     }
 
     function withdrawProtocolFees(address payable to, uint256 amount) external nonReentrant onlyOwner {
         if (amount > protocolBalance) revert InsufficientBalance();
         protocolBalance -= amount;
-        Address.sendValue(to, amount);
         emit ProtocolFeesWithdrawn(to, amount);
+        // forge-lint: disable-next-line(arbitrary-send-eth) -- sadece owner (multisig), kendi seçtiği adrese
+        Address.sendValue(to, amount);
     }
 }

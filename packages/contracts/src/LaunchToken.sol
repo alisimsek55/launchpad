@@ -19,8 +19,10 @@ contract LaunchToken is ERC20 {
     error OnlyCurve();
     error PoolAlreadySet();
     error TransferToPoolBeforeGraduation();
+    error ZeroAddress();
 
     constructor(string memory name_, string memory symbol_, address curve_) ERC20(name_, symbol_) {
+        if (curve_ == address(0)) revert ZeroAddress();
         factory = msg.sender;
         curve = curve_;
         _mint(curve_, Constants.TOTAL_SUPPLY);
@@ -29,6 +31,7 @@ contract LaunchToken is ERC20 {
     function setPool(address pool_) external {
         if (msg.sender != factory) revert OnlyFactory();
         if (pool != address(0)) revert PoolAlreadySet();
+        if (pool_ == address(0)) revert ZeroAddress();
         pool = pool_;
     }
 

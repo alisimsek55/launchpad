@@ -12,9 +12,9 @@ Format:
 
 ## Açık işler
 
-- [ ] **Faz 5 — Lansman hazırlığı** (eklenme: 2026-11-03)
-  - Durum: Başlandı.
-  - Sonraki adım: forge lint uyarılarını kapat/gerekçelendir → büyük WETH likiditesiyle manipülasyon testi → CI (GitHub Actions) → audit kapsam dokümanı → deploy runbook. Gerçek deploy ve audit kullanıcı kararı/hesabı gerektirir.
+- [ ] **Faz 5 — Lansman: kullanıcı adımları** (eklenme: 2026-11-03)
+  - Durum: Kod tarafı hazır (lint temiz, manipülasyon DoS'u düzeltildi, CI, audit kapsamı, deploy runbook, deploy dry-run başarılı). Kalanlar kullanıcıya ait: audit firması, Safe multisig, deployer/keeper cüzdanları, Alchemy, Privy, Goldsky, R2, hosting hesapları.
+  - Sonraki adım: `reports/deploy-runbook.md` §0–1'deki [SEN] adımları. Hesaplar açılınca Echo §2–6'yı yürütür.
 
 - [ ] **Privy ile gerçek giriş testi** (eklenme: 2026-11-03)
   - Durum: Kod hazır (`apps/web/src/wallet/PrivyProviders.tsx`); app ID olmadan test edilemedi.
@@ -23,14 +23,6 @@ Format:
 - [ ] **Goldsky subgraph deploy'u** (eklenme: 2026-11-03)
   - Durum: Subgraph derleniyor; adresler sıfır. Mainnet sözleşme deploy'una ve kullanıcının Goldsky hesabına bağlı.
   - Sonraki adım: Mainnet deploy sonrası `subgraph.yaml` adres/startBlock'larını doldur, `goldsky subgraph deploy` (kullanıcı hesap açınca).
-
-- [ ] **Audit hazırlığı: forge lint uyarıları ve uç durumlar** (eklenme: 2026-11-03)
-  - Durum: Faz 1 raporunda listelendi (reports/2026-11-03-faz1-sozlesmeler.md, "Bilinen açık noktalar").
-  - Sonraki adım: Faz 5'te uyarıları tek tek kapat veya gerekçelendir; büyük WETH likiditesiyle manipülasyon uç testi ekle.
-
-- [ ] **Chainlink Automation desteğini teyit et** (eklenme: 2026-11-03)
-  - Durum: Bulunamadı; v1 kararı kendi keeper'ımız, bu yüzden acil değil.
-  - Sonraki adım: Chainlink Automation "Supported Networks" sayfasını kontrol et.
 
 - [ ] **Robinhood sequencer sıralama politikasını doğrula** (eklenme: 2026-11-03)
   - Durum: Arbitrum Orbit varsayımıyla FCFS kabul edildi; MEV stratejisi buna dayanıyor.

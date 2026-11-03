@@ -21,7 +21,8 @@ contract Graduator {
     INonfungiblePositionManager public immutable positionManager;
     FeeVault public immutable feeVault;
 
-    address private activePool; // swap callback yetkisi için
+    /// Swap callback yetkisi; sadece tx süresince yaşar (EIP-1153 transient storage)
+    address private transient activePool;
 
     event Graduated(
         address indexed token,
@@ -34,6 +35,7 @@ contract Graduator {
 
     error OnlyCurve();
     error UnauthorizedCallback();
+    error ZeroAddress();
     error OnlyWeth();
 
     constructor(
@@ -43,6 +45,10 @@ contract Graduator {
         INonfungiblePositionManager positionManager_,
         FeeVault feeVault_
     ) {
+        if (
+            curve_ == address(0) || address(locker_) == address(0) || address(weth_) == address(0)
+                || address(positionManager_) == address(0) || address(feeVault_) == address(0)
+        ) revert ZeroAddress();
         curve = curve_;
         locker = locker_;
         weth = weth_;
@@ -61,7 +67,10 @@ contract Graduator {
         // Pool, launch'ta hedef fiyatla initialize edildi. Biri likiditesiz pool'da fiyatı
         // oynattıysa geri çek. Token transferi pool'a kapalı olduğu için saldırgan sadece WETH
         // likiditesi ekleyebilir; bu da düzeltme swap'ını bizim için zararsız (hatta kârlı) yapar.
+        // Çok derin WETH likiditesinde fiyat hedefe tam inmeyebilir; o zaman LP mevcut (daha yüksek)
+        // fiyattan açılır ve piyasa (token sahiplerinin satışları) fiyatı aşağı çeker.
         uint160 target = PriceMath.targetSqrtPriceX96(tokenIsToken0);
+        // forge-lint: disable-next-line(unused-return) -- sadece fiyat gerekli
         (uint160 current,,,,,,) = IUniswapV3Pool(pool).slot0();
         if (current != target) _movePrice(pool, current > target, target, token0, token1);
 
@@ -70,6 +79,8 @@ contract Graduator {
         IERC20(token0).forceApprove(address(positionManager), amount0);
         IERC20(token1).forceApprove(address(positionManager), amount1);
 
+        // liquidity değeri gerekmiyor
+        // forge-lint: disable-start(unused-return)
         (uint256 positionId,, uint256 used0, uint256 used1) = positionManager.mint(
             INonfungiblePositionManager.MintParams({
                 token0: token0,
@@ -85,6 +96,7 @@ contract Graduator {
                 deadline: block.timestamp
             })
         );
+        // forge-lint: disable-end(unused-return)
         locker.register(positionId, token, creator);
 
         // Yuvarlama artıkları: token yakılır, WETH protokole gider.
@@ -96,17 +108,22 @@ contract Graduator {
             feeVault.depositFees{value: leftoverWeth}(address(0), leftoverWeth, 0);
         }
 
+        // forge-lint: disable-next-line(unused-return) -- sadece fiyat gerekli
         (uint160 finalPrice,,,,,,) = IUniswapV3Pool(pool).slot0();
         (uint256 ethUsed, uint256 tokenUsed) = tokenIsToken0 ? (used1, used0) : (used0, used1);
+        // Graduated, final pool fiyatını içerdiği için sonda yayınlanır; çağıran sadece BondingCurve (nonReentrant).
+        // forge-lint: disable-next-line(reentrancy-events)
         emit Graduated(token, pool, positionId, ethUsed, tokenUsed, finalPrice);
     }
 
     function uniswapV3SwapCallback(int256 amount0Delta, int256 amount1Delta, bytes calldata) external {
         if (msg.sender != activePool) revert UnauthorizedCallback();
         if (amount0Delta > 0) {
+            // forge-lint: disable-next-line(unsafe-typecast) -- amount0Delta > 0 kontrol edildi
             IERC20(IUniswapV3Pool(msg.sender).token0()).safeTransfer(msg.sender, uint256(amount0Delta));
         }
         if (amount1Delta > 0) {
+            // forge-lint: disable-next-line(unsafe-typecast) -- amount1Delta > 0 kontrol edildi
             IERC20(IUniswapV3Pool(msg.sender).token1()).safeTransfer(msg.sender, uint256(amount1Delta));
         }
     }
@@ -117,8 +134,14 @@ contract Graduator {
     }
 
     function _movePrice(address pool, bool zeroForOne, uint160 target, address token0, address token1) private {
-        uint256 amountIn = IERC20(zeroForOne ? token0 : token1).balanceOf(address(this));
+        // En fazla bakiyenin YARISI: saldırgan araya derin WETH likiditesi koyarsa tüm token'ı satıp
+        // likiditesiz kalmayalım (aksi halde mint revert eder ve token hiç graduate olamaz = DoS).
+        // Normal durumda (boş pool) fiyatı oynatmak bedavadır; yarısı fazlasıyla yeter.
+        uint256 amountIn = IERC20(zeroForOne ? token0 : token1).balanceOf(address(this)) / 2;
+        // forge-lint: disable-next-line(missing-events-access-control) -- tx içi geçici (transient) kilit
         activePool = pool;
+        // Dönen tutarlara gerek yok: sonrasında kalan bakiyeler okunuyor.
+        // forge-lint: disable-next-line(unsafe-typecast,unused-return) -- amountIn bir ERC20 bakiyesi (< 2^255)
         IUniswapV3Pool(pool).swap(address(this), zeroForOne, int256(amountIn), target, "");
         activePool = address(0);
     }

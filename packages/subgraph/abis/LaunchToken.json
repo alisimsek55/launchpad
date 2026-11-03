@@ -419,5 +419,10 @@
     "type": "error",
     "name": "TransferToPoolBeforeGraduation",
     "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroAddress",
+    "inputs": []
   }
 ]

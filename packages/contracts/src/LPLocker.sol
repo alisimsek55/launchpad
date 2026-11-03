@@ -34,8 +34,15 @@ contract LPLocker is ReentrancyGuard {
     error OnlyGraduator();
     error UnknownToken();
     error OnlyWeth();
+    error ZeroAddress();
+
+    event Initialized(address graduator);
 
     constructor(INonfungiblePositionManager positionManager_, IWETH9 weth_, FeeVault feeVault_, address treasury_) {
+        if (
+            address(positionManager_) == address(0) || address(weth_) == address(0) || address(feeVault_) == address(0)
+                || treasury_ == address(0)
+        ) revert ZeroAddress();
         positionManager = positionManager_;
         weth = weth_;
         feeVault = feeVault_;
@@ -45,7 +52,9 @@ contract LPLocker is ReentrancyGuard {
 
     function initialize(address graduator_) external {
         if (msg.sender != deployer || graduator != address(0)) revert AlreadyInitialized();
+        if (graduator_ == address(0)) revert ZeroAddress();
         graduator = graduator_;
+        emit Initialized(graduator_);
     }
 
     function register(uint256 positionId, address token, address creator) external {
@@ -79,6 +88,8 @@ contract LPLocker is ReentrancyGuard {
             IERC20(token).safeTransfer(treasury, protocolPart);
             IERC20(token).safeTransfer(p.creator, tokenAmount - protocolPart);
         }
+        // Tutarlar collect çağrısından geliyor; tüm akış nonReentrant.
+        // forge-lint: disable-next-line(reentrancy-events)
         emit LPFeesCollected(token, ethAmount, tokenAmount);
     }
 

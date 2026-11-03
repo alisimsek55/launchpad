@@ -6,6 +6,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {Constants as C} from "./Constants.sol";
 import {FeeVault} from "./FeeVault.sol";
 import {LaunchToken} from "./LaunchToken.sol";
@@ -20,6 +21,7 @@ interface IGraduator {
 /// Yuvarlama her zaman curve lehinedir; bu yüzden k hiçbir işlemde azalmaz.
 contract BondingCurve is ReentrancyGuard {
     using SafeERC20 for IERC20;
+    using SafeCast for uint256;
 
     struct Curve {
         uint128 virtualEth; // x
@@ -62,6 +64,9 @@ contract BondingCurve is ReentrancyGuard {
     error ZeroAmount();
     error Slippage();
     error DevBuyTooLarge();
+    error ZeroAddress();
+
+    event Initialized(address factory, address graduator);
 
     modifier onlyFactory() {
         if (msg.sender != factory) revert OnlyFactory();
@@ -69,6 +74,7 @@ contract BondingCurve is ReentrancyGuard {
     }
 
     constructor(FeeVault feeVault_) {
+        if (address(feeVault_) == address(0)) revert ZeroAddress();
         feeVault = feeVault_;
         deployer = msg.sender;
     }
@@ -76,18 +82,20 @@ contract BondingCurve is ReentrancyGuard {
     /// Deploy sırasında bir kez çağrılır (döngüsel bağımlılık nedeniyle constructor'da verilemiyor).
     function initialize(address factory_, address graduator_) external {
         if (msg.sender != deployer || factory != address(0)) revert AlreadyInitialized();
+        if (factory_ == address(0) || graduator_ == address(0)) revert ZeroAddress();
         factory = factory_;
         graduator = IGraduator(graduator_);
+        emit Initialized(factory_, graduator_);
     }
 
     function register(address token, address creator) external onlyFactory {
         curves[token] = Curve({
-            virtualEth: uint128(C.VIRTUAL_ETH),
-            virtualToken: uint128(C.VIRTUAL_TOKEN),
+            virtualEth: C.VIRTUAL_ETH.toUint128(),
+            virtualToken: C.VIRTUAL_TOKEN.toUint128(),
             realEth: 0,
             tokensSold: 0,
             creator: creator,
-            launchTime: uint40(block.timestamp),
+            launchTime: block.timestamp.toUint40(),
             graduated: false
         });
     }
@@ -100,6 +108,7 @@ contract BondingCurve is ReentrancyGuard {
         nonReentrant
         returns (uint256 tokensOut)
     {
+        // forge-lint: disable-next-line(block-timestamp) -- deadline kontrolü; birkaç sn sapma önemsiz
         if (block.timestamp > deadline) revert Expired();
         Curve storage c = _active(token);
         uint256 feeBps = PriceMath.buyFeeBps(block.timestamp - c.launchTime);
@@ -123,6 +132,7 @@ contract BondingCurve is ReentrancyGuard {
         nonReentrant
         returns (uint256 ethOut)
     {
+        // forge-lint: disable-next-line(block-timestamp) -- deadline kontrolü; birkaç sn sapma önemsiz
         if (block.timestamp > deadline) revert Expired();
         if (tokenIn == 0) revert ZeroAmount();
         Curve storage c = _active(token);
@@ -140,13 +150,14 @@ contract BondingCurve is ReentrancyGuard {
         ethOut = ethFromCurve - fee;
         if (ethOut < minEthOut) revert Slippage();
 
-        c.virtualEth = uint128(newX);
-        c.virtualToken = uint128(newY);
-        c.realEth -= uint128(ethFromCurve);
-        c.tokensSold -= uint128(tokenIn);
+        c.virtualEth = newX.toUint128();
+        c.virtualToken = newY.toUint128();
+        c.realEth -= ethFromCurve.toUint128();
+        c.tokensSold -= tokenIn.toUint128();
 
         _settleFeesAndEmit(token, c, msg.sender, false, ethFromCurve, tokenIn, fee);
 
+        // forge-lint: disable-next-line(arbitrary-send-eth) -- satıcının kendi seçtiği alıcı, son adım, nonReentrant
         Address.sendValue(payable(recipient), ethOut);
     }
 
@@ -207,7 +218,7 @@ contract BondingCurve is ReentrancyGuard {
         if (tokensOut > maxTokens) revert DevBuyTooLarge();
 
         // Eşiği aşan son alım: kalan token'la sınırlanır, fazla ETH iade edilir.
-        uint256 refund;
+        uint256 refund = 0;
         if (tokensOut >= remaining) {
             tokensOut = remaining;
             ethToCurve = Math.mulDiv(x, y, y - remaining, Math.Rounding.Ceil) - x;
@@ -220,15 +231,16 @@ contract BondingCurve is ReentrancyGuard {
 
         uint256 newX = x + ethToCurve;
         uint256 newY = y - tokensOut;
-        c.virtualEth = uint128(newX);
-        c.virtualToken = uint128(newY);
-        c.realEth += uint128(ethToCurve);
-        c.tokensSold += uint128(tokensOut);
+        c.virtualEth = newX.toUint128();
+        c.virtualToken = newY.toUint128();
+        c.realEth += ethToCurve.toUint128();
+        c.tokensSold += tokensOut.toUint128();
 
         IERC20(token).safeTransfer(recipient, tokensOut);
         _settleFeesAndEmit(token, c, recipient, true, ethToCurve, tokensOut, fee);
 
         if (c.tokensSold == C.CURVE_SUPPLY) _graduate(token, c);
+        // forge-lint: disable-next-line(arbitrary-send-eth) -- fazla ETH ödeyene iade, son adım, nonReentrant
         if (refund > 0) Address.sendValue(payable(msg.sender), refund);
     }
 
@@ -236,6 +248,7 @@ contract BondingCurve is ReentrancyGuard {
         c.graduated = true;
         LaunchToken(token).markGraduated();
         IERC20(token).safeTransfer(address(graduator), IERC20(token).balanceOf(address(this)));
+        // forge-lint: disable-next-line(arbitrary-send-eth) -- alıcı sabit, initialize ile atanan kendi Graduator sözleşmemiz
         graduator.graduate{value: c.realEth}(token, c.creator);
     }
 
@@ -251,7 +264,9 @@ contract BondingCurve is ReentrancyGuard {
     ) private {
         uint256 protocolFee = (fee * C.PROTOCOL_FEE_BPS) / C.TRADE_FEE_BPS;
         uint256 creatorFee = fee - protocolFee;
-        if (fee > 0) feeVault.depositFees{value: fee}(c.creator, protocolFee, creatorFee);
+        // Event fee kasasına yapılan çağrıdan önce. Öncesindeki tek harici çağrı kendi LaunchToken'ımıza
+        // (hook yok) ve tüm akış nonReentrant.
+        // forge-lint: disable-start(reentrancy-events)
         emit Trade(
             token,
             trader,
@@ -265,5 +280,7 @@ contract BondingCurve is ReentrancyGuard {
             c.realEth,
             block.timestamp
         );
+        // forge-lint: disable-end(reentrancy-events)
+        if (fee > 0) feeVault.depositFees{value: fee}(c.creator, protocolFee, creatorFee);
     }
 }

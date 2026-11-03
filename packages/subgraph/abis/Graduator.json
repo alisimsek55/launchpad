@@ -208,5 +208,10 @@
     "type": "error",
     "name": "UnauthorizedCallback",
     "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroAddress",
+    "inputs": []
   }
 ]

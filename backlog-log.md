@@ -12,6 +12,18 @@ Format:
 ---
 
 ## 2026-11-03 — Faz 5 — Lansman hazırlığı
+- Olay: GÜNCELLENDİ
+- Not: Kod tarafı tamamlandı: forge lint 0 uyarı (gerçek düzeltmeler: SafeCast, sıfır adres kontrolleri, init event'leri, CEI sırası, transient storage; kalan bilinçli istisnalar gerekçeli). Manipülasyon fuzz testi gerçek bir DoS buldu (derin WETH likiditesi tüm token'ı tüketip graduation'ı kilitliyordu) → düzeltme swap'ı bakiyenin yarısıyla sınırlandı. CI workflow, reports/audit-scope.md, reports/deploy-runbook.md, deploy dry-run (8.1M gas). Kalanlar kullanıcı hesapları.
+
+## 2026-11-03 — Audit hazırlığı: forge lint uyarıları ve uç durumlar
+- Olay: TAMAMLANDI
+- Not: Faz 5 kapsamında kapatıldı (yukarıya bkz.).
+
+## 2026-11-03 — Chainlink Automation desteğini teyit et
+- Olay: İPTAL
+- Not: v1'de kendi keeper'ımız (apps/keeper) yazıldı ve çalışıyor; Chainlink Automation'a gerek kalmadı.
+
+## 2026-11-03 — Faz 5 — Lansman hazırlığı
 - Olay: EKLENDİ
 
 ## 2026-11-03 — Faz 4 — DCA + Analytics + Docs

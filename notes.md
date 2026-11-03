@@ -244,9 +244,11 @@ event DCAPlanCancelled(uint256 indexed planId, uint256 refund);
 - Fee: %1 (%0.7 protokol / %0.3 creator), graduation fee'si yok
 - MEV: zorunlu slippage + 60 sn azalan sniper fee'si + creator dev buy (max %5)
 - Sözleşmeler: Solidity + Foundry, upgrade edilemez, admin multisig
-- DCA: v1'de kendi keeper servisimiz (whitelist), `maxPrice` + TWAP koruması
+- DCA: v1'de kendi keeper servisimiz (whitelist) + `maxPrice` koruması. TWAP, permissionless keeper'a geçerken (faz 2.0) eklenecek.
 - Stack: pnpm/Turborepo monorepo — Next.js, Hono, Ponder, Foundry, Goldsky
-- Mainnet öncesi bağımsız audit zorunlu
+- Mainnet öncesi bağımsız audit zorunlu (kapsam: reports/audit-scope.md, deploy: reports/deploy-runbook.md)
+- Graduation fiyat düzeltme swap'ı bakiyenin en fazla yarısını kullanır (derin likidite DoS'una karşı)
+- Deploy adresleri: `packages/shared/deployments/*.json` (tek kaynak)
 
 ## Açık sorular
 - Robinhood sequencer'ının sıralama politikası (FCFS mi, öncelik ücreti var mı?)

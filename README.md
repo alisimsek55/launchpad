@@ -65,6 +65,10 @@ pnpm --filter @launchpad/api dev
 ```bash
 pnpm --filter @launchpad/web dev
 ```
+DCA keeper (yerelde anvil hesabı #0 keeper olarak yetkili; herkese açık test anahtarı, sadece yerelde kullan):
+```bash
+cd apps/keeper && LAUNCHPAD_NETWORK=local POLL_MS=5000 KEEPER_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 npx tsx src/index.ts
+```
 `http://localhost:3000` → **Connect** yerelde anvil test hesabı #1'i bağlar (Privy app ID yoksa). Yerelde subgraph yok; trades ve chart zincirden okunur (graduation sonrası Uniswap işlemleri listede görünmez).
 
 Indexer uçları: `http://localhost:42069/tokens/<token>/holders`, `/users/<adres>/balances`, `/graphql`.

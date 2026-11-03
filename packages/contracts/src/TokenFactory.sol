@@ -32,6 +32,7 @@ contract TokenFactory is Ownable2Step, Pausable, ReentrancyGuard {
     error InsufficientLaunchFee();
     error InvalidName();
     error InvalidSymbol();
+    error ZeroAddress();
 
     constructor(
         address owner_,
@@ -40,6 +41,10 @@ contract TokenFactory is Ownable2Step, Pausable, ReentrancyGuard {
         INonfungiblePositionManager positionManager_,
         address weth_
     ) Ownable(owner_) {
+        if (
+            address(curve_) == address(0) || address(feeVault_) == address(0) || address(positionManager_) == address(0)
+                || weth_ == address(0)
+        ) revert ZeroAddress();
         curve = curve_;
         feeVault = feeVault_;
         positionManager = positionManager_;
@@ -70,6 +75,8 @@ contract TokenFactory is Ownable2Step, Pausable, ReentrancyGuard {
 
         curve.register(token, msg.sender);
         feeVault.depositFees{value: C.LAUNCH_FEE}(address(0), C.LAUNCH_FEE, 0);
+        // Pool adresi harici çağrıdan geliyor; çağrılanlar kendi sözleşmelerimiz + Uniswap NPM, akış nonReentrant.
+        // forge-lint: disable-next-line(reentrancy-events)
         emit TokenCreated(token, msg.sender, name, symbol, metadataURI, pool, block.timestamp);
 
         uint256 devEth = msg.value - C.LAUNCH_FEE;
