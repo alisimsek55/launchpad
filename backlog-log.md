@@ -11,6 +11,13 @@ Format:
 
 ---
 
+## 2026-11-03 — Faz 5 — Lansman hazırlığı
+- Olay: EKLENDİ
+
+## 2026-11-03 — Faz 4 — DCA + Analytics + Docs
+- Olay: TAMAMLANDI
+- Not: DCAVault (7 test) + keeper + web DCA sekmesi + Analytics + Docs. DCA tarayıcıda uçtan uca test edildi (keeper otomatik alım, iptal/iade). Düzeltmeler: Multicall3 zincir tanımı, Analytics Suspense. TWAP yerine v1'de maxPrice + izinli keeper. Rapor: reports/2026-11-03-faz4-dca-analytics-docs.md.
+
 ## 2026-11-03 — Privy ile gerçek giriş testi
 - Olay: EKLENDİ
 - Not: Kullanıcının Privy hesabı/app ID'si bekleniyor.

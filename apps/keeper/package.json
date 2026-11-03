@@ -1,0 +1,19 @@
+{
+  "name": "@launchpad/keeper",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "once": "tsx src/index.ts --once",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@launchpad/shared": "workspace:*",
+    "viem": "^2.57.16"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}

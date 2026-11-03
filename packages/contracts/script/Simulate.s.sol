@@ -3,6 +3,7 @@ pragma solidity ^0.8.28;
 
 import {Script, console} from "forge-std/Script.sol";
 import {DeployLib, Deployment} from "./Deploy.s.sol";
+import {ISwapRouter02} from "../src/DCAVault.sol";
 import {Constants as C, RobinhoodMainnet as RH} from "../src/Constants.sol";
 import {LaunchToken} from "../src/LaunchToken.sol";
 import {INonfungiblePositionManager, IWETH9} from "../src/interfaces/IUniswapV3.sol";
@@ -30,7 +31,10 @@ contract Simulate is Script {
         // Bu herkese açık test adresleri mainnet'te EIP-7702 ile "sweeper" sözleşmesine bağlı:
         // gelen ETH'yi botlara aktarıyor. Fork bu kodu kopyalar; yerelde temizle.
         for (uint256 i; i < 4; i++) {
-            vm.rpc("anvil_setCode", string.concat('["', vm.toString(vm.addr(vm.deriveKey(ANVIL_MNEMONIC, uint32(i)))), '","0x"]'));
+            vm.rpc(
+                "anvil_setCode",
+                string.concat('["', vm.toString(vm.addr(vm.deriveKey(ANVIL_MNEMONIC, uint32(i)))), '","0x"]')
+            );
         }
 
         address deployer = vm.addr(PK0);
@@ -38,10 +42,18 @@ contract Simulate is Script {
         bytes memory raw = vm.rpc("eth_blockNumber", "[]");
         uint256 startBlock = uint256(bytes32(raw)) >> (256 - raw.length * 8);
         vm.startBroadcast(PK0);
-        Deployment memory d =
-            DeployLib.deploy(deployer, deployer, IWETH9(RH.WETH), INonfungiblePositionManager(RH.UNI_V3_POSITION_MANAGER));
+        Deployment memory d = DeployLib.deploy(
+            deployer,
+            deployer,
+            IWETH9(RH.WETH),
+            INonfungiblePositionManager(RH.UNI_V3_POSITION_MANAGER),
+            ISwapRouter02(RH.UNI_SWAP_ROUTER_02)
+        );
+        // Yerel keeper: deployer (apps/keeper yerelde bu hesapla çalışır)
+        d.dca.setKeeper(deployer, true);
         // Token A: dev buy ile
-        LaunchToken a = LaunchToken(d.factory.createToken{value: C.LAUNCH_FEE + 0.05 ether}("Alpha", "ALPHA", "ipfs://a", 0));
+        LaunchToken a =
+            LaunchToken(d.factory.createToken{value: C.LAUNCH_FEE + 0.05 ether}("Alpha", "ALPHA", "ipfs://a", 0));
         // Token B: graduate olacak
         LaunchToken b = LaunchToken(d.factory.createToken{value: C.LAUNCH_FEE}("Beta", "BETA", "ipfs://b", 0));
         vm.stopBroadcast();
@@ -80,7 +92,8 @@ contract Simulate is Script {
         vm.serializeAddress(k, "bondingCurve", address(d.curve));
         vm.serializeAddress(k, "graduator", address(d.graduator));
         vm.serializeAddress(k, "lpLocker", address(d.locker));
-        string memory json = vm.serializeAddress(k, "feeVault", address(d.feeVault));
+        vm.serializeAddress(k, "feeVault", address(d.feeVault));
+        string memory json = vm.serializeAddress(k, "dcaVault", address(d.dca));
         vm.writeJson(json, "../shared/deployments/local.json");
     }
 

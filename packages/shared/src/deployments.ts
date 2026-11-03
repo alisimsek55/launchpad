@@ -15,6 +15,7 @@ export type Deployment = {
   graduator: Address;
   lpLocker: Address;
   feeVault: Address;
+  dcaVault: Address;
 };
 
 export const deployments = { local, mainnet } as Record<Deployment["network"], Deployment>;

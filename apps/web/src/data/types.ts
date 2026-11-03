@@ -43,12 +43,38 @@ export type CandleRow = {
 
 export type TokenSort = "new" | "marketCap" | "volume";
 
+export type ProtocolStats = {
+  tokenCount: number;
+  graduatedCount: number;
+  tradeCount: number;
+  volumeEth: number;
+  feesEth: number;
+  protocolRevenueEth: number;
+};
+
+/// Günlük protokol verisi (date: günün başlangıcı, unix saniye)
+export type DayStat = {
+  date: number;
+  volumeEth: number;
+  feesEth: number;
+  protocolRevenueEth: number;
+  launches: number;
+  graduations: number;
+  tradeCount: number;
+};
+
+export type TokenVolume = { token: Address; volumeEth: number; tradeCount: number };
+
 export interface DataSource {
   tokens(sort: TokenSort, limit: number): Promise<TokenInfo[]>;
   tokensByCreator(creator: Address): Promise<TokenInfo[]>;
   token(address: Address): Promise<TokenInfo | null>;
   trades(token: Address, limit: number): Promise<TradeRow[]>;
   candles(token: Address, interval: number): Promise<CandleRow[]>;
+  protocol(): Promise<ProtocolStats>;
+  days(sinceUnix: number): Promise<DayStat[]>;
+  /// Belirli tarihten bu yana en çok hacim yapan tokenlar
+  topTokens(sinceUnix: number, limit: number): Promise<TokenVolume[]>;
 }
 
 export const CANDLE_INTERVALS = [

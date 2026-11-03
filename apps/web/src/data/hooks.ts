@@ -29,6 +29,14 @@ export const useTrades = (token: Address, limit = 50) =>
 export const useCandles = (token: Address, interval: number) =>
   useQuery({ queryKey: ["candles", token, interval], queryFn: () => source.candles(token, interval), ...LIVE });
 
+export const useProtocol = () => useQuery({ queryKey: ["protocol"], queryFn: () => source.protocol(), ...LIVE });
+
+export const useDays = (since: number) =>
+  useQuery({ queryKey: ["days", since], queryFn: () => source.days(since), refetchInterval: 30_000 });
+
+export const useTopTokens = (since: number, limit = 10) =>
+  useQuery({ queryKey: ["topTokens", since, limit], queryFn: () => source.topTokens(since, limit), refetchInterval: 30_000 });
+
 // ---------------------------------------------------------------- indexer (Ponder)
 
 export type HolderRow = {

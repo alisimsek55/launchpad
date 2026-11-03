@@ -3,6 +3,7 @@ pragma solidity ^0.8.28;
 
 import {Script, console} from "forge-std/Script.sol";
 import {BondingCurve} from "../src/BondingCurve.sol";
+import {DCAVault, ISwapRouter02} from "../src/DCAVault.sol";
 import {RobinhoodMainnet as RH} from "../src/Constants.sol";
 import {FeeVault} from "../src/FeeVault.sol";
 import {Graduator} from "../src/Graduator.sol";
@@ -16,11 +17,12 @@ struct Deployment {
     LPLocker locker;
     Graduator graduator;
     TokenFactory factory;
+    DCAVault dca;
 }
 
 library DeployLib {
     /// owner: admin (mainnet'te Safe multisig), treasury: protokolün token-tarafı fee'leri.
-    function deploy(address owner, address treasury, IWETH9 weth, INonfungiblePositionManager npm)
+    function deploy(address owner, address treasury, IWETH9 weth, INonfungiblePositionManager npm, ISwapRouter02 router)
         internal
         returns (Deployment memory d)
     {
@@ -31,6 +33,7 @@ library DeployLib {
         d.factory = new TokenFactory(owner, d.curve, d.feeVault, npm, address(weth));
         d.curve.initialize(address(d.factory), address(d.graduator));
         d.locker.initialize(address(d.graduator));
+        d.dca = new DCAVault(owner, d.curve, router, address(weth));
     }
 }
 
@@ -43,7 +46,13 @@ contract Deploy is Script {
         require(block.chainid == RH.CHAIN_ID, "sadece Robinhood mainnet");
 
         vm.startBroadcast();
-        d = DeployLib.deploy(owner, treasury, IWETH9(RH.WETH), INonfungiblePositionManager(RH.UNI_V3_POSITION_MANAGER));
+        d = DeployLib.deploy(
+            owner,
+            treasury,
+            IWETH9(RH.WETH),
+            INonfungiblePositionManager(RH.UNI_V3_POSITION_MANAGER),
+            ISwapRouter02(RH.UNI_SWAP_ROUTER_02)
+        );
         vm.stopBroadcast();
 
         console.log("FeeVault     ", address(d.feeVault));
@@ -51,5 +60,6 @@ contract Deploy is Script {
         console.log("LPLocker     ", address(d.locker));
         console.log("Graduator    ", address(d.graduator));
         console.log("TokenFactory ", address(d.factory));
+        console.log("DCAVault     ", address(d.dca));
     }
 }

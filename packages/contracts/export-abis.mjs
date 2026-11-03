@@ -7,7 +7,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = dirname(fileURLToPath(import.meta.url));
-const contracts = ["TokenFactory", "BondingCurve", "Graduator", "LPLocker", "FeeVault", "LaunchToken"];
+const contracts = ["TokenFactory", "BondingCurve", "Graduator", "LPLocker", "FeeVault", "LaunchToken", "DCAVault"];
 
 const read = (name) => JSON.parse(readFileSync(join(root, "out", `${name}.sol`, `${name}.json`), "utf8")).abi;
 

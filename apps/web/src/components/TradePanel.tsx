@@ -9,6 +9,7 @@ import { fmtEth } from "@/lib/format";
 import { ADDRESS_THIS, UNI_FEE_TIER, quoterV2Abi, swapRouter02Abi } from "@/lib/uniswap";
 import { useTx, useWrite } from "@/lib/useTx";
 import { useWalletUI } from "@/wallet/context";
+import { DcaPanel } from "./DcaPanel";
 
 const UNI = addresses[4663];
 const deadline = () => BigInt(Math.floor(Date.now() / 1000) + 300);
@@ -26,6 +27,7 @@ function parseAmount(s: string): bigint {
 export function TradePanel({ token, symbol, graduated }: { token: Address; symbol: string; graduated: boolean }) {
   const { address } = useAccount();
   const wallet = useWalletUI();
+  const [mode, setMode] = useState<"market" | "dca">("market");
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [input, setInput] = useState("");
   const [slippageBps, setSlippageBps] = useState(DEFAULT_SLIPPAGE_BPS);
@@ -164,8 +166,32 @@ export function TradePanel({ token, symbol, graduated }: { token: Address; symbo
   const outSymbol = side === "buy" ? symbol : "ETH";
   const inSymbol = side === "buy" ? "ETH" : symbol;
 
+  const modeTabs = (
+    <div className="grid grid-cols-2 rounded-full bg-surface-2 p-1 text-sm font-medium">
+      {(["market", "dca"] as const).map((m) => (
+        <button
+          key={m}
+          onClick={() => setMode(m)}
+          className={`rounded-full py-1.5 ${mode === m ? "bg-background text-foreground" : "text-muted"}`}
+        >
+          {m === "market" ? "Market" : "DCA"}
+        </button>
+      ))}
+    </div>
+  );
+
+  if (mode === "dca") {
+    return (
+      <div className="space-y-4 rounded-2xl border border-line bg-surface p-4">
+        {modeTabs}
+        <DcaPanel token={token} symbol={symbol} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 rounded-2xl border border-line bg-surface p-4">
+      {modeTabs}
       <p className="text-xs text-muted">
         {graduated ? "Graduated · Uniswap v3 pool'unda işlem görüyor." : "Bonding curve · 4.2 ETH'de Uniswap v3'e geçer."}
       </p>

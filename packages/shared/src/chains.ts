@@ -11,6 +11,10 @@ export const robinhood = defineChain({
   blockExplorers: {
     default: { name: "Blockscout", url: "https://robinhoodchain.blockscout.com" },
   },
+  // Standart Multicall3 adresi; 2026-11-03'te zincirde doğrulandı (const.md)
+  contracts: {
+    multicall3: { address: "0xcA11bde05977b3631167028862bE2a173976CA11" },
+  },
 });
 
 export const robinhoodTestnet = defineChain({

@@ -1,11 +1,12 @@
 {
-  "bondingCurve": "0x7331Da9b95D5944c8b76D96192371e52eD187BFe",
+  "bondingCurve": "0x57a7b5cD15eA2c64A48104482837519B81a0619a",
   "chainId": 4663,
-  "feeVault": "0xA388228A1fA75a5F5844226E2874d7EE4d940256",
-  "graduator": "0x329058C12E8B269BFA0896c8705b427c5Dd26b96",
-  "lpLocker": "0x73Be4F9bD5323ceEC603149186862c86dDa2BB23",
+  "dcaVault": "0xFCc4Ba754Ae127396D3c6dCA507389b5A5b6EFAe",
+  "feeVault": "0x2B09d54B5cA65dEB169c29c2D3e01cc3Dd214cd3",
+  "graduator": "0xD83C9f1B0DaFb1992eF92ac62D6509e54AD4eD48",
+  "lpLocker": "0xB3a1e45D60f9394bC4327f5Dc46dB56D8a3c3688",
   "network": "local",
   "rpcUrl": "http://127.0.0.1:8545",
-  "startBlock": 105295339,
-  "tokenFactory": "0x50D0F8Fe8b59878706A7bC0288c960255d55867b"
+  "startBlock": 105307456,
+  "tokenFactory": "0x1f720E7952650ED8Ca142feBD52aCBe8b7A21741"
 }

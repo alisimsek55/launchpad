@@ -208,14 +208,33 @@ importers:
         version: 4.13.16
       ponder:
         specifier: ^0.18.4
-        version: 0.18.4(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(esbuild@0.28.2)(hono@4.13.16)(jiti@2.7.0)(tsx@4.23.15)(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
+        version: 0.18.4(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(bufferutil@4.1.0)(esbuild@0.28.2)(hono@4.13.16)(jiti@2.7.0)(tsx@4.23.15)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.57.16(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76)
       viem:
         specifier: ^2.57.16
-        version: 2.57.16(typescript@5.9.3)(zod@3.25.76)
+        version: 2.57.16(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
     devDependencies:
       '@types/node':
         specifier: ^24
         version: 24.19.2
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  apps/keeper:
+    dependencies:
+      '@launchpad/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      viem:
+        specifier: ^2.57.16
+        version: 2.57.16(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.6.7)
+    devDependencies:
+      '@types/node':
+        specifier: ^24
+        version: 24.19.2
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -284,7 +303,7 @@ importers:
     dependencies:
       viem:
         specifier: ^2.57.16
-        version: 2.57.16(typescript@5.9.3)(zod@4.6.7)
+        version: 2.57.16(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.6.7)
     devDependencies:
       typescript:
         specifier: ^5.9.3
@@ -297,7 +316,7 @@ importers:
     devDependencies:
       '@graphprotocol/graph-cli':
         specifier: ^0.98.1
-        version: 0.98.1(@types/node@24.19.2)(supports-color@8.1.1)(typescript@5.9.3)(zod@3.25.76)
+        version: 0.98.1(@types/node@24.19.2)(bufferutil@4.1.0)(supports-color@8.1.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
       '@graphprotocol/graph-ts':
         specifier: ^0.38.2
         version: 0.38.2
@@ -7638,7 +7657,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@graphprotocol/graph-cli@0.98.1(@types/node@24.19.2)(supports-color@8.1.1)(typescript@5.9.3)(zod@3.25.76)':
+  '@graphprotocol/graph-cli@0.98.1(@types/node@24.19.2)(bufferutil@4.1.0)(supports-color@8.1.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)':
     dependencies:
       '@float-capital/float-subgraph-uncrashable': 0.0.0-internal-testing.5
       '@oclif/core': 4.5.5
@@ -7657,7 +7676,7 @@ snapshots:
       gluegun: 5.2.0(debug@4.4.3(supports-color@8.1.1))
       graphql: 16.11.0
       immutable: 5.1.4
-      jayson: 4.2.0
+      jayson: 4.2.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       js-yaml: 4.1.0
       kubo-rpc-client: 5.4.1(undici@7.16.0)
       open: 10.2.0
@@ -8557,9 +8576,9 @@ snapshots:
       '@pnpm/network.ca-file': 1.0.2
       config-chain: 1.1.13
 
-  '@ponder/utils@0.3.0(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@3.25.76))':
+  '@ponder/utils@0.3.0(typescript@5.9.3)(viem@2.57.16(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))':
     dependencies:
-      viem: 2.57.16(typescript@5.9.3)(zod@3.25.76)
+      viem: 2.57.16(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
     optionalDependencies:
       typescript: 5.9.3
 
@@ -13155,9 +13174,9 @@ snapshots:
 
   iso-url@1.2.1: {}
 
-  isomorphic-ws@4.0.1(ws@7.5.13):
+  isomorphic-ws@4.0.1(ws@7.5.13(bufferutil@4.1.0)(utf-8-validate@5.0.10)):
     dependencies:
-      ws: 7.5.13
+      ws: 7.5.13(bufferutil@4.1.0)(utf-8-validate@5.0.10)
 
   isows@1.0.6(ws@8.18.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)):
     dependencies:
@@ -13170,10 +13189,6 @@ snapshots:
   isows@1.0.7(ws@8.21.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)):
     dependencies:
       ws: 8.21.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-
-  isows@1.0.7(ws@8.21.0):
-    dependencies:
-      ws: 8.21.0
 
   it-all@3.0.11: {}
 
@@ -13231,7 +13246,7 @@ snapshots:
       filelist: 1.0.6
       picocolors: 1.1.1
 
-  jayson@4.2.0:
+  jayson@4.2.0(bufferutil@4.1.0)(utf-8-validate@5.0.10):
     dependencies:
       '@types/connect': 3.4.38
       '@types/node': 12.20.55
@@ -13240,11 +13255,11 @@ snapshots:
       delay: 5.0.0
       es6-promisify: 5.0.0
       eyes: 0.1.8
-      isomorphic-ws: 4.0.1(ws@7.5.13)
+      isomorphic-ws: 4.0.1(ws@7.5.13(bufferutil@4.1.0)(utf-8-validate@5.0.10))
       json-stringify-safe: 5.0.1
       stream-json: 1.9.1
       uuid: 8.3.2
-      ws: 7.5.13
+      ws: 7.5.13(bufferutil@4.1.0)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -14188,7 +14203,7 @@ snapshots:
 
   pngjs@5.0.0: {}
 
-  ponder@0.18.4(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(esbuild@0.28.2)(hono@4.13.16)(jiti@2.7.0)(tsx@4.23.15)(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76):
+  ponder@0.18.4(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(bufferutil@4.1.0)(esbuild@0.28.2)(hono@4.13.16)(jiti@2.7.0)(tsx@4.23.15)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.57.16(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))(yaml@2.8.1)(zod@3.25.76):
     dependencies:
       '@babel/code-frame': 7.29.7
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
@@ -14197,7 +14212,7 @@ snapshots:
       '@escape.tech/graphql-armor-max-depth': 2.4.2
       '@escape.tech/graphql-armor-max-tokens': 2.5.1
       '@hono/node-server': 1.19.5(hono@4.13.16)
-      '@ponder/utils': 0.3.0(typescript@5.9.3)(viem@2.57.16(typescript@5.9.3)(zod@3.25.76))
+      '@ponder/utils': 0.3.0(typescript@5.9.3)(viem@2.57.16(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))
       abitype: 0.10.3(typescript@5.9.3)(zod@3.25.76)
       ansi-escapes: 7.3.0
       commander: 12.1.0
@@ -14219,9 +14234,9 @@ snapshots:
       stacktrace-parser: 0.1.11
       superjson: 2.2.6
       terminal-size: 4.0.1
-      viem: 2.57.16(typescript@5.9.3)(zod@3.25.76)
+      viem: 2.57.16(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
       vite: 8.3.1(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.8.1)
-      ws: 8.21.0
+      ws: 8.21.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
     optionalDependencies:
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -15318,40 +15333,6 @@ snapshots:
       - utf-8-validate
       - zod
 
-  viem@2.57.16(typescript@5.9.3)(zod@3.25.76):
-    dependencies:
-      '@noble/curves': 1.9.1
-      '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.7.0
-      '@scure/bip39': 1.6.0
-      abitype: 1.2.3(typescript@5.9.3)(zod@3.25.76)
-      isows: 1.0.7(ws@8.21.0)
-      ox: 0.14.59(typescript@5.9.3)(zod@3.25.76)
-      ws: 8.21.0
-    optionalDependencies:
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-      - zod
-
-  viem@2.57.16(typescript@5.9.3)(zod@4.6.7):
-    dependencies:
-      '@noble/curves': 1.9.1
-      '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.7.0
-      '@scure/bip39': 1.6.0
-      abitype: 1.2.3(typescript@5.9.3)(zod@4.6.7)
-      isows: 1.0.7(ws@8.21.0)
-      ox: 0.14.59(typescript@5.9.3)(zod@4.6.7)
-      ws: 8.21.0
-    optionalDependencies:
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-      - zod
-
   viem@2.57.8(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.6.7):
     dependencies:
       '@noble/curves': 1.9.1
@@ -15611,8 +15592,6 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  ws@7.5.13: {}
-
   ws@7.5.13(bufferutil@4.1.0)(utf-8-validate@5.0.10):
     optionalDependencies:
       bufferutil: 4.1.0
@@ -15627,8 +15606,6 @@ snapshots:
     optionalDependencies:
       bufferutil: 4.1.0
       utf-8-validate: 5.0.10
-
-  ws@8.21.0: {}
 
   ws@8.21.0(bufferutil@4.1.0)(utf-8-validate@5.0.10):
     optionalDependencies:

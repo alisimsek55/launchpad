@@ -3,6 +3,7 @@ pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
 import {DeployLib, Deployment} from "../script/Deploy.s.sol";
+import {ISwapRouter02} from "../src/DCAVault.sol";
 import {BondingCurve} from "../src/BondingCurve.sol";
 import {Constants as C, RobinhoodMainnet as RH} from "../src/Constants.sol";
 import {LaunchToken} from "../src/LaunchToken.sol";
@@ -22,7 +23,13 @@ abstract contract BaseTest is Test {
 
     function setUp() public virtual {
         vm.createSelectFork("robinhood");
-        d = DeployLib.deploy(owner, treasury, IWETH9(RH.WETH), INonfungiblePositionManager(RH.UNI_V3_POSITION_MANAGER));
+        d = DeployLib.deploy(
+            owner,
+            treasury,
+            IWETH9(RH.WETH),
+            INonfungiblePositionManager(RH.UNI_V3_POSITION_MANAGER),
+            ISwapRouter02(RH.UNI_SWAP_ROUTER_02)
+        );
         vm.deal(creator, 100 ether);
         vm.deal(alice, 100 ether);
         vm.deal(bob, 100 ether);

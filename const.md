@@ -42,6 +42,7 @@ Production'da public RPC yerine Alchemy vb. özel RPC kullanılmalı (Robinhood 
 | Uniswap SwapRouter02 | `0xCaf681a66D020601342297493863E78C959E5cb2` | ✅ | `factory()` = Factory, `WETH9()` = WETH |
 | Uniswap QuoterV2 | `0x33e885eD0Ec9bF04EcfB19341582aADCb4c8A9E7` | ✅ | `factory()`, `WETH9()` doğru |
 | USDG (Paxos) | `0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168` | ✅ | ⚠️ **6 ondalık** (18 değil!) |
+| Multicall3 | `0xcA11bde05977b3631167028862bE2a173976CA11` | ✅ | Zincirde kod var, `getBlockNumber()` çalışıyor |
 | Uniswap UniversalRouter | `0x8876…0904` veya `0x204F…0498` | ⚠️ | İki resmi kaynak farklı adres veriyor; **kullanmıyoruz** (SwapRouter02 yeterli) |
 
 ## Kontrat adresleri (Testnet 46630)

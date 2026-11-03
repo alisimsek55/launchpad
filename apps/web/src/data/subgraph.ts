@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 import { SUBGRAPH_URL } from "@/config";
-import type { DataSource, TokenInfo, TokenSort, TradeRow } from "./types";
+import type { DataSource, DayStat, TokenInfo, TokenSort, TokenVolume, TradeRow } from "./types";
 
 /// Production veri kaynağı: Goldsky subgraph (packages/subgraph/schema.graphql).
 async function query<T>(q: string, variables: Record<string, unknown>): Promise<T> {
@@ -120,5 +120,68 @@ export const subgraphSource: DataSource = {
       close: Number(c.close),
       volumeEth: Number(c.volumeEth),
     }));
+  },
+  async protocol() {
+    const d = await query<{
+      protocol: {
+        tokenCount: number;
+        graduatedCount: number;
+        tradeCount: string;
+        volumeEth: string;
+        feesEth: string;
+        protocolRevenueEth: string;
+      } | null;
+    }>(`{ protocol(id:"0x01"){ tokenCount graduatedCount tradeCount volumeEth feesEth protocolRevenueEth } }`, {});
+    const p = d.protocol;
+    return {
+      tokenCount: p?.tokenCount ?? 0,
+      graduatedCount: p?.graduatedCount ?? 0,
+      tradeCount: Number(p?.tradeCount ?? 0),
+      volumeEth: Number(p?.volumeEth ?? 0),
+      feesEth: Number(p?.feesEth ?? 0),
+      protocolRevenueEth: Number(p?.protocolRevenueEth ?? 0),
+    };
+  },
+  async days(since) {
+    const d = await query<{
+      protocolDayDatas: {
+        date: number;
+        volumeEth: string;
+        feesEth: string;
+        protocolRevenueEth: string;
+        launches: number;
+        graduations: number;
+        tradeCount: number;
+      }[];
+    }>(
+      `query($s:Int!){ protocolDayDatas(where:{date_gte:$s}, first:1000, orderBy:date, orderDirection:asc){ date volumeEth feesEth protocolRevenueEth launches graduations tradeCount } }`,
+      { s: since - 86400 },
+    );
+    return d.protocolDayDatas.map(
+      (x): DayStat => ({
+        date: x.date,
+        volumeEth: Number(x.volumeEth),
+        feesEth: Number(x.feesEth),
+        protocolRevenueEth: Number(x.protocolRevenueEth),
+        launches: x.launches,
+        graduations: x.graduations,
+        tradeCount: x.tradeCount,
+      }),
+    );
+  },
+  async topTokens(since, limit) {
+    // Günlük token verilerini topla (subgraph'ta group-by yok)
+    const d = await query<{ tokenDayDatas: { token: { id: Address }; volumeEth: string; tradeCount: number }[] }>(
+      `query($s:Int!){ tokenDayDatas(where:{date_gte:$s}, first:1000, orderBy:volumeEth, orderDirection:desc){ token { id } volumeEth tradeCount } }`,
+      { s: Math.floor(since / 86400) * 86400 },
+    );
+    const map = new Map<string, TokenVolume>();
+    for (const x of d.tokenDayDatas) {
+      const v = map.get(x.token.id) ?? { token: x.token.id, volumeEth: 0, tradeCount: 0 };
+      v.volumeEth += Number(x.volumeEth);
+      v.tradeCount += x.tradeCount;
+      map.set(x.token.id, v);
+    }
+    return [...map.values()].sort((a, b) => b.volumeEth - a.volumeEth).slice(0, limit);
   },
 };

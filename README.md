@@ -13,7 +13,7 @@ Robinhood Chain üzerinde bonding curve tabanlı token launchpad. Token'lar curv
 apps/web            Next.js frontend
 apps/api            Hono API
 apps/indexer        Ponder: holders indexer + holders API
-apps/keeper         DCA keeper (Faz 4)
+apps/keeper         DCA keeper servisi
 packages/contracts  Solidity + Foundry
 packages/shared     Ortak TS: chain tanımları, adresler, curve matematiği, ABI'ler
 packages/subgraph   Goldsky subgraph: trades, mumlar, analytics
@@ -35,6 +35,7 @@ cp env.example .env   # değerleri doldur
 ```bash
 pnpm --filter @launchpad/web dev        # frontend: http://localhost:3000
 pnpm --filter @launchpad/api dev        # api: http://localhost:4000/health
+LAUNCHPAD_NETWORK=local KEEPER_PRIVATE_KEY=0x... pnpm --filter @launchpad/keeper start  # DCA keeper
 pnpm --filter @launchpad/shared test    # curve matematiği testleri
 pnpm --filter @launchpad/contracts test # Solidity testleri (mainnet fork, ~3 dk)
 pnpm --filter @launchpad/contracts test:fast  # invariant hariç (~15 sn)

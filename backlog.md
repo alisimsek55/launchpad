@@ -12,9 +12,9 @@ Format:
 
 ## Açık işler
 
-- [ ] **Faz 4 — DCA + Analytics + Docs** (eklenme: 2026-11-03)
-  - Durum: Başlanmadı.
-  - Sonraki adım: `DCAVault` sözleşmesi + testleri (notes.md §11) → `apps/keeper` → web'de DCA sekmesi → Analytics sayfası (subgraph `Protocol`/`ProtocolDayData`/`TokenDayData`) → Docs.
+- [ ] **Faz 5 — Lansman hazırlığı** (eklenme: 2026-11-03)
+  - Durum: Başlandı.
+  - Sonraki adım: forge lint uyarılarını kapat/gerekçelendir → büyük WETH likiditesiyle manipülasyon testi → CI (GitHub Actions) → audit kapsam dokümanı → deploy runbook. Gerçek deploy ve audit kullanıcı kararı/hesabı gerektirir.
 
 - [ ] **Privy ile gerçek giriş testi** (eklenme: 2026-11-03)
   - Durum: Kod hazır (`apps/web/src/wallet/PrivyProviders.tsx`); app ID olmadan test edilemedi.

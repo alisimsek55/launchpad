@@ -20,6 +20,12 @@ export function Header() {
           <Link href="/create" className="hover:text-foreground">
             + Create a token
           </Link>
+          <Link href="/analytics" className="hover:text-foreground">
+            Analytics
+          </Link>
+          <Link href="/docs" className="hover:text-foreground">
+            Docs
+          </Link>
           {address && (
             <Link href={`/profile/${address}`} className="hover:text-foreground">
               Profile
