@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-03 — Karar: creator fee payı
+- Olay: TAMAMLANDI
+- Not: Kullanıcı onayıyla fee bölüşümü %0.7/%0.3 → %0.5 protokol / %0.5 creator (işlem fee'si, sniper fee'si ve Uniswap LP fee'leri). Constants.sol, shared/curve.ts, subgraph, web, docs, const.md, notes.md güncellendi; 40 test geçiyor.
+
 ## 2026-11-03 — Faz 2.0 fikirleri
 - Olay: EKLENDİ
 

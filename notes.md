@@ -74,14 +74,14 @@ Ekran görüntülerinden çıkanlar:
 Parametreler, curve'ün son fiyatı Uniswap v3 açılış fiyatına (4.2 ETH / 200M token) birebir eşit olacak şekilde seçildi. Böylece graduation'da fiyat sıçramaz ve arbitraj fırsatı doğmaz.
 
 **Fee (karar):**
-- İşlem fee'si **%1**: **%0.7 protokol**, **%0.3 creator**. Fee ETH tarafından kesilir ve rezervlere girmez.
+- İşlem fee'si **%1**: **%0.5 protokol**, **%0.5 creator** (2026-11-03'te %0.7/%0.3'ten değişti, rakip analizi sonrası). Fee ETH tarafından kesilir ve rezervlere girmez.
 - Graduation fee'si **yok**. Gelir işlem fee'lerinden gelir, fiyat sürekliliği bozulmaz.
 - Launch fee: 0.0005 ETH (spam token engeli).
 
 **Graduation (karar):**
 - Eşiği aşan son alım kalan tokenla sınırlanır, fazla ETH iade edilir. Graduation aynı tx içinde, atomik olarak yapılır.
 - Uniswap v3 **%1 fee tier**, **full-range** pozisyon, `sqrtPriceX96` = curve'ün son fiyatı.
-- LP NFT **yakılmaz, kilitlenir**: LP kilit sözleşmesinde kalır, likidite asla çekilemez. Toplanan v3 fee'leri aynı oranla (%70 protokol, %30 creator) dağıtılır. Referanstaki "Creator earned" alanı da bu şekilde çalışıyor.
+- LP NFT **yakılmaz, kilitlenir**: LP kilit sözleşmesinde kalır, likidite asla çekilemez. Toplanan v3 fee'leri aynı oranla (%50 protokol, %50 creator) dağıtılır. Referanstaki "Creator earned" alanı da bu şekilde çalışıyor.
 - Pool'un önceden kurulmasına karşı: pool adresi CREATE2 ile önceden hesaplanır, token sözleşmesi graduation'a kadar bu adrese transferi engeller.
 
 **Güvenlik/uygulama:**
@@ -116,7 +116,7 @@ Robinhood Chain (Arbitrum Orbit) FCFS sıralıyor ve açık mempool yok. Bu yüz
 | `TokenFactory` | `createToken(name, symbol, metadataURI, devBuyMinOut)` payable. Launch fee'yi alır, token'ı CREATE2 ile deploy eder, curve'e kaydeder, varsa creator'ın dev buy'ını aynı tx'te yapar. |
 | `BondingCurve` | **Tek (singleton) sözleşme**, tüm token'ların curve durumunu tutar (her token için ayrı curve deploy etmekten çok daha ucuz). `buy`, `sell`, `quoteBuy`, `quoteSell`. Eşik aşılınca `Graduator`'ı çağırır. |
 | `Graduator` | ETH'yi WETH'e çevirir, v3 pool'u doğru fiyatla oluşturur/initialize eder, full-range likidite ekler, LP NFT'sini `LPLocker`'a gönderir. Hepsi tek tx. |
-| `LPLocker` | LP NFT'lerini sonsuza kadar tutar; likidite çekme fonksiyonu **yoktur**. `collect(tokenId)` herkes tarafından çağrılabilir, fee'leri `FeeVault`'a %70/%30 böler. |
+| `LPLocker` | LP NFT'lerini sonsuza kadar tutar; likidite çekme fonksiyonu **yoktur**. `collect(tokenId)` herkes tarafından çağrılabilir, fee'leri `FeeVault`'a %50/%50 böler. |
 | `FeeVault` | Protokol ve creator fee'lerinin biriktiği kasa. `claimCreatorFees()`, `withdrawProtocolFees()`. |
 | `DCAVault` | Kullanıcı ETH yatırıp plan açar: `createPlan(token, ethPerBuy, interval, count, maxPrice)`. `execute(planId)` zamanı gelince alım yapar: token curve'deyse `BondingCurve`, graduate olduysa Uniswap `SwapRouter02` üzerinden. `cancelPlan` kalan ETH'yi iade eder. |
 
@@ -241,7 +241,7 @@ event DCAPlanCancelled(uint256 indexed planId, uint256 refund);
 - Subgraph sağlayıcı: **Goldsky**
 - Graduation hedefi: **Uniswap v3** (Robinhood Chain'de canlı), %1 fee tier, full-range, LP kilitli
 - Bonding curve: sanal rezervli constant product, 80/20 bölüşüm, 4.20 ETH eşik
-- Fee: %1 (%0.7 protokol / %0.3 creator), graduation fee'si yok
+- Fee: %1 (%0.5 protokol / %0.5 creator), graduation fee'si yok
 - MEV: zorunlu slippage + 60 sn azalan sniper fee'si + creator dev buy (max %5)
 - Sözleşmeler: Solidity + Foundry, upgrade edilemez, admin multisig
 - DCA: v1'de kendi keeper servisimiz (whitelist) + `maxPrice` koruması. TWAP, permissionless keeper'a geçerken (faz 2.0) eklenecek.
@@ -251,5 +251,4 @@ event DCAPlanCancelled(uint256 indexed planId, uint256 refund);
 - Deploy adresleri: `packages/shared/deployments/*.json` (tek kaynak)
 
 ## Açık sorular
-- Creator fee payı %0.3 mü kalsın, %0.5'e mi çıksın? (reports/2026-11-03-rakip-analizi.md)
 - Faz 2 limit emirler: on-chain mi, off-chain keeper mı?

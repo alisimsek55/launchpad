@@ -81,11 +81,11 @@ Bunlar tasarım kararlarıdır (gerekçeler notes.md §9-10'da). Bir token'ın p
 | Ad | Değer |
 |---|---|
 | İşlem fee'si | %1 (`100` bps) |
-| Protokol payı | %0.7 (`70` bps) |
-| Creator payı | %0.3 (`30` bps) |
+| Protokol payı | %0.5 (`50` bps) |
+| Creator payı | %0.5 (`50` bps) |
 | Launch fee | `0.0005 ETH` |
 | Graduation fee | Yok |
-| LP fee dağılımı | %70 protokol / %30 creator |
+| LP fee dağılımı | %50 protokol / %50 creator |
 
 ### MEV koruması
 | Ad | Değer |

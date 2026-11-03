@@ -17,9 +17,9 @@ contract TradeTest is BaseTest {
         assertEq(got, TS_BUY_1ETH_TOKENS);
         assertEq(t.balanceOf(alice), got);
 
-        // %1 fee: %0.7 protokol, %0.3 creator
-        assertEq(d.feeVault.protocolBalance(), C.LAUNCH_FEE + 0.007 ether);
-        assertEq(d.feeVault.creatorBalance(creator), 0.003 ether);
+        // %1 fee: %0.5 protokol, %0.5 creator
+        assertEq(d.feeVault.protocolBalance(), C.LAUNCH_FEE + 0.005 ether);
+        assertEq(d.feeVault.creatorBalance(creator), 0.005 ether);
         assertEq(address(d.curve).balance, 0.99 ether);
     }
 
@@ -55,9 +55,9 @@ contract TradeTest is BaseTest {
     function test_SniperPaysTwentyPercent() public {
         LaunchToken t = _launch();
         _buy(alice, t, 1 ether);
-        // %20 fee: 0.14 protokol + 0.06 creator
-        assertEq(d.feeVault.protocolBalance(), C.LAUNCH_FEE + 0.14 ether);
-        assertEq(d.feeVault.creatorBalance(creator), 0.06 ether);
+        // %20 fee: 0.1 protokol + 0.1 creator
+        assertEq(d.feeVault.protocolBalance(), C.LAUNCH_FEE + 0.1 ether);
+        assertEq(d.feeVault.creatorBalance(creator), 0.1 ether);
     }
 
     function test_CreatorClaimsFees() public {
@@ -66,7 +66,7 @@ contract TradeTest is BaseTest {
         uint256 before = creator.balance;
         vm.prank(creator);
         d.feeVault.claimCreatorFees();
-        assertEq(creator.balance - before, 0.003 ether);
+        assertEq(creator.balance - before, 0.005 ether);
     }
 
     function test_RevertWhen_Slippage() public {

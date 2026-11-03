@@ -74,10 +74,10 @@ export default function DocsPage() {
 
         <H id="fee">Fee&apos;ler</H>
         <ul>
-          <li><strong>İşlem fee&apos;si %1</strong>: %0.7 protokol, %0.3 creator. Alım ve satımda ETH tarafından kesilir.</li>
+          <li><strong>İşlem fee&apos;si %1</strong>: %0.5 protokol, %0.5 creator. Alım ve satımda ETH tarafından kesilir.</li>
           <li><strong>Launch fee&apos;si 0.0005 ETH</strong> (spam önleme).</li>
           <li>Graduation fee&apos;si yok.</li>
-          <li>Graduation sonrası Uniswap&apos;in %1 LP fee&apos;i de aynı oranla (%70 / %30) dağıtılır.</li>
+          <li>Graduation sonrası Uniswap&apos;in %1 LP fee&apos;i de aynı oranla (%50 / %50) dağıtılır.</li>
         </ul>
 
         <H id="sniper">Sniper koruması</H>
@@ -90,7 +90,7 @@ export default function DocsPage() {
 
         <H id="creator">Creator kazancı</H>
         <p>
-          Creator her işlemden %0.3 kazanır; graduation sonrası Uniswap LP fee&apos;lerinin %30&apos;u da creator&apos;ındır. Kazançlar <strong>FeeVault</strong>&apos;ta birikir;
+          Creator her işlemden %0.5 kazanır; graduation sonrası Uniswap LP fee&apos;lerinin yarısı da creator&apos;ındır. Kazançlar <strong>FeeVault</strong>&apos;ta birikir;
           profil sayfasından <strong>Claim</strong> ile çekilir.
         </p>
 

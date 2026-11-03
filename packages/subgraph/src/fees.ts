@@ -4,7 +4,7 @@ import { LPFeesCollected } from "../generated/LPLocker/LPLocker";
 import { Token } from "../generated/schema";
 import { getProtocol, getProtocolDay, toDecimal } from "./helpers";
 
-const CREATOR_SHARE = BigDecimal.fromString("0.3");
+const CREATOR_SHARE = BigDecimal.fromString("0.5");
 
 /// Kasaya yatan her fee (işlem, launch, LP, graduation artığı) buradan sayılır.
 export function handleFeesDeposited(event: FeesDeposited): void {

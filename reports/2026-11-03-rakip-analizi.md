@@ -25,8 +25,8 @@ Kaynaklar sonda. Doğrulanamayan bilgiler işaretli.
 
 | Öneri | Karar | Gerekçe |
 |---|---|---|
-| **Creator payını artır** (ör. 0.5 / 0.5) | ⏳ **Kullanıcı kararı** (iş modeli) | Creator'lar token'ı tanıtır ve hacim getirir; Pons'un creator'a %70 verdiği iddiası doğruysa %0.3 rekabetçi değil. Önerim **%0.5 protokol / %0.5 creator**: protokol geliri %29 düşer ama creator teşviki 1.67x artar. Kod değişikliği küçük (Constants + testler + docs). |
-| Sniper fee fazlasını creator'a/burn'e yönlendir | Şimdilik hayır | Zaten %30'u creator'a gidiyor; creator'ı kendi token'ını snipe'lamaya teşvik etmemek için oranı artırmıyoruz. |
+| **Creator payını artır** (ör. 0.5 / 0.5) | ✅ **Uygulandı** (kullanıcı onayı, 2026-11-03) | Creator'lar token'ı tanıtır ve hacim getirir; Pons'un creator'a %70 verdiği iddiası doğruysa %0.3 rekabetçi değil. Önerim **%0.5 protokol / %0.5 creator**: protokol geliri %29 düşer ama creator teşviki 1.67x artar. Kod değişikliği küçük (Constants + testler + docs). |
+| Sniper fee fazlasını creator'a/burn'e yönlendir | Hayır | 50/50 ile sniper fee'sinin yarısı zaten creator'a gidiyor. Creator kendi token'ını snipe'larsa %20 öder, %10'unu geri alır: net %10 kayıp, teşvik yok (zaten sniper fee'siz dev buy hakkı var). |
 | Graduation'da v4'e geçiş | Faz 2.0'a | v4 hook'larıyla fee yönlendirme daha esnek, ama v3 çalışıyor, test edildi ve auditlenecek. Lansmandan önce değiştirmek risk. Not: başkası aynı token için %0.3 v3 pool açıp akışı bölebilir — bu tüm launchpad'lerde geçerli, kilitli derin likiditemiz avantaj. |
 | **Fair launch modu** (DCA altyapısıyla, Crowd Launch'a yanıt) | Faz 2.0 backlog'a | Güçlü farklılaştırıcı ama yeni sözleşme mantığı = yeni audit kapsamı. |
 | **Dağıtım:** DexScreener/GMGN/Bitquery entegrasyonu + açık quote/swap API | Lansman sonrası, yüksek öncelik | Curve token'ları aggregator'larda görünmüyor; event'lerimiz (Trade, Graduated) indeksçilerin işini kolaylaştırıyor. |

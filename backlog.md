@@ -24,9 +24,6 @@ Format:
   - Durum: Subgraph derleniyor; adresler sıfır. Mainnet sözleşme deploy'una ve kullanıcının Goldsky hesabına bağlı.
   - Sonraki adım: Mainnet deploy sonrası `subgraph.yaml` adres/startBlock'larını doldur, `goldsky subgraph deploy` (kullanıcı hesap açınca).
 
-- [ ] **Karar: creator fee payı** (eklenme: 2026-11-03)
-  - Durum: Rakip analizi (reports/2026-11-03-rakip-analizi.md) creator payının (%0.3) rekabetçi olmayabileceğini gösterdi. Echo önerisi: %0.5 protokol / %0.5 creator. İş modeli kararı, kullanıcıda.
-  - Sonraki adım: Kullanıcı onaylarsa Constants.sol + shared/curve.ts + testler + const.md + docs güncellenir (mainnet deploy öncesi).
 
 - [ ] **Faz 2.0 fikirleri** (eklenme: 2026-11-03)
   - Durum: Lansman sonrası.

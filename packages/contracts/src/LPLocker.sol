@@ -9,7 +9,7 @@ import {FeeVault} from "./FeeVault.sol";
 import {INonfungiblePositionManager, IWETH9} from "./interfaces/IUniswapV3.sol";
 
 /// @notice Graduation LP NFT'lerini sonsuza kadar tutar. Likidite çekme veya NFT transfer
-/// fonksiyonu YOKTUR; sadece birikmiş Uniswap fee'leri toplanıp %70/%30 dağıtılır.
+/// fonksiyonu YOKTUR; sadece birikmiş Uniswap fee'leri toplanıp %50/%50 dağıtılır.
 contract LPLocker is ReentrancyGuard {
     using SafeERC20 for IERC20;
 

@@ -84,13 +84,13 @@ contract GraduationTest is BaseTest {
         vm.stopPrank();
         assertGt(wethOut, 0);
 
-        // LP fee'leri toplanır: ETH tarafı FeeVault'a (%70/%30), token tarafı treasury + creator'a
+        // LP fee'leri toplanır: ETH tarafı FeeVault'a (%50/%50), token tarafı treasury + creator'a
         uint256 creatorBefore = d.feeVault.creatorBalance(creator);
         (uint256 ethFees, uint256 tokenFees) = d.locker.collect(address(t));
         assertGt(ethFees, 0);
         assertGt(tokenFees, 0);
-        assertEq(d.feeVault.creatorBalance(creator) - creatorBefore, ethFees - ethFees * 70 / 100);
-        assertEq(t.balanceOf(treasury), tokenFees * 70 / 100);
+        assertEq(d.feeVault.creatorBalance(creator) - creatorBefore, ethFees - ethFees * 50 / 100);
+        assertEq(t.balanceOf(treasury), tokenFees * 50 / 100);
     }
 
     /// Saldırgan likiditesiz pool'da fiyatı oynatsa da graduation fiyatı hedefe geri çeker.

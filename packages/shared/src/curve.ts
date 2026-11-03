@@ -10,8 +10,8 @@ export const VIRTUAL_TOKEN = 1_066_666_666_666_666_666_666_666_667n;
 
 export const BPS = 10_000n;
 export const TRADE_FEE_BPS = 100n;
-export const PROTOCOL_FEE_BPS = 70n;
-export const CREATOR_FEE_BPS = 30n;
+export const PROTOCOL_FEE_BPS = 50n;
+export const CREATOR_FEE_BPS = 50n;
 export const SNIPER_WINDOW = 60n;
 export const SNIPER_FEE_START_BPS = 2_000n;
 

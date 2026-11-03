@@ -252,7 +252,7 @@ contract BondingCurve is ReentrancyGuard {
         graduator.graduate{value: c.realEth}(token, c.creator);
     }
 
-    /// Fee, protokol ve creator arasında %70 / %30 bölünür (sniper fee'si dahil).
+    /// Fee, protokol ve creator arasında %50 / %50 bölünür (sniper fee'si dahil).
     function _settleFeesAndEmit(
         address token,
         Curve storage c,

@@ -17,8 +17,8 @@ library Constants {
     // Fee'ler (bps, 10_000 = %100)
     uint256 internal constant BPS = 10_000;
     uint256 internal constant TRADE_FEE_BPS = 100; // %1
-    uint256 internal constant PROTOCOL_FEE_BPS = 70; // %0.7
-    uint256 internal constant CREATOR_FEE_BPS = 30; // %0.3
+    uint256 internal constant PROTOCOL_FEE_BPS = 50; // %0.5
+    uint256 internal constant CREATOR_FEE_BPS = 50; // %0.5
     uint256 internal constant LAUNCH_FEE = 0.0005 ether;
 
     // MEV koruması

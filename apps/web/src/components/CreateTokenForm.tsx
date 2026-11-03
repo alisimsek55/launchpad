@@ -223,7 +223,7 @@ export function CreateTokenForm() {
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div><div className="text-xs text-muted">Supply</div>1,000,000,000</div>
             <div><div className="text-xs text-muted">Graduates at</div>4.20 ETH</div>
-            <div><div className="text-xs text-muted">Creator fee</div>0.3% / işlem</div>
+            <div><div className="text-xs text-muted">Creator fee</div>0.5% / işlem</div>
             <div><div className="text-xs text-muted">Launch fee</div>0.0005 ETH</div>
           </div>
         </div>
