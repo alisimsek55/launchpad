@@ -229,7 +229,7 @@ event DCAPlanCancelled(uint256 indexed planId, uint256 refund);
 
 **Sonuçlar:**
 - **DCA keeper:** Gelato ve Chainlink Automation teyit edilemediği için büyük ihtimalle **kendi keeper servisimiz** gerekecek. DCA sözleşmesi herkesin tetikleyebileceği (permissionless) şekilde tasarlanmalı, keeper'a küçük bir ödül verilmeli.
-- **MEV:** Arbitrum Orbit zincirlerinde sequencer merkezi ve işlemleri FCFS (ilk gelen önce) sıralıyor, açık bir mempool yok. Bu yüzden klasik sandwich riski düşük, asıl risk **sniper botları** (latency yarışı). MEV stratejisi sniper korumasına odaklanmalı. ⚠️ Robinhood sequencer'ının sıralama politikası ayrıca doğrulanmalı.
+- **MEV:** Arbitrum Orbit zincirlerinde sequencer merkezi ve işlemleri FCFS (ilk gelen önce) sıralıyor, açık bir mempool yok. Bu yüzden klasik sandwich riski düşük, asıl risk **sniper botları** (latency yarışı). MEV stratejisi sniper korumasına odaklanmalı. ✅ Doğrulandı: FCFS, Timeboost kapalı, public mempool yok, ~100 ms blok (reports/2026-11-03-sequencer-mev.md).
 - **Rakip/alternatif:** Uniswap, Robinhood Chain'de kendi "Liquidity Launchpad"ini açmış. Bunu inceleyip farkımızı netleştirmek lazım.
 
 ## Kararlar
@@ -251,6 +251,5 @@ event DCAPlanCancelled(uint256 indexed planId, uint256 refund);
 - Deploy adresleri: `packages/shared/deployments/*.json` (tek kaynak)
 
 ## Açık sorular
-- Robinhood sequencer'ının sıralama politikası (FCFS mi, öncelik ücreti var mı?)
-- Uniswap Liquidity Launchpad'den farkımız ne olacak?
+- Creator fee payı %0.3 mü kalsın, %0.5'e mi çıksın? (reports/2026-11-03-rakip-analizi.md)
 - Faz 2 limit emirler: on-chain mi, off-chain keeper mı?

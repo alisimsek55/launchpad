@@ -11,6 +11,21 @@ Format:
 
 ---
 
+## 2026-11-03 — Faz 2.0 fikirleri
+- Olay: EKLENDİ
+
+## 2026-11-03 — Karar: creator fee payı
+- Olay: EKLENDİ
+- Not: Kullanıcı kararı bekleniyor.
+
+## 2026-11-03 — Uniswap Liquidity Launchpad rakip analizi
+- Olay: TAMAMLANDI
+- Not: Pools.trade (%0 platform fee, v4) ve Pons (%1) incelendi. Rapor: reports/2026-11-03-rakip-analizi.md.
+
+## 2026-11-03 — Robinhood sequencer sıralama politikasını doğrula
+- Olay: TAMAMLANDI
+- Not: FCFS, Timeboost kapalı, public mempool yok, ~100 ms blok → MEV varsayımı geçerli. PGA gelebilir, takip edilmeli. Rapor: reports/2026-11-03-sequencer-mev.md.
+
 ## 2026-11-03 — Faz 5 — Lansman hazırlığı
 - Olay: GÜNCELLENDİ
 - Not: Kod tarafı tamamlandı: forge lint 0 uyarı (gerçek düzeltmeler: SafeCast, sıfır adres kontrolleri, init event'leri, CEI sırası, transient storage; kalan bilinçli istisnalar gerekçeli). Manipülasyon fuzz testi gerçek bir DoS buldu (derin WETH likiditesi tüm token'ı tüketip graduation'ı kilitliyordu) → düzeltme swap'ı bakiyenin yarısıyla sınırlandı. CI workflow, reports/audit-scope.md, reports/deploy-runbook.md, deploy dry-run (8.1M gas). Kalanlar kullanıcı hesapları.

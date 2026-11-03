@@ -24,10 +24,10 @@ Format:
   - Durum: Subgraph derleniyor; adresler sıfır. Mainnet sözleşme deploy'una ve kullanıcının Goldsky hesabına bağlı.
   - Sonraki adım: Mainnet deploy sonrası `subgraph.yaml` adres/startBlock'larını doldur, `goldsky subgraph deploy` (kullanıcı hesap açınca).
 
-- [ ] **Robinhood sequencer sıralama politikasını doğrula** (eklenme: 2026-11-03)
-  - Durum: Arbitrum Orbit varsayımıyla FCFS kabul edildi; MEV stratejisi buna dayanıyor.
-  - Sonraki adım: Robinhood Chain dokümanlarında sequencer/ordering bilgisi ara; sonucu reports/'a yaz.
+- [ ] **Karar: creator fee payı** (eklenme: 2026-11-03)
+  - Durum: Rakip analizi (reports/2026-11-03-rakip-analizi.md) creator payının (%0.3) rekabetçi olmayabileceğini gösterdi. Echo önerisi: %0.5 protokol / %0.5 creator. İş modeli kararı, kullanıcıda.
+  - Sonraki adım: Kullanıcı onaylarsa Constants.sol + shared/curve.ts + testler + const.md + docs güncellenir (mainnet deploy öncesi).
 
-- [ ] **Uniswap Liquidity Launchpad rakip analizi** (eklenme: 2026-11-03)
-  - Durum: Varlığı tespit edildi, incelenmedi.
-  - Sonraki adım: Özelliklerini incele, farkımızı reports/ altında bir rapora yaz.
+- [ ] **Faz 2.0 fikirleri** (eklenme: 2026-11-03)
+  - Durum: Lansman sonrası.
+  - Sonraki adım: DexScreener/GMGN/Bitquery entegrasyonu + açık quote API (yüksek öncelik); fair launch modu (DCA tabanlı); Uniswap v4 graduation; hisse token eşli lansman; limit emirler; permissionless keeper + TWAP; USD fiyatlar; kullanıcı adı düzenleme.
