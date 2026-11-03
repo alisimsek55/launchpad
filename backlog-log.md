@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-03 — Projeyi kalıcı klasöre taşı
+- Olay: TAMAMLANDI
+- Not: Proje `C:\Users\alisi\Documents\launchpad`'e taşındı (OneDrive dışı yerel klasör). Git geçmişi GitHub'dan yeniden bağlandı.
+
 ## 2026-11-03 — `.env.example` şablonu
 - Olay: TAMAMLANDI
 - Not: Şablon `env.example` adıyla oluşturuldu (`.env.*` deny kuralına takılmadan). Gerçek `.env` koruması aynen duruyor. README'ye kopyalama komutu eklendi.

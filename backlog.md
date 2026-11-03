@@ -12,12 +12,8 @@ Format:
 
 ## Açık işler
 
-- [ ] **Projeyi kalıcı klasöre taşı** (eklenme: 2026-11-03)
-  - Durum: Kod artık GitHub'da (`alisimsek55/launchpad`) güvende, ama yerel çalışma klasörü hâlâ oturumla silinecek geçici klasör. Öneri: OneDrive dışında, örn. `C:\Users\alisi\projects\launchpad`.
-  - Sonraki adım: Kullanıcı onay verince oturumu kalıcı klasöre taşı (veya repoyu oraya clone et).
-
 - [ ] **Faz 0 — Kurulum** (eklenme: 2026-11-03)
-  - Durum: Başlanmadı; taşıma işine bağlı.
+  - Durum: Başlanmadı. Proje `C:\Users\alisi\Documents\launchpad`'de, önünde engel yok.
   - Sonraki adım: pnpm + Turborepo monorepo, Foundry, Next.js iskeleti (bkz. notes.md §13-14).
 
 - [ ] **Adresleri explorer'dan doğrula** (eklenme: 2026-11-03)
