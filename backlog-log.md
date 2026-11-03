@@ -12,6 +12,10 @@ Format:
 ---
 
 ## 2026-11-03 — `.env.example` şablonu
+- Olay: TAMAMLANDI
+- Not: Şablon `env.example` adıyla oluşturuldu (`.env.*` deny kuralına takılmadan). Gerçek `.env` koruması aynen duruyor. README'ye kopyalama komutu eklendi.
+
+## 2026-11-03 — `.env.example` şablonu
 - Olay: EKLENDİ
 - Not: Kullanıcının deny kuralı nedeniyle oluşturulamadı; kural güvenlik için korunuyor.
 

@@ -16,10 +16,6 @@ Format:
   - Durum: Kod artık GitHub'da (`alisimsek55/launchpad`) güvende, ama yerel çalışma klasörü hâlâ oturumla silinecek geçici klasör. Öneri: OneDrive dışında, örn. `C:\Users\alisi\projects\launchpad`.
   - Sonraki adım: Kullanıcı onay verince oturumu kalıcı klasöre taşı (veya repoyu oraya clone et).
 
-- [ ] **`.env.example` şablonu** (eklenme: 2026-11-03)
-  - Durum: `~/.claude/settings.json`'daki `Read(**/.env.*)` deny kuralı nedeniyle Claude oluşturamıyor. Kullanıcı kuralı korumayı seçti.
-  - Sonraki adım: Faz 0'da gerçekten gerektiğinde içeriği sohbete yaz, kullanıcı elle oluştursun.
-
 - [ ] **Faz 0 — Kurulum** (eklenme: 2026-11-03)
   - Durum: Başlanmadı; taşıma işine bağlı.
   - Sonraki adım: pnpm + Turborepo monorepo, Foundry, Next.js iskeleti (bkz. notes.md §13-14).

@@ -11,6 +11,7 @@ Senin adın Echo. Kullanıcı sana "Echo" diye seslenecek.
 - `notes.md` — Proje notları, kararlar, mimari ve yol haritası.
 - `const.md` — Projenin değişmez gerçekleri: chain ID, RPC, explorer, kontrat adresleri, protokol parametreleri (fee, curve, eşikler). Kodda bir sabit gerektiğinde değeri tahmin etme, buradan al. ⚠️ ile işaretli değerleri kullanmadan önce doğrula. Yeni bir sabit kesinleşince buraya ekle.
 - `reports/` — Ek raporlar (araştırmalar, analizler, karşılaştırmalar). Kullanıcı bir rapordan bahsettiğinde veya rapor araması gerektiğinde önce bu klasöre bak. Yeni raporları da buraya yaz.
+- `env.example` — Ortam değişkenleri şablonu (gizli bilgi yok). `.env.example` adı kullanılmaz çünkü `.env.*` dosyaları Claude'a kapalı; yeni bir değişken eklendiğinde bu dosyayı güncelle. Gerçek `.env`'yi asla okuma veya yazma.
 - `backlog.md` — Açık ve yarıda kalan işler.
 - `backlog-log.md` — Backlog'un değişiklik geçmişi (sadece ekleme yapılır).
 

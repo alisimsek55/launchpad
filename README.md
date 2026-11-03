@@ -10,3 +10,8 @@ Robinhood Chain üzerinde bonding curve tabanlı token launchpad. Token'lar curv
 
 ## Ortam değişkenleri
 Gizli anahtarlar `.env` dosyasında tutulur ve `.gitignore` ile repoya girmez. Gizli olmayan sabitler `const.md`'dedir.
+
+Şablon: [env.example](env.example) — `.env` adıyla kopyalayıp değerleri doldur:
+```bash
+cp env.example .env
+```
