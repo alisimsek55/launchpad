@@ -27,8 +27,16 @@ contract Simulate is Script {
         require(block.chainid == RH.CHAIN_ID, "fork degil");
         // Fork chain id'yi korur; anvil'de olduğumuzu test hesabının 10k ETH bakiyesinden anlarız.
         require(vm.addr(PK0).balance >= 1_000 ether, "sadece yerel anvil");
+        // Bu herkese açık test adresleri mainnet'te EIP-7702 ile "sweeper" sözleşmesine bağlı:
+        // gelen ETH'yi botlara aktarıyor. Fork bu kodu kopyalar; yerelde temizle.
+        for (uint256 i; i < 4; i++) {
+            vm.rpc("anvil_setCode", string.concat('["', vm.toString(vm.addr(vm.deriveKey(ANVIL_MNEMONIC, uint32(i)))), '","0x"]'));
+        }
 
         address deployer = vm.addr(PK0);
+        // Arbitrum Orbit: block.number L1 blok numarasını döndürür; L2 bloğunu RPC'den al.
+        bytes memory raw = vm.rpc("eth_blockNumber", "[]");
+        uint256 startBlock = uint256(bytes32(raw)) >> (256 - raw.length * 8);
         vm.startBroadcast(PK0);
         Deployment memory d =
             DeployLib.deploy(deployer, deployer, IWETH9(RH.WETH), INonfungiblePositionManager(RH.UNI_V3_POSITION_MANAGER));
@@ -58,6 +66,22 @@ contract Simulate is Script {
         console.log("GRADUATOR_ADDRESS", address(d.graduator));
         console.log("TOKEN_A", address(a));
         console.log("TOKEN_B", address(b));
+        _writeDeployment(d, startBlock);
+    }
+
+    /// web, api ve indexer'ın okuduğu packages/shared/deployments/local.json
+    function _writeDeployment(Deployment memory d, uint256 startBlock) internal {
+        string memory k = "deployment";
+        vm.serializeString(k, "network", "local");
+        vm.serializeUint(k, "chainId", block.chainid);
+        vm.serializeString(k, "rpcUrl", "http://127.0.0.1:8545");
+        vm.serializeUint(k, "startBlock", startBlock);
+        vm.serializeAddress(k, "tokenFactory", address(d.factory));
+        vm.serializeAddress(k, "bondingCurve", address(d.curve));
+        vm.serializeAddress(k, "graduator", address(d.graduator));
+        vm.serializeAddress(k, "lpLocker", address(d.locker));
+        string memory json = vm.serializeAddress(k, "feeVault", address(d.feeVault));
+        vm.writeJson(json, "../shared/deployments/local.json");
     }
 
     function _buy(uint256 pk, Deployment memory d, LaunchToken t, uint256 eth) internal {

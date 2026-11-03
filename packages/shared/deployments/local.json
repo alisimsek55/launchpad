@@ -1,0 +1,11 @@
+{
+  "bondingCurve": "0x7331Da9b95D5944c8b76D96192371e52eD187BFe",
+  "chainId": 4663,
+  "feeVault": "0xA388228A1fA75a5F5844226E2874d7EE4d940256",
+  "graduator": "0x329058C12E8B269BFA0896c8705b427c5Dd26b96",
+  "lpLocker": "0x73Be4F9bD5323ceEC603149186862c86dDa2BB23",
+  "network": "local",
+  "rpcUrl": "http://127.0.0.1:8545",
+  "startBlock": 105295339,
+  "tokenFactory": "0x50D0F8Fe8b59878706A7bC0288c960255d55867b"
+}

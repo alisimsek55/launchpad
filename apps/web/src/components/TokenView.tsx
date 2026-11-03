@@ -1,0 +1,101 @@
+"use client";
+
+import { nameFromAddress } from "@launchpad/shared";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { getAddress, isAddress, type Address } from "viem";
+import { chain } from "@/config";
+import { useMetadata, useToken, useHolders } from "@/data/hooks";
+import { fmtEth, fmtPrice, shortAddr } from "@/lib/format";
+import { Avatar } from "./Avatar";
+import { GraduationBar } from "./GraduationBar";
+import { PriceChart } from "./PriceChart";
+import { TokenImage } from "./TokenImage";
+import { TokenTabs } from "./TokenTabs";
+import { TradePanel } from "./TradePanel";
+
+export function TokenView() {
+  const params = useParams<{ address: string }>();
+  if (!isAddress(params.address)) return <p className="text-muted">Geçersiz adres.</p>;
+  return <TokenViewInner token={getAddress(params.address)} />;
+}
+
+function TokenViewInner({ token }: { token: Address }) {
+  const { data: t, isLoading } = useToken(token);
+  const { data: meta } = useMetadata(t?.metadataURI);
+  const { data: holders } = useHolders(token);
+  if (isLoading) return <p className="text-muted">Yükleniyor…</p>;
+  if (!t) return <p className="text-muted">Token bulunamadı.</p>;
+
+  const explorer = chain.blockExplorers?.default.url;
+  const stats = [
+    { label: "Market cap", value: `${fmtEth(t.marketCapEth, 2)} ETH` },
+    { label: "Holders", value: holders ? String(holders.holderCount) : "–" },
+    { label: "Trades", value: String(t.tradeCount) },
+    { label: "Supply", value: "1B" },
+    { label: "Creator earned", value: `${fmtEth(t.creatorFeesEth)} ETH` },
+  ];
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <div className="min-w-0 space-y-4">
+        <div className="flex items-start gap-4">
+          <TokenImage address={t.address} metadataURI={t.metadataURI} symbol={t.symbol} size={64} />
+          <div className="min-w-0 flex-1">
+            <h1 className="text-2xl font-semibold">
+              {t.name} <span className="text-muted">${t.symbol}</span>
+            </h1>
+            <Link href={`/profile/${t.creator}`} className="mt-1 flex items-center gap-2 text-sm text-muted hover:underline">
+              <Avatar address={t.creator} size={16} /> {nameFromAddress(t.creator)}
+            </Link>
+            {meta?.description && <p className="mt-2 text-sm">{meta.description}</p>}
+            <div className="mt-2 flex gap-3 text-xs text-muted">
+              {meta?.x && <a href={meta.x} target="_blank" rel="noreferrer" className="hover:text-foreground">X</a>}
+              {meta?.telegram && <a href={meta.telegram} target="_blank" rel="noreferrer" className="hover:text-foreground">Telegram</a>}
+              {meta?.website && <a href={meta.website} target="_blank" rel="noreferrer" className="hover:text-foreground">Website</a>}
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-semibold">{fmtPrice(t.priceEth)} ETH</div>
+            <div className="text-xs text-muted">token başına</div>
+          </div>
+        </div>
+
+        <PriceChart token={token} />
+
+        <div className="grid grid-cols-2 gap-3 rounded-2xl border border-line bg-surface p-4 sm:grid-cols-5">
+          {stats.map((s) => (
+            <div key={s.label}>
+              <div className="text-xs text-muted">{s.label}</div>
+              <div className="font-semibold">{s.value}</div>
+            </div>
+          ))}
+          <div className="col-span-2 sm:col-span-5">
+            <GraduationBar realEth={t.realEth} graduated={t.graduated} />
+          </div>
+          <div className="col-span-2 flex gap-6 text-xs text-muted sm:col-span-5">
+            <span>
+              Token{" "}
+              <a href={`${explorer}/address/${t.address}`} target="_blank" rel="noreferrer" className="text-foreground hover:underline">
+                {shortAddr(t.address)}
+              </a>
+            </span>
+            <span>
+              Pool{" "}
+              <a href={`${explorer}/address/${t.pool}`} target="_blank" rel="noreferrer" className="text-foreground hover:underline">
+                {shortAddr(t.pool)}
+              </a>
+            </span>
+            <span>Launched {new Date(t.createdAt * 1000).toLocaleString()}</span>
+          </div>
+        </div>
+
+        <TokenTabs token={token} symbol={t.symbol} />
+      </div>
+
+      <div className="lg:sticky lg:top-6 lg:self-start">
+        <TradePanel token={token} symbol={t.symbol} graduated={t.graduated} />
+      </div>
+    </div>
+  );
+}

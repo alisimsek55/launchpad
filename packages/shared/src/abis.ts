@@ -1045,7 +1045,7 @@ export const graduatorAbi = [
   }
 ] as const;
 
-export const lPLockerAbi = [
+export const lpLockerAbi = [
   {
     "type": "constructor",
     "inputs": [

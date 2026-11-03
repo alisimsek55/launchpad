@@ -35,7 +35,7 @@ abis.UniswapV3Pool = uniswapV3Pool;
 const ts =
   "// OTOMATİK ÜRETİLDİ — elle düzenleme. Kaynak: packages/contracts/export-abis.mjs\n\n" +
   Object.entries(abis)
-    .map(([name, abi]) => `export const ${name[0].toLowerCase() + name.slice(1)}Abi = ${JSON.stringify(abi, null, 2)} as const;\n`)
+    .map(([name, abi]) => `export const ${name.replace(/^[A-Z]+(?=[A-Z][a-z])|^[A-Z]/, (m) => m.toLowerCase())}Abi = ${JSON.stringify(abi, null, 2)} as const;\n`)
     .join("\n");
 writeFileSync(join(root, "..", "shared", "src", "abis.ts"), ts);
 

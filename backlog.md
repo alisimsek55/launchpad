@@ -12,9 +12,13 @@ Format:
 
 ## Açık işler
 
-- [ ] **Faz 3 — Frontend v1** (eklenme: 2026-11-03)
-  - Durum: Başlanmadı. Veri kaynakları hazır: subgraph (trades/mumlar/analytics), indexer API (holders, bakiyeler), `packages/shared` (ABI, curve matematiği).
-  - Sonraki adım: Privy girişi → token sayfası (Lightweight Charts + trade paneli + trades/holders) → token oluşturma (2 adım) → ana sayfa listesi → profil. Metadata/profil API'si (görsel yükleme R2, kullanıcı adı) da bu fazda.
+- [ ] **Faz 4 — DCA + Analytics + Docs** (eklenme: 2026-11-03)
+  - Durum: Başlanmadı.
+  - Sonraki adım: `DCAVault` sözleşmesi + testleri (notes.md §11) → `apps/keeper` → web'de DCA sekmesi → Analytics sayfası (subgraph `Protocol`/`ProtocolDayData`/`TokenDayData`) → Docs.
+
+- [ ] **Privy ile gerçek giriş testi** (eklenme: 2026-11-03)
+  - Durum: Kod hazır (`apps/web/src/wallet/PrivyProviders.tsx`); app ID olmadan test edilemedi.
+  - Sonraki adım: Kullanıcı privy.io'da hesap + app açıp App ID'yi `.env`'ye (`NEXT_PUBLIC_PRIVY_APP_ID`) yazınca giriş/embedded wallet akışını test et.
 
 - [ ] **Goldsky subgraph deploy'u** (eklenme: 2026-11-03)
   - Durum: Subgraph derleniyor; adresler sıfır. Mainnet sözleşme deploy'una ve kullanıcının Goldsky hesabına bağlı.

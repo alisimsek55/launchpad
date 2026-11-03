@@ -26,6 +26,10 @@ pnpm + Turborepo monorepo. Ayrıntılar `README.md`'de.
 - Sözleşme ABI'si değişirse `pnpm --filter @launchpad/contracts abis` çalıştır (`packages/shared/src/abis.ts` ve `packages/subgraph/abis/` otomatik üretilir, elle düzenleme).
 - Fork testleri en son bloktan fork alır: public RPC arşiv node değil, eski bloğa sabitlemek çalışmaz.
 - Indexer/subgraph değişikliklerini anvil fork + `script/Simulate.s.sol` ile uçtan uca doğrula (README "Yerel uçtan uca test"). Subgraph sadece `graph build` ile doğrulanabiliyor (matchstick Docker istiyor, makinede yok).
+- Deploy adresleri `packages/shared/deployments/{local,mainnet}.json`'da; web/api/indexer buradan okur. `local.json`'ı `Simulate.s.sol` yazar.
+- **Robinhood Chain (Arbitrum Orbit) tuzakları:** Solidity'de `block.number` L1 blok numarasını döndürür (L2 değil); `cast run` çalışmaz (izleme için `cast rpc debug_traceTransaction <tx> '{"tracer":"callTracer"}'`). Anvil'in herkese açık test adresleri mainnet'te EIP-7702 sweeper'a bağlı; fork'ta `anvil_setCode` ile temizlenmeli (Simulate yapıyor).
+- **Web:** Next 16 + Cache Components: `useParams()`/`useSearchParams()` kullanan client bileşenleri `<Suspense>` içinde olmalı. Kontrat yazmaları `useWrite()` (`src/lib/useTx.ts`) ile yapılır: %20 gas payı ekler (Uniswap multicall'da tahmin yetmiyor). Cüzdan: Privy app ID varsa Privy, yoksa yerelde anvil test cüzdanı (`src/wallet`).
+- Web'i tarayıcıda test: anvil + Simulate + indexer + api + web (README "Yerel geliştirme").
 - Curve sabitlerini değiştirirsen `test/Trade.t.sol` ve `test/Launch.t.sol`'daki TS referans değerlerini `packages/shared` ile yeniden hesapla.
 
 ## Backlog kuralları (her oturumda uygula)

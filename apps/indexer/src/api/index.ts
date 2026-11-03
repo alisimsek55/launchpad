@@ -3,16 +3,19 @@ import schema from "ponder:schema";
 import { and, desc, eq, graphql, gt } from "ponder";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { getDeployment } from "@launchpad/shared";
 import { getAddress, isAddress } from "viem";
 
 const TOTAL_SUPPLY = 1_000_000_000n * 10n ** 18n;
 const DEAD = "0x000000000000000000000000000000000000dEaD";
+const deployment = getDeployment(process.env.LAUNCHPAD_NETWORK);
 
-// Holder listesinde "Contract" olarak etiketlenecek protokol adresleri (deploy sonrası env'den)
+// Holder listesinde "Contract" olarak etiketlenecek protokol adresleri
 const protocolContracts: Record<string, string> = {};
 for (const [label, value] of [
-  ["Curve", process.env.BONDING_CURVE_ADDRESS],
-  ["Graduator", process.env.GRADUATOR_ADDRESS],
+  ["Curve", process.env.BONDING_CURVE_ADDRESS ?? deployment.bondingCurve],
+  ["Graduator", process.env.GRADUATOR_ADDRESS ?? deployment.graduator],
+  ["LP Locker", deployment.lpLocker],
   ["Burn", DEAD],
 ] as const) {
   if (value && isAddress(value)) protocolContracts[value.toLowerCase()] = label;
@@ -31,7 +34,8 @@ app.get("/tokens/:address/holders", async (c) => {
   const offset = Math.max(Number(c.req.query("offset") ?? 0), 0);
 
   const [info] = await db.select().from(schema.token).where(eq(schema.token.address, token)).limit(1);
-  if (!info) return c.json({ error: "unknown token" }, 404);
+  // Yeni token henüz indekslenmemiş olabilir: hata değil, boş liste
+  if (!info) return c.json({ token, holderCount: 0, holders: [] });
   const [stats] = await db.select().from(schema.holderStats).where(eq(schema.holderStats.token, token)).limit(1);
 
   const rows = await db

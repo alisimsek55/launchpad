@@ -11,6 +11,17 @@ Format:
 
 ---
 
+## 2026-11-03 — Privy ile gerçek giriş testi
+- Olay: EKLENDİ
+- Not: Kullanıcının Privy hesabı/app ID'si bekleniyor.
+
+## 2026-11-03 — Faz 4 — DCA + Analytics + Docs
+- Olay: EKLENDİ
+
+## 2026-11-03 — Faz 3 — Frontend v1
+- Olay: TAMAMLANDI
+- Not: Ana sayfa, token sayfası (chart, trade paneli curve + Uniswap, trades/holders), 2 adımlı token oluşturma + metadata API (R2/yerel), profil (claim, LP fee). Anvil fork'ta tarayıcıdan uçtan uca test; 4 hata bulunup düzeltildi (Uniswap satış gas'ı, Next 16 Suspense, Arbitrum block.number, indexer 404). Rapor: reports/2026-11-03-faz3-frontend.md.
+
 ## 2026-11-03 — Goldsky subgraph deploy'u
 - Olay: EKLENDİ
 - Not: Mainnet deploy + kullanıcının Goldsky hesabı bekleniyor.

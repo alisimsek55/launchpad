@@ -1,13 +1,15 @@
-import { GRADUATION_ETH, robinhood } from "@launchpad/shared";
-import { formatEther } from "viem";
+import { TokenList } from "@/components/TokenList";
 
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-4 bg-black p-16 text-zinc-50">
-      <h1 className="text-4xl font-semibold tracking-tight">Launchpad</h1>
-      <p className="text-zinc-400">
-        {robinhood.name} (chain {robinhood.id}) · graduation {formatEther(GRADUATION_ETH)} ETH
-      </p>
-    </main>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-semibold tracking-tight">Tokens</h1>
+        <p className="mt-1 text-sm text-muted">
+          Bonding curve ile başlar, 4.2 ETH&apos;de Uniswap v3&apos;e geçer. Likidite sonsuza kadar kilitli.
+        </p>
+      </div>
+      <TokenList />
+    </div>
   );
 }
