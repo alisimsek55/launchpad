@@ -5,6 +5,7 @@
     "build": "forge build",
     "test": "forge test",
     "test:fast": "forge test --no-match-contract Invariant",
-    "fmt": "forge fmt"
+    "fmt": "forge fmt",
+    "abis": "forge build && node export-abis.mjs"
   }
 }

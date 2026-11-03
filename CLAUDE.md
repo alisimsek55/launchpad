@@ -23,6 +23,9 @@ pnpm + Turborepo monorepo. Ayrıntılar `README.md`'de.
 - Foundry PATH'te değilse: `export PATH="$PATH:$HOME/.foundry/bin"`.
 - Test: `pnpm --filter @launchpad/contracts test` (tümü mainnet fork üzerinde, ~3 dk; hızlı tur için `test:fast`), `pnpm --filter @launchpad/shared test`. Değişiklikten sonra ilgili testleri çalıştır.
 - Sözleşme testlerinde `vm.warp` ile zaman ilerletirken mutlak zaman kullan (`t0 + 30`): via-IR, test içinde `block.timestamp`'i önbelleğe alabiliyor.
+- Sözleşme ABI'si değişirse `pnpm --filter @launchpad/contracts abis` çalıştır (`packages/shared/src/abis.ts` ve `packages/subgraph/abis/` otomatik üretilir, elle düzenleme).
+- Fork testleri en son bloktan fork alır: public RPC arşiv node değil, eski bloğa sabitlemek çalışmaz.
+- Indexer/subgraph değişikliklerini anvil fork + `script/Simulate.s.sol` ile uçtan uca doğrula (README "Yerel uçtan uca test"). Subgraph sadece `graph build` ile doğrulanabiliyor (matchstick Docker istiyor, makinede yok).
 - Curve sabitlerini değiştirirsen `test/Trade.t.sol` ve `test/Launch.t.sol`'daki TS referans değerlerini `packages/shared` ile yeniden hesapla.
 
 ## Backlog kuralları (her oturumda uygula)

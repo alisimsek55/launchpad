@@ -11,6 +11,17 @@ Format:
 
 ---
 
+## 2026-11-03 — Goldsky subgraph deploy'u
+- Olay: EKLENDİ
+- Not: Mainnet deploy + kullanıcının Goldsky hesabı bekleniyor.
+
+## 2026-11-03 — Faz 3 — Frontend v1
+- Olay: EKLENDİ
+
+## 2026-11-03 — Faz 2 — Veri katmanı
+- Olay: TAMAMLANDI
+- Not: Goldsky subgraph (7 entity, Uniswap pool dinamik data source; graph build geçiyor) + Ponder holders indexer ve API. Anvil fork'ta uçtan uca test: 8 bakiye zincirle birebir. 2 hata bulunup düzeltildi (mint/TokenCreated sırası, fork bloğu sabitleme). Metadata/profil API'si Faz 3'e kaydı. Rapor: reports/2026-11-03-faz2-veri-katmani.md.
+
 ## 2026-11-03 — Audit hazırlığı: forge lint uyarıları ve uç durumlar
 - Olay: EKLENDİ
 - Not: Faz 1'den kalan, kritik olmayan noktalar.

@@ -1,0 +1,126 @@
+# Adresler ve startBlock, mainnet deploy'undan sonra networks.json'da güncellenecek.
+specVersion: 1.2.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: TokenFactory
+    network: robinhood-mainnet
+    source:
+      abi: TokenFactory
+      address: "0x0000000000000000000000000000000000000000"
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities: [Token, Protocol, ProtocolDayData, User]
+      abis:
+        - name: TokenFactory
+          file: ./abis/TokenFactory.json
+      eventHandlers:
+        - event: TokenCreated(indexed address,indexed address,string,string,string,address,uint256)
+          handler: handleTokenCreated
+      file: ./src/factory.ts
+
+  - kind: ethereum/contract
+    name: BondingCurve
+    network: robinhood-mainnet
+    source:
+      abi: BondingCurve
+      address: "0x0000000000000000000000000000000000000000"
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities: [Token, Trade, Candle, TokenDayData, ProtocolDayData, Protocol, User]
+      abis:
+        - name: BondingCurve
+          file: ./abis/BondingCurve.json
+      eventHandlers:
+        - event: Trade(indexed address,indexed address,bool,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleCurveTrade
+      file: ./src/curve.ts
+
+  - kind: ethereum/contract
+    name: Graduator
+    network: robinhood-mainnet
+    source:
+      abi: Graduator
+      address: "0x0000000000000000000000000000000000000000"
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities: [Token, Protocol, ProtocolDayData]
+      abis:
+        - name: Graduator
+          file: ./abis/Graduator.json
+      eventHandlers:
+        - event: Graduated(indexed address,indexed address,uint256,uint256,uint256,uint160)
+          handler: handleGraduated
+      file: ./src/graduator.ts
+
+  - kind: ethereum/contract
+    name: FeeVault
+    network: robinhood-mainnet
+    source:
+      abi: FeeVault
+      address: "0x0000000000000000000000000000000000000000"
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities: [Protocol, ProtocolDayData]
+      abis:
+        - name: FeeVault
+          file: ./abis/FeeVault.json
+      eventHandlers:
+        - event: FeesDeposited(indexed address,uint256,uint256)
+          handler: handleFeesDeposited
+      file: ./src/fees.ts
+
+  - kind: ethereum/contract
+    name: LPLocker
+    network: robinhood-mainnet
+    source:
+      abi: LPLocker
+      address: "0x0000000000000000000000000000000000000000"
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities: [Token]
+      abis:
+        - name: LPLocker
+          file: ./abis/LPLocker.json
+      eventHandlers:
+        - event: LPFeesCollected(indexed address,uint256,uint256)
+          handler: handleLPFeesCollected
+      file: ./src/fees.ts
+
+templates:
+  # Graduation sonrası her token'ın Uniswap v3 pool'u
+  - kind: ethereum/contract
+    name: UniswapV3Pool
+    network: robinhood-mainnet
+    source:
+      abi: UniswapV3Pool
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities: [Token, Trade, Candle, TokenDayData, ProtocolDayData, Protocol, User]
+      abis:
+        - name: UniswapV3Pool
+          file: ./abis/UniswapV3Pool.json
+      eventHandlers:
+        - event: Swap(indexed address,indexed address,int256,int256,uint160,uint128,int24)
+          handler: handleSwap
+      file: ./src/pool.ts

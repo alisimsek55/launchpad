@@ -10,10 +10,9 @@ import {INonfungiblePositionManager, IUniswapV3Pool, IWETH9} from "../src/interf
 import {PriceMath} from "../src/libraries/PriceMath.sol";
 
 /// Tüm testler Robinhood Chain mainnet fork'u üzerinde çalışır (testnet'te Uniswap yok).
-/// Blok sabitlenmiştir: sonuçlar tekrarlanabilir ve RPC yanıtları önbelleğe alınır.
+/// Public RPC arşiv node değil (eski blokların state'i yok), bu yüzden en son bloktan fork alınır.
+/// Sonuçlar bloktan bağımsızdır: sözleşmeler her testte sıfırdan deploy edilir.
 abstract contract BaseTest is Test {
-    uint256 internal constant FORK_BLOCK = 105_259_296;
-
     Deployment internal d;
     address internal owner = makeAddr("owner");
     address internal treasury = makeAddr("treasury");
@@ -22,7 +21,7 @@ abstract contract BaseTest is Test {
     address internal bob = makeAddr("bob");
 
     function setUp() public virtual {
-        vm.createSelectFork("robinhood", FORK_BLOCK);
+        vm.createSelectFork("robinhood");
         d = DeployLib.deploy(owner, treasury, IWETH9(RH.WETH), INonfungiblePositionManager(RH.UNI_V3_POSITION_MANAGER));
         vm.deal(creator, 100 ether);
         vm.deal(alice, 100 ether);

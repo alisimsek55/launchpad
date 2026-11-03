@@ -1,0 +1,21 @@
+{
+  "name": "@launchpad/indexer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "ponder dev",
+    "start": "ponder start",
+    "codegen": "ponder codegen",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@launchpad/shared": "workspace:*",
+    "hono": "^4.13.16",
+    "ponder": "^0.18.4",
+    "viem": "^2.57.16"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "typescript": "^5.9.3"
+  }
+}

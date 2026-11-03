@@ -38,3 +38,6 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Foundry: yerel simülasyon çıktıları
+/packages/contracts/broadcast/Simulate.s.sol/

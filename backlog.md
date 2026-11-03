@@ -12,9 +12,13 @@ Format:
 
 ## Açık işler
 
-- [ ] **Faz 2 — Veri katmanı** (eklenme: 2026-11-03)
-  - Durum: Başlanmadı. Sözleşme event'leri hazır (`TokenCreated`, `Trade`, `Graduated`, `LPFeesCollected`, `FeesDeposited`).
-  - Sonraki adım: Goldsky subgraph (trades, candles, analytics; graduation sonrası Uniswap `Swap` dinamik data source) → Ponder holders indexer → API uçları (bkz. notes.md §12).
+- [ ] **Faz 3 — Frontend v1** (eklenme: 2026-11-03)
+  - Durum: Başlanmadı. Veri kaynakları hazır: subgraph (trades/mumlar/analytics), indexer API (holders, bakiyeler), `packages/shared` (ABI, curve matematiği).
+  - Sonraki adım: Privy girişi → token sayfası (Lightweight Charts + trade paneli + trades/holders) → token oluşturma (2 adım) → ana sayfa listesi → profil. Metadata/profil API'si (görsel yükleme R2, kullanıcı adı) da bu fazda.
+
+- [ ] **Goldsky subgraph deploy'u** (eklenme: 2026-11-03)
+  - Durum: Subgraph derleniyor; adresler sıfır. Mainnet sözleşme deploy'una ve kullanıcının Goldsky hesabına bağlı.
+  - Sonraki adım: Mainnet deploy sonrası `subgraph.yaml` adres/startBlock'larını doldur, `goldsky subgraph deploy` (kullanıcı hesap açınca).
 
 - [ ] **Audit hazırlığı: forge lint uyarıları ve uç durumlar** (eklenme: 2026-11-03)
   - Durum: Faz 1 raporunda listelendi (reports/2026-11-03-faz1-sozlesmeler.md, "Bilinen açık noktalar").

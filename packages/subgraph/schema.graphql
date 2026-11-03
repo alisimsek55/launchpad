@@ -1,0 +1,101 @@
+# Tüm tutarlar ETH / token birimindedir (18 ondalık, BigDecimal).
+
+"Protokol geneli toplamlar (tek kayıt, id = 0x01)"
+type Protocol @entity(immutable: false) {
+  id: Bytes!
+  tokenCount: Int!
+  graduatedCount: Int!
+  tradeCount: BigInt!
+  volumeEth: BigDecimal!
+  "Kasaya yatan tüm fee'ler (protokol + creator)"
+  feesEth: BigDecimal!
+  "Protokol payı (işlem fee'leri, launch fee'si, LP fee'leri, graduation artıkları)"
+  protocolRevenueEth: BigDecimal!
+}
+
+type Token @entity(immutable: false) {
+  "Token adresi"
+  id: Bytes!
+  creator: User!
+  name: String!
+  symbol: String!
+  metadataURI: String!
+  pool: Bytes!
+  tokenIsToken0: Boolean!
+  createdAt: BigInt!
+  createdAtBlock: BigInt!
+  graduated: Boolean!
+  graduatedAt: BigInt
+  "Son işlem sonrası spot fiyat (token başına ETH)"
+  priceEth: BigDecimal!
+  marketCapEth: BigDecimal!
+  volumeEth: BigDecimal!
+  tradeCount: BigInt!
+  "Curve'deki gerçek ETH (graduation ilerlemesi = realEth / 4.2)"
+  realEth: BigDecimal!
+  creatorFeesEth: BigDecimal!
+  trades: [Trade!]! @derivedFrom(field: "token")
+}
+
+type Trade @entity(immutable: true) {
+  "txHash + logIndex"
+  id: Bytes!
+  token: Token!
+  trader: User!
+  isBuy: Boolean!
+  ethAmount: BigDecimal!
+  tokenAmount: BigDecimal!
+  "İşlem fiyatı (ethAmount / tokenAmount)"
+  priceEth: BigDecimal!
+  "curve | uniswap"
+  source: String!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  txHash: Bytes!
+}
+
+"OHLCV mumu. interval: saniye (60, 300, 3600, 21600, 86400)"
+type Candle @entity(immutable: false) {
+  "token + interval + başlangıç zamanı"
+  id: Bytes!
+  token: Token!
+  interval: Int!
+  timestamp: BigInt!
+  open: BigDecimal!
+  high: BigDecimal!
+  low: BigDecimal!
+  close: BigDecimal!
+  volumeEth: BigDecimal!
+  tradeCount: Int!
+}
+
+type TokenDayData @entity(immutable: false) {
+  "token + gün"
+  id: Bytes!
+  token: Token!
+  date: Int!
+  volumeEth: BigDecimal!
+  tradeCount: Int!
+}
+
+type ProtocolDayData @entity(immutable: false) {
+  "gün (unix / 86400)"
+  id: Bytes!
+  date: Int!
+  volumeEth: BigDecimal!
+  feesEth: BigDecimal!
+  protocolRevenueEth: BigDecimal!
+  launches: Int!
+  graduations: Int!
+  tradeCount: Int!
+}
+
+type User @entity(immutable: false) {
+  "Cüzdan adresi"
+  id: Bytes!
+  tradeCount: BigInt!
+  volumeEth: BigDecimal!
+  tokensCreated: Int!
+  created: [Token!]! @derivedFrom(field: "creator")
+  trades: [Trade!]! @derivedFrom(field: "trader")
+}

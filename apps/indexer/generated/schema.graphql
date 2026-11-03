@@ -1,0 +1,167 @@
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+scalar BigInt
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type ViewPageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
+type Meta {
+  status: JSON
+}
+
+type Query {
+  token(address: String!): token
+  tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): tokenPage!
+  holderStats(token: String!): holderStats
+  holderStatss(where: holderStatsFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): holderStatsPage!
+  balance(token: String!, holder: String!): balance
+  balances(where: balanceFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): balancePage!
+  _meta: Meta
+}
+
+type token {
+  address: String!
+  pool: String!
+  creator: String!
+  createdAt: BigInt!
+}
+
+type tokenPage {
+  items: [token!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input tokenFilter {
+  AND: [tokenFilter]
+  OR: [tokenFilter]
+  address: String
+  address_not: String
+  address_in: [String]
+  address_not_in: [String]
+  address_contains: String
+  address_not_contains: String
+  address_starts_with: String
+  address_ends_with: String
+  address_not_starts_with: String
+  address_not_ends_with: String
+  pool: String
+  pool_not: String
+  pool_in: [String]
+  pool_not_in: [String]
+  pool_contains: String
+  pool_not_contains: String
+  pool_starts_with: String
+  pool_ends_with: String
+  pool_not_starts_with: String
+  pool_not_ends_with: String
+  creator: String
+  creator_not: String
+  creator_in: [String]
+  creator_not_in: [String]
+  creator_contains: String
+  creator_not_contains: String
+  creator_starts_with: String
+  creator_ends_with: String
+  creator_not_starts_with: String
+  creator_not_ends_with: String
+  createdAt: BigInt
+  createdAt_not: BigInt
+  createdAt_in: [BigInt]
+  createdAt_not_in: [BigInt]
+  createdAt_gt: BigInt
+  createdAt_lt: BigInt
+  createdAt_gte: BigInt
+  createdAt_lte: BigInt
+}
+
+type holderStats {
+  token: String!
+  holderCount: Int!
+}
+
+type holderStatsPage {
+  items: [holderStats!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input holderStatsFilter {
+  AND: [holderStatsFilter]
+  OR: [holderStatsFilter]
+  token: String
+  token_not: String
+  token_in: [String]
+  token_not_in: [String]
+  token_contains: String
+  token_not_contains: String
+  token_starts_with: String
+  token_ends_with: String
+  token_not_starts_with: String
+  token_not_ends_with: String
+  holderCount: Int
+  holderCount_not: Int
+  holderCount_in: [Int]
+  holderCount_not_in: [Int]
+  holderCount_gt: Int
+  holderCount_lt: Int
+  holderCount_gte: Int
+  holderCount_lte: Int
+}
+
+type balance {
+  token: String!
+  holder: String!
+  balance: BigInt!
+}
+
+type balancePage {
+  items: [balance!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input balanceFilter {
+  AND: [balanceFilter]
+  OR: [balanceFilter]
+  token: String
+  token_not: String
+  token_in: [String]
+  token_not_in: [String]
+  token_contains: String
+  token_not_contains: String
+  token_starts_with: String
+  token_ends_with: String
+  token_not_starts_with: String
+  token_not_ends_with: String
+  holder: String
+  holder_not: String
+  holder_in: [String]
+  holder_not_in: [String]
+  holder_contains: String
+  holder_not_contains: String
+  holder_starts_with: String
+  holder_ends_with: String
+  holder_not_starts_with: String
+  holder_not_ends_with: String
+  balance: BigInt
+  balance_not: BigInt
+  balance_in: [BigInt]
+  balance_not_in: [BigInt]
+  balance_gt: BigInt
+  balance_lt: BigInt
+  balance_gte: BigInt
+  balance_lte: BigInt
+}
