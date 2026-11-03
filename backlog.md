@@ -12,13 +12,9 @@ Format:
 
 ## Açık işler
 
-- [ ] **Faz 0 — Kurulum** (eklenme: 2026-11-03)
-  - Durum: Başlanmadı. Proje `C:\Users\alisi\Documents\launchpad`'de, önünde engel yok.
-  - Sonraki adım: pnpm + Turborepo monorepo, Foundry, Next.js iskeleti (bkz. notes.md §13-14).
-
-- [ ] **Adresleri explorer'dan doğrula** (eklenme: 2026-11-03)
-  - Durum: WETH ve Uniswap v3 adresleri sadece web kaynaklarından alındı. NonfungiblePositionManager adreslerinde tutarsızlık bildirilmiş.
-  - Sonraki adım: `https://robinhoodchain.blockscout.com` üzerinde WETH, v3 Factory, NonfungiblePositionManager, SwapRouter02 adreslerini kontrol et; sonucu notes.md'ye yaz.
+- [ ] **Faz 1 — Sözleşmeler** (eklenme: 2026-11-03)
+  - Durum: Başlanmadı. `Constants.sol` ve TS curve matematiği (`packages/shared/src/curve.ts`) hazır; Uniswap testnet'te olmadığı için graduation testleri mainnet fork ile yapılacak.
+  - Sonraki adım: `LaunchToken` → `BondingCurve` (buy/sell/quote, sniper fee, rounding) → `FeeVault` → `Graduator` + `LPLocker` → `TokenFactory`. Her biri için unit + fuzz + invariant testleri (bkz. notes.md §9-11).
 
 - [ ] **Chainlink Automation desteğini teyit et** (eklenme: 2026-11-03)
   - Durum: Bulunamadı; v1 kararı kendi keeper'ımız, bu yüzden acil değil.

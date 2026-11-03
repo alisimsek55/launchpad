@@ -1,0 +1,10 @@
+{
+  "name": "@launchpad/contracts",
+  "private": true,
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test --no-match-path \"test/fork/*\"",
+    "test:fork": "forge test --match-path \"test/fork/*\"",
+    "fmt": "forge fmt"
+  }
+}

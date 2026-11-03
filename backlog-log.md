@@ -11,6 +11,18 @@ Format:
 
 ---
 
+## 2026-11-03 — Faz 1 — Sözleşmeler
+- Olay: EKLENDİ
+- Not: Faz 0 bittiği için sıradaki faz backlog'a eklendi.
+
+## 2026-11-03 — Faz 0 — Kurulum
+- Olay: TAMAMLANDI
+- Not: pnpm 12 + Turborepo monorepo; Foundry 1.9 (forge-std v1.17.0, OpenZeppelin v5.6.1 submodule, solc 0.8.38); `Constants.sol` + 5 unit + 4 mainnet fork testi geçiyor; `packages/shared` (viem chain tanımları, adresler, curve matematiği + 4 vitest testi); Next.js 16 web (build geçiyor); Hono API (`/health` çalışıyor); indexer/keeper/subgraph yer tutucuları. TypeScript 5.9 (Next uyumu için 7 yerine).
+
+## 2026-11-03 — Adresleri explorer'dan doğrula
+- Olay: TAMAMLANDI
+- Not: Tüm mainnet adresleri resmi kaynaklar + `cast call` ile doğrulandı (const.md). NPM tutarsızlığı bulunmadı. Önemli: USDG 6 ondalıklı; testnet'te Uniswap yok → fork testleri; UniversalRouter adresi kaynaklar arasında tutarsız, kullanılmayacak.
+
 ## 2026-11-03 — Projeyi kalıcı klasöre taşı
 - Olay: TAMAMLANDI
 - Not: Proje `C:\Users\alisi\Documents\launchpad`'e taşındı (OneDrive dışı yerel klasör). Git geçmişi GitHub'dan yeniden bağlandı.

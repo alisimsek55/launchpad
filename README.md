@@ -8,10 +8,38 @@ Robinhood Chain üzerinde bonding curve tabanlı token launchpad. Token'lar curv
 - [backlog.md](backlog.md) — açık işler
 - [reports/](reports/) — raporlar
 
-## Ortam değişkenleri
-Gizli anahtarlar `.env` dosyasında tutulur ve `.gitignore` ile repoya girmez. Gizli olmayan sabitler `const.md`'dedir.
-
-Şablon: [env.example](env.example) — `.env` adıyla kopyalayıp değerleri doldur:
-```bash
-cp env.example .env
+## Yapı
 ```
+apps/web            Next.js frontend
+apps/api            Hono API
+apps/indexer        Ponder holders indexer (Faz 2)
+apps/keeper         DCA keeper (Faz 4)
+packages/contracts  Solidity + Foundry
+packages/shared     Ortak TS: chain tanımları, adresler, curve matematiği
+packages/subgraph   Goldsky subgraph (Faz 2)
+```
+
+## Gereksinimler
+- Node 24+, pnpm 12+
+- Foundry (`foundryup`)
+
+## Kurulum
+```bash
+git clone --recurse-submodules https://github.com/alisimsek55/launchpad.git
+cd launchpad
+pnpm install
+cp env.example .env   # değerleri doldur
+```
+
+## Komutlar
+```bash
+pnpm --filter @launchpad/web dev        # frontend: http://localhost:3000
+pnpm --filter @launchpad/api dev        # api: http://localhost:4000/health
+pnpm --filter @launchpad/shared test    # curve matematiği testleri
+pnpm --filter @launchpad/contracts test # Solidity testleri
+pnpm --filter @launchpad/contracts test:fork  # mainnet fork testleri
+pnpm build                              # tüm paketleri derle
+```
+
+## Ortam değişkenleri
+Gizli anahtarlar `.env` dosyasında tutulur ve `.gitignore` ile repoya girmez. Gizli olmayan sabitler `const.md`'dedir. Şablon: [env.example](env.example).

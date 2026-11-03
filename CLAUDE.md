@@ -15,6 +15,14 @@ Senin adın Echo. Kullanıcı sana "Echo" diye seslenecek.
 - `backlog.md` — Açık ve yarıda kalan işler.
 - `backlog-log.md` — Backlog'un değişiklik geçmişi (sadece ekleme yapılır).
 
+## Kod yapısı ve komutlar
+pnpm + Turborepo monorepo. Ayrıntılar `README.md`'de.
+- `apps/web` (Next.js 16 — sürüm eğitim verisinden farklı olabilir, `apps/web/AGENTS.md`'ye bak), `apps/api` (Hono), `packages/contracts` (Foundry), `packages/shared` (chain, adres, curve matematiği).
+- Curve matematiği iki yerde yaşar: `packages/contracts` (Solidity) ve `packages/shared/src/curve.ts` (TS). Birini değiştirirsen diğerini ve testlerini de güncelle; sonuçlar birebir aynı olmalı.
+- Sabitler üç yerde birebir aynı olmalı: `const.md` → `packages/contracts/src/Constants.sol` → `packages/shared/src`.
+- Foundry PATH'te değilse: `export PATH="$PATH:$HOME/.foundry/bin"`.
+- Test: `pnpm --filter @launchpad/contracts test`, `pnpm --filter @launchpad/shared test`, fork testleri `test:fork`. Değişiklikten sonra ilgili testleri çalıştır.
+
 ## Backlog kuralları (her oturumda uygula)
 Hiçbir iş yarım kalmamalı.
 1. **Oturum başında** `backlog.md`'yi oku; açık işleri göz önünde bulundur.

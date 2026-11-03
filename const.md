@@ -4,7 +4,7 @@ Projede değişmeyen değerler: ağ bilgileri, adresler, protokol parametreleri.
 Kodda bir sabit gerektiğinde **önce buraya bak**; yeni bir sabit kesinleşince buraya ekle.
 
 Durum etiketleri:
-- ✅ **Doğrulandı** — resmi kaynak veya explorer'dan teyit edildi
+- ✅ **Doğrulandı** — resmi kaynak + zincirde (`cast call`) teyit edildi
 - ⚠️ **Doğrulanmadı** — web kaynaklarından alındı; kullanmadan önce explorer'dan teyit et (bkz. backlog.md)
 
 ---
@@ -21,22 +21,38 @@ Durum etiketleri:
 
 | Ad | Mainnet | Testnet | Durum |
 |---|---|---|---|
-| Chain ID | `4663` | `46630` | ⚠️ |
-| Tip | Arbitrum Orbit L2 | | ⚠️ |
-| Gas token | ETH | ETH | ⚠️ |
-| RPC | `https://rpc.mainnet.chain.robinhood.com` | — | ⚠️ |
-| Explorer | `https://robinhoodchain.blockscout.com` | — | ⚠️ |
+| Chain ID | `4663` | `46630` | ✅ (RPC'den teyit) |
+| Tip | Arbitrum Orbit L2 | | ✅ |
+| Gas token | ETH | ETH | ✅ |
+| RPC (public, rate-limit'li) | `https://rpc.mainnet.chain.robinhood.com` | `https://rpc.testnet.chain.robinhood.com` | ✅ |
+| Explorer | `https://robinhoodchain.blockscout.com` | `https://explorer.testnet.chain.robinhood.com` | ✅ |
 | Goldsky network adı | `robinhood-mainnet` | — | ⚠️ |
+
+Production'da public RPC yerine Alchemy vb. özel RPC kullanılmalı (Robinhood dokümanı public RPC'yi rate-limit'li tanımlıyor).
 
 ## Kontrat adresleri (Mainnet)
 
+2026-11-03'te resmi kaynaklarla (Robinhood docs, Uniswap deployments, Paxos) ve zincirde `cast call` ile çapraz kontrol edildi.
+
+| Kontrat | Adres | Durum | Zincir kontrolü |
+|---|---|---|---|
+| WETH | `0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73` | ✅ | name/symbol = WETH, 18 ondalık |
+| Uniswap v3 Factory | `0x1f7d7550B1b028f7571E69A784071F0205FD2EfA` | ✅ | %1 fee tier aktif (`feeAmountTickSpacing(10000)` = 200) |
+| Uniswap v3 NonfungiblePositionManager | `0x73991a25C818Bf1f1128dEAaB1492D45638DE0D3` | ✅ | `factory()` = Factory, `WETH9()` = WETH. Bildirilen tutarsızlık yok (Ethereum'daki `0xC364...` adresi burada geçerli değil). |
+| Uniswap SwapRouter02 | `0xCaf681a66D020601342297493863E78C959E5cb2` | ✅ | `factory()` = Factory, `WETH9()` = WETH |
+| Uniswap QuoterV2 | `0x33e885eD0Ec9bF04EcfB19341582aADCb4c8A9E7` | ✅ | `factory()`, `WETH9()` doğru |
+| USDG (Paxos) | `0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168` | ✅ | ⚠️ **6 ondalık** (18 değil!) |
+| Uniswap UniversalRouter | `0x8876…0904` veya `0x204F…0498` | ⚠️ | İki resmi kaynak farklı adres veriyor; **kullanmıyoruz** (SwapRouter02 yeterli) |
+
+## Kontrat adresleri (Testnet 46630)
+
 | Kontrat | Adres | Durum |
 |---|---|---|
-| WETH | `0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73` | ⚠️ |
-| Uniswap v3 Factory | — | ⚠️ bulunacak |
-| Uniswap v3 NonfungiblePositionManager | — | ⚠️ bulunacak (tutarsızlık bildirilmiş) |
-| Uniswap SwapRouter02 | — | ⚠️ bulunacak |
-| USDG (Paxos) | — | ⚠️ bulunacak |
+| WETH | `0x7943e237c7F95DA44E0301572D358911207852Fa` | ✅ |
+| Uniswap v3 | — | ❌ Testnet'te deploy yok |
+| USDG | — | ❌ Testnet'te yok |
+
+**Sonuç:** Uniswap testnet'te olmadığı için graduation testleri **mainnet fork** ile yapılacak (`anvil --fork-url` / Foundry fork testleri).
 
 ## Protokol parametreleri
 
