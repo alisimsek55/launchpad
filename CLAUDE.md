@@ -21,7 +21,9 @@ pnpm + Turborepo monorepo. Ayrıntılar `README.md`'de.
 - Curve matematiği iki yerde yaşar: `packages/contracts` (Solidity) ve `packages/shared/src/curve.ts` (TS). Birini değiştirirsen diğerini ve testlerini de güncelle; sonuçlar birebir aynı olmalı.
 - Sabitler üç yerde birebir aynı olmalı: `const.md` → `packages/contracts/src/Constants.sol` → `packages/shared/src`.
 - Foundry PATH'te değilse: `export PATH="$PATH:$HOME/.foundry/bin"`.
-- Test: `pnpm --filter @launchpad/contracts test`, `pnpm --filter @launchpad/shared test`, fork testleri `test:fork`. Değişiklikten sonra ilgili testleri çalıştır.
+- Test: `pnpm --filter @launchpad/contracts test` (tümü mainnet fork üzerinde, ~3 dk; hızlı tur için `test:fast`), `pnpm --filter @launchpad/shared test`. Değişiklikten sonra ilgili testleri çalıştır.
+- Sözleşme testlerinde `vm.warp` ile zaman ilerletirken mutlak zaman kullan (`t0 + 30`): via-IR, test içinde `block.timestamp`'i önbelleğe alabiliyor.
+- Curve sabitlerini değiştirirsen `test/Trade.t.sol` ve `test/Launch.t.sol`'daki TS referans değerlerini `packages/shared` ile yeniden hesapla.
 
 ## Backlog kuralları (her oturumda uygula)
 Hiçbir iş yarım kalmamalı.

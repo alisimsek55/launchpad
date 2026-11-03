@@ -29,6 +29,12 @@ library Constants {
     // Uniswap v3 graduation
     uint24 internal constant UNI_FEE_TIER = 10_000; // %1
     int24 internal constant UNI_TICK_SPACING = 200;
+    // Full-range: TickMath.MIN/MAX_TICK (±887272) tick spacing'e (200) yuvarlanmış hali
+    int24 internal constant MIN_TICK = -887_200;
+    int24 internal constant MAX_TICK = 887_200;
+
+    // Graduation'da artan token'ların yakıldığı adres (OZ ERC20 address(0)'a transferi reddeder)
+    address internal constant DEAD = 0x000000000000000000000000000000000000dEaD;
 }
 
 /// @notice Robinhood Chain mainnet (4663) adresleri. 2026-11-03'te zincirde doğrulandı, bkz. const.md

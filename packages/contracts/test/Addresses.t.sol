@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
-import {RobinhoodMainnet as RH, Constants} from "../../src/Constants.sol";
+import {RobinhoodMainnet as RH, Constants} from "../src/Constants.sol";
 
 interface IPeriphery {
     function factory() external view returns (address);
@@ -14,10 +14,10 @@ interface IUniV3Factory {
 }
 
 /// Mainnet fork testi: adreslerin zincirdeki gerçek kontratlarla eşleştiğini doğrular.
-/// Çalıştırma: forge test --match-path "test/fork/*"
+
 contract AddressesForkTest is Test {
     function setUp() public {
-        vm.createSelectFork("robinhood");
+        vm.createSelectFork("robinhood", 105_259_296);
     }
 
     function test_ChainId() public view {
@@ -35,6 +35,8 @@ contract AddressesForkTest is Test {
     }
 
     function test_OnePercentFeeTierEnabled() public view {
-        assertEq(IUniV3Factory(RH.UNI_V3_FACTORY).feeAmountTickSpacing(Constants.UNI_FEE_TIER), Constants.UNI_TICK_SPACING);
+        assertEq(
+            IUniV3Factory(RH.UNI_V3_FACTORY).feeAmountTickSpacing(Constants.UNI_FEE_TIER), Constants.UNI_TICK_SPACING
+        );
     }
 }

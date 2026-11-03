@@ -11,6 +11,17 @@ Format:
 
 ---
 
+## 2026-11-03 — Audit hazırlığı: forge lint uyarıları ve uç durumlar
+- Olay: EKLENDİ
+- Not: Faz 1'den kalan, kritik olmayan noktalar.
+
+## 2026-11-03 — Faz 2 — Veri katmanı
+- Olay: EKLENDİ
+
+## 2026-11-03 — Faz 1 — Sözleşmeler
+- Olay: TAMAMLANDI
+- Not: LaunchToken, TokenFactory, BondingCurve, Graduator, LPLocker, FeeVault + Deploy script'i. 34 test (unit/fuzz/invariant) mainnet fork'ta geçiyor. Rapor: reports/2026-11-03-faz1-sozlesmeler.md. DCAVault plana göre Faz 4'te.
+
 ## 2026-11-03 — Faz 1 — Sözleşmeler
 - Olay: EKLENDİ
 - Not: Faz 0 bittiği için sıradaki faz backlog'a eklendi.

@@ -3,8 +3,8 @@
   "private": true,
   "scripts": {
     "build": "forge build",
-    "test": "forge test --no-match-path \"test/fork/*\"",
-    "test:fork": "forge test --match-path \"test/fork/*\"",
+    "test": "forge test",
+    "test:fast": "forge test --no-match-contract Invariant",
     "fmt": "forge fmt"
   }
 }

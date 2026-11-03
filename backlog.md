@@ -12,9 +12,13 @@ Format:
 
 ## Açık işler
 
-- [ ] **Faz 1 — Sözleşmeler** (eklenme: 2026-11-03)
-  - Durum: Başlanmadı. `Constants.sol` ve TS curve matematiği (`packages/shared/src/curve.ts`) hazır; Uniswap testnet'te olmadığı için graduation testleri mainnet fork ile yapılacak.
-  - Sonraki adım: `LaunchToken` → `BondingCurve` (buy/sell/quote, sniper fee, rounding) → `FeeVault` → `Graduator` + `LPLocker` → `TokenFactory`. Her biri için unit + fuzz + invariant testleri (bkz. notes.md §9-11).
+- [ ] **Faz 2 — Veri katmanı** (eklenme: 2026-11-03)
+  - Durum: Başlanmadı. Sözleşme event'leri hazır (`TokenCreated`, `Trade`, `Graduated`, `LPFeesCollected`, `FeesDeposited`).
+  - Sonraki adım: Goldsky subgraph (trades, candles, analytics; graduation sonrası Uniswap `Swap` dinamik data source) → Ponder holders indexer → API uçları (bkz. notes.md §12).
+
+- [ ] **Audit hazırlığı: forge lint uyarıları ve uç durumlar** (eklenme: 2026-11-03)
+  - Durum: Faz 1 raporunda listelendi (reports/2026-11-03-faz1-sozlesmeler.md, "Bilinen açık noktalar").
+  - Sonraki adım: Faz 5'te uyarıları tek tek kapat veya gerekçelendir; büyük WETH likiditesiyle manipülasyon uç testi ekle.
 
 - [ ] **Chainlink Automation desteğini teyit et** (eklenme: 2026-11-03)
   - Durum: Bulunamadı; v1 kararı kendi keeper'ımız, bu yüzden acil değil.

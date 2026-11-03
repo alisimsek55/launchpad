@@ -36,8 +36,8 @@ cp env.example .env   # değerleri doldur
 pnpm --filter @launchpad/web dev        # frontend: http://localhost:3000
 pnpm --filter @launchpad/api dev        # api: http://localhost:4000/health
 pnpm --filter @launchpad/shared test    # curve matematiği testleri
-pnpm --filter @launchpad/contracts test # Solidity testleri
-pnpm --filter @launchpad/contracts test:fork  # mainnet fork testleri
+pnpm --filter @launchpad/contracts test # Solidity testleri (mainnet fork, ~3 dk)
+pnpm --filter @launchpad/contracts test:fast  # invariant hariç (~15 sn)
 pnpm build                              # tüm paketleri derle
 ```
 

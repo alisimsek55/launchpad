@@ -16,8 +16,8 @@ contract ConstantsTest is Test {
     /// k sabit kalmalı: x0 * y0 == (x0 + E) * (y0 - T)
     function test_CurveInvariantHoldsAtGraduation() public pure {
         uint256 kStart = Constants.VIRTUAL_ETH * Constants.VIRTUAL_TOKEN;
-        uint256 kEnd = (Constants.VIRTUAL_ETH + Constants.GRADUATION_ETH)
-            * (Constants.VIRTUAL_TOKEN - Constants.CURVE_SUPPLY);
+        uint256 kEnd =
+            (Constants.VIRTUAL_ETH + Constants.GRADUATION_ETH) * (Constants.VIRTUAL_TOKEN - Constants.CURVE_SUPPLY);
         assertApproxEqRel(kStart, kEnd, 1e6); // 1e-12 hassasiyet (y0 yuvarlaması)
     }
 
