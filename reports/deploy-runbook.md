@@ -1,5 +1,7 @@
 # Mainnet Deploy Runbook
 
+> Bu rehber **mainnet** (gerçek para) içindir ve audit gerektirir. Proje şu an ücretsiz testnet demosu olarak ilerliyor: [testnet-deploy.md](testnet-deploy.md).
+
 Sırayla uygulanacak adımlar. **[SEN]** işaretli adımlar hesap/anahtar/para gerektirir ve senin yapman gerekir; diğerlerini Echo yapar.
 
 ## 0. Ön koşullar

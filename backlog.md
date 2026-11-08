@@ -12,19 +12,14 @@ Format:
 
 ## Açık işler
 
-- [ ] **Faz 5 — Lansman: kullanıcı adımları** (eklenme: 2026-11-03)
-  - Durum: Kod tarafı hazır (lint temiz, manipülasyon DoS'u düzeltildi, CI, audit kapsamı, deploy runbook, deploy dry-run başarılı). Kalanlar kullanıcıya ait: audit firması, Safe multisig, deployer/keeper cüzdanları, Alchemy, Privy, Goldsky, R2, hosting hesapları.
-  - Sonraki adım: `reports/deploy-runbook.md` §0–1'deki [SEN] adımları. Hesaplar açılınca Echo §2–6'yı yürütür.
+- [ ] **Testnet'e ücretsiz yayın: kullanıcı adımları** (eklenme: 2026-11-09)
+  - Durum: Kod hazır ve yerelde uçtan uca test edildi (testnet kopyasında deploy + graduation + Uniswap swap; mainnet kopyasında indexer + web + zincir üstü metadata). Kalanlar kullanıcıya ait: MetaMask cüzdanları + faucet test ETH'si, `cast wallet import deployer`, Neon/Render/Vercel hesapları (GitHub ile giriş, ücretsiz), GitHub'a `KEEPER_PRIVATE_KEY` secret'ı.
+  - Sonraki adım: `reports/testnet-deploy.md` §1'deki [SEN] adımları; deployer hazır olunca Echo §2 deploy'unu çalıştırır, adresleri commit'ler.
 
-- [ ] **Privy ile gerçek giriş testi** (eklenme: 2026-11-03)
-  - Durum: Kod hazır (`apps/web/src/wallet/PrivyProviders.tsx`); app ID olmadan test edilemedi.
-  - Sonraki adım: Kullanıcı privy.io'da hesap + app açıp App ID'yi `.env`'ye (`NEXT_PUBLIC_PRIVY_APP_ID`) yazınca giriş/embedded wallet akışını test et.
-
-- [ ] **Goldsky subgraph deploy'u** (eklenme: 2026-11-03)
-  - Durum: Subgraph derleniyor; adresler sıfır. Mainnet sözleşme deploy'una ve kullanıcının Goldsky hesabına bağlı.
-  - Sonraki adım: Mainnet deploy sonrası `subgraph.yaml` adres/startBlock'larını doldur, `goldsky subgraph deploy` (kullanıcı hesap açınca).
-
+- [ ] **Tarayıcı cüzdanıyla (MetaMask) gerçek bağlantı testi** (eklenme: 2026-11-09)
+  - Durum: `injected` connector + otomatik ağ geçişi kodu hazır; tarayıcı panelinde eklenti olmadığı için yalnızca yerel test cüzdanıyla denendi.
+  - Sonraki adım: Testnet yayınından sonra kullanıcının MetaMask'ıyla bağlan → ağ ekleme/geçiş → al/sat.
 
 - [ ] **Faz 2.0 fikirleri** (eklenme: 2026-11-03)
   - Durum: Lansman sonrası.
-  - Sonraki adım: DexScreener/GMGN/Bitquery entegrasyonu + açık quote API (yüksek öncelik); fair launch modu (DCA tabanlı); Uniswap v4 graduation; hisse token eşli lansman; limit emirler; permissionless keeper + TWAP; USD fiyatlar; kullanıcı adı düzenleme.
+  - Sonraki adım: DexScreener/GMGN/Bitquery entegrasyonu + açık quote API (yüksek öncelik); fair launch modu (DCA tabanlı); Uniswap v4 graduation; hisse token eşli lansman; limit emirler; permissionless keeper + TWAP; USD fiyatlar; kullanıcı adı düzenleme; README'ye ekran görüntüleri / demo GIF'i.

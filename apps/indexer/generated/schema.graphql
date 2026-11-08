@@ -24,6 +24,18 @@ type Meta {
 type Query {
   token(address: String!): token
   tokens(where: tokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): tokenPage!
+  poolToken(pool: String!): poolToken
+  poolTokens(where: poolTokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): poolTokenPage!
+  trade(id: String!): trade
+  trades(where: tradeFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): tradePage!
+  candle(token: String!, interval: Float!, time: Float!): candle
+  candles(where: candleFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): candlePage!
+  protocolStat(id: Int!): protocolStat
+  protocolStats(where: protocolStatFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): protocolStatPage!
+  dayStat(date: Int!): dayStat
+  dayStats(where: dayStatFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): dayStatPage!
+  tokenDay(token: String!, date: Float!): tokenDay
+  tokenDays(where: tokenDayFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): tokenDayPage!
   holderStats(token: String!): holderStats
   holderStatss(where: holderStatsFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): holderStatsPage!
   balance(token: String!, holder: String!): balance
@@ -33,9 +45,19 @@ type Query {
 
 type token {
   address: String!
-  pool: String!
+  name: String!
+  symbol: String!
+  metadataURI: String!
   creator: String!
+  pool: String!
+  tokenIsToken0: Boolean!
   createdAt: BigInt!
+  graduated: Boolean!
+  priceEth: Float!
+  volumeWei: BigInt!
+  tradeCount: Int!
+  realEthWei: BigInt!
+  creatorFeesWei: BigInt!
 }
 
 type tokenPage {
@@ -57,16 +79,54 @@ input tokenFilter {
   address_ends_with: String
   address_not_starts_with: String
   address_not_ends_with: String
-  pool: String
-  pool_not: String
-  pool_in: [String]
-  pool_not_in: [String]
-  pool_contains: String
-  pool_not_contains: String
-  pool_starts_with: String
-  pool_ends_with: String
-  pool_not_starts_with: String
-  pool_not_ends_with: String
+  name: String
+  name_not: String
+  name_in: [String]
+  name_not_in: [String]
+  name_contains: String
+  name_not_contains: String
+  name_starts_with: String
+  name_ends_with: String
+  name_not_starts_with: String
+  name_not_ends_with: String
+  name_contains_nocase: String
+  name_not_contains_nocase: String
+  name_starts_with_nocase: String
+  name_ends_with_nocase: String
+  name_not_starts_with_nocase: String
+  name_not_ends_with_nocase: String
+  symbol: String
+  symbol_not: String
+  symbol_in: [String]
+  symbol_not_in: [String]
+  symbol_contains: String
+  symbol_not_contains: String
+  symbol_starts_with: String
+  symbol_ends_with: String
+  symbol_not_starts_with: String
+  symbol_not_ends_with: String
+  symbol_contains_nocase: String
+  symbol_not_contains_nocase: String
+  symbol_starts_with_nocase: String
+  symbol_ends_with_nocase: String
+  symbol_not_starts_with_nocase: String
+  symbol_not_ends_with_nocase: String
+  metadataURI: String
+  metadataURI_not: String
+  metadataURI_in: [String]
+  metadataURI_not_in: [String]
+  metadataURI_contains: String
+  metadataURI_not_contains: String
+  metadataURI_starts_with: String
+  metadataURI_ends_with: String
+  metadataURI_not_starts_with: String
+  metadataURI_not_ends_with: String
+  metadataURI_contains_nocase: String
+  metadataURI_not_contains_nocase: String
+  metadataURI_starts_with_nocase: String
+  metadataURI_ends_with_nocase: String
+  metadataURI_not_starts_with_nocase: String
+  metadataURI_not_ends_with_nocase: String
   creator: String
   creator_not: String
   creator_in: [String]
@@ -77,6 +137,20 @@ input tokenFilter {
   creator_ends_with: String
   creator_not_starts_with: String
   creator_not_ends_with: String
+  pool: String
+  pool_not: String
+  pool_in: [String]
+  pool_not_in: [String]
+  pool_contains: String
+  pool_not_contains: String
+  pool_starts_with: String
+  pool_ends_with: String
+  pool_not_starts_with: String
+  pool_not_ends_with: String
+  tokenIsToken0: Boolean
+  tokenIsToken0_not: Boolean
+  tokenIsToken0_in: [Boolean]
+  tokenIsToken0_not_in: [Boolean]
   createdAt: BigInt
   createdAt_not: BigInt
   createdAt_in: [BigInt]
@@ -85,6 +159,507 @@ input tokenFilter {
   createdAt_lt: BigInt
   createdAt_gte: BigInt
   createdAt_lte: BigInt
+  graduated: Boolean
+  graduated_not: Boolean
+  graduated_in: [Boolean]
+  graduated_not_in: [Boolean]
+  priceEth: Float
+  priceEth_not: Float
+  priceEth_in: [Float]
+  priceEth_not_in: [Float]
+  priceEth_gt: Float
+  priceEth_lt: Float
+  priceEth_gte: Float
+  priceEth_lte: Float
+  volumeWei: BigInt
+  volumeWei_not: BigInt
+  volumeWei_in: [BigInt]
+  volumeWei_not_in: [BigInt]
+  volumeWei_gt: BigInt
+  volumeWei_lt: BigInt
+  volumeWei_gte: BigInt
+  volumeWei_lte: BigInt
+  tradeCount: Int
+  tradeCount_not: Int
+  tradeCount_in: [Int]
+  tradeCount_not_in: [Int]
+  tradeCount_gt: Int
+  tradeCount_lt: Int
+  tradeCount_gte: Int
+  tradeCount_lte: Int
+  realEthWei: BigInt
+  realEthWei_not: BigInt
+  realEthWei_in: [BigInt]
+  realEthWei_not_in: [BigInt]
+  realEthWei_gt: BigInt
+  realEthWei_lt: BigInt
+  realEthWei_gte: BigInt
+  realEthWei_lte: BigInt
+  creatorFeesWei: BigInt
+  creatorFeesWei_not: BigInt
+  creatorFeesWei_in: [BigInt]
+  creatorFeesWei_not_in: [BigInt]
+  creatorFeesWei_gt: BigInt
+  creatorFeesWei_lt: BigInt
+  creatorFeesWei_gte: BigInt
+  creatorFeesWei_lte: BigInt
+}
+
+type poolToken {
+  pool: String!
+  token: String!
+  tokenIsToken0: Boolean!
+}
+
+type poolTokenPage {
+  items: [poolToken!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input poolTokenFilter {
+  AND: [poolTokenFilter]
+  OR: [poolTokenFilter]
+  pool: String
+  pool_not: String
+  pool_in: [String]
+  pool_not_in: [String]
+  pool_contains: String
+  pool_not_contains: String
+  pool_starts_with: String
+  pool_ends_with: String
+  pool_not_starts_with: String
+  pool_not_ends_with: String
+  token: String
+  token_not: String
+  token_in: [String]
+  token_not_in: [String]
+  token_contains: String
+  token_not_contains: String
+  token_starts_with: String
+  token_ends_with: String
+  token_not_starts_with: String
+  token_not_ends_with: String
+  tokenIsToken0: Boolean
+  tokenIsToken0_not: Boolean
+  tokenIsToken0_in: [Boolean]
+  tokenIsToken0_not_in: [Boolean]
+}
+
+type trade {
+  id: String!
+  token: String!
+  trader: String!
+  isBuy: Boolean!
+  ethWei: BigInt!
+  tokenWei: BigInt!
+  priceEth: Float!
+  timestamp: BigInt!
+  txHash: String!
+  source: String!
+}
+
+type tradePage {
+  items: [trade!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input tradeFilter {
+  AND: [tradeFilter]
+  OR: [tradeFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_contains_nocase: String
+  id_not_contains_nocase: String
+  id_starts_with_nocase: String
+  id_ends_with_nocase: String
+  id_not_starts_with_nocase: String
+  id_not_ends_with_nocase: String
+  token: String
+  token_not: String
+  token_in: [String]
+  token_not_in: [String]
+  token_contains: String
+  token_not_contains: String
+  token_starts_with: String
+  token_ends_with: String
+  token_not_starts_with: String
+  token_not_ends_with: String
+  trader: String
+  trader_not: String
+  trader_in: [String]
+  trader_not_in: [String]
+  trader_contains: String
+  trader_not_contains: String
+  trader_starts_with: String
+  trader_ends_with: String
+  trader_not_starts_with: String
+  trader_not_ends_with: String
+  isBuy: Boolean
+  isBuy_not: Boolean
+  isBuy_in: [Boolean]
+  isBuy_not_in: [Boolean]
+  ethWei: BigInt
+  ethWei_not: BigInt
+  ethWei_in: [BigInt]
+  ethWei_not_in: [BigInt]
+  ethWei_gt: BigInt
+  ethWei_lt: BigInt
+  ethWei_gte: BigInt
+  ethWei_lte: BigInt
+  tokenWei: BigInt
+  tokenWei_not: BigInt
+  tokenWei_in: [BigInt]
+  tokenWei_not_in: [BigInt]
+  tokenWei_gt: BigInt
+  tokenWei_lt: BigInt
+  tokenWei_gte: BigInt
+  tokenWei_lte: BigInt
+  priceEth: Float
+  priceEth_not: Float
+  priceEth_in: [Float]
+  priceEth_not_in: [Float]
+  priceEth_gt: Float
+  priceEth_lt: Float
+  priceEth_gte: Float
+  priceEth_lte: Float
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+  txHash: String
+  txHash_not: String
+  txHash_in: [String]
+  txHash_not_in: [String]
+  txHash_contains: String
+  txHash_not_contains: String
+  txHash_starts_with: String
+  txHash_ends_with: String
+  txHash_not_starts_with: String
+  txHash_not_ends_with: String
+  source: String
+  source_not: String
+  source_in: [String]
+  source_not_in: [String]
+  source_contains: String
+  source_not_contains: String
+  source_starts_with: String
+  source_ends_with: String
+  source_not_starts_with: String
+  source_not_ends_with: String
+  source_contains_nocase: String
+  source_not_contains_nocase: String
+  source_starts_with_nocase: String
+  source_ends_with_nocase: String
+  source_not_starts_with_nocase: String
+  source_not_ends_with_nocase: String
+}
+
+type candle {
+  token: String!
+  interval: Int!
+  time: Int!
+  open: Float!
+  high: Float!
+  low: Float!
+  close: Float!
+  volumeWei: BigInt!
+}
+
+type candlePage {
+  items: [candle!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input candleFilter {
+  AND: [candleFilter]
+  OR: [candleFilter]
+  token: String
+  token_not: String
+  token_in: [String]
+  token_not_in: [String]
+  token_contains: String
+  token_not_contains: String
+  token_starts_with: String
+  token_ends_with: String
+  token_not_starts_with: String
+  token_not_ends_with: String
+  interval: Int
+  interval_not: Int
+  interval_in: [Int]
+  interval_not_in: [Int]
+  interval_gt: Int
+  interval_lt: Int
+  interval_gte: Int
+  interval_lte: Int
+  time: Int
+  time_not: Int
+  time_in: [Int]
+  time_not_in: [Int]
+  time_gt: Int
+  time_lt: Int
+  time_gte: Int
+  time_lte: Int
+  open: Float
+  open_not: Float
+  open_in: [Float]
+  open_not_in: [Float]
+  open_gt: Float
+  open_lt: Float
+  open_gte: Float
+  open_lte: Float
+  high: Float
+  high_not: Float
+  high_in: [Float]
+  high_not_in: [Float]
+  high_gt: Float
+  high_lt: Float
+  high_gte: Float
+  high_lte: Float
+  low: Float
+  low_not: Float
+  low_in: [Float]
+  low_not_in: [Float]
+  low_gt: Float
+  low_lt: Float
+  low_gte: Float
+  low_lte: Float
+  close: Float
+  close_not: Float
+  close_in: [Float]
+  close_not_in: [Float]
+  close_gt: Float
+  close_lt: Float
+  close_gte: Float
+  close_lte: Float
+  volumeWei: BigInt
+  volumeWei_not: BigInt
+  volumeWei_in: [BigInt]
+  volumeWei_not_in: [BigInt]
+  volumeWei_gt: BigInt
+  volumeWei_lt: BigInt
+  volumeWei_gte: BigInt
+  volumeWei_lte: BigInt
+}
+
+type protocolStat {
+  id: Int!
+  tokenCount: Int!
+  graduatedCount: Int!
+  tradeCount: Int!
+  volumeWei: BigInt!
+  feesWei: BigInt!
+  revenueWei: BigInt!
+}
+
+type protocolStatPage {
+  items: [protocolStat!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input protocolStatFilter {
+  AND: [protocolStatFilter]
+  OR: [protocolStatFilter]
+  id: Int
+  id_not: Int
+  id_in: [Int]
+  id_not_in: [Int]
+  id_gt: Int
+  id_lt: Int
+  id_gte: Int
+  id_lte: Int
+  tokenCount: Int
+  tokenCount_not: Int
+  tokenCount_in: [Int]
+  tokenCount_not_in: [Int]
+  tokenCount_gt: Int
+  tokenCount_lt: Int
+  tokenCount_gte: Int
+  tokenCount_lte: Int
+  graduatedCount: Int
+  graduatedCount_not: Int
+  graduatedCount_in: [Int]
+  graduatedCount_not_in: [Int]
+  graduatedCount_gt: Int
+  graduatedCount_lt: Int
+  graduatedCount_gte: Int
+  graduatedCount_lte: Int
+  tradeCount: Int
+  tradeCount_not: Int
+  tradeCount_in: [Int]
+  tradeCount_not_in: [Int]
+  tradeCount_gt: Int
+  tradeCount_lt: Int
+  tradeCount_gte: Int
+  tradeCount_lte: Int
+  volumeWei: BigInt
+  volumeWei_not: BigInt
+  volumeWei_in: [BigInt]
+  volumeWei_not_in: [BigInt]
+  volumeWei_gt: BigInt
+  volumeWei_lt: BigInt
+  volumeWei_gte: BigInt
+  volumeWei_lte: BigInt
+  feesWei: BigInt
+  feesWei_not: BigInt
+  feesWei_in: [BigInt]
+  feesWei_not_in: [BigInt]
+  feesWei_gt: BigInt
+  feesWei_lt: BigInt
+  feesWei_gte: BigInt
+  feesWei_lte: BigInt
+  revenueWei: BigInt
+  revenueWei_not: BigInt
+  revenueWei_in: [BigInt]
+  revenueWei_not_in: [BigInt]
+  revenueWei_gt: BigInt
+  revenueWei_lt: BigInt
+  revenueWei_gte: BigInt
+  revenueWei_lte: BigInt
+}
+
+type dayStat {
+  date: Int!
+  volumeWei: BigInt!
+  feesWei: BigInt!
+  revenueWei: BigInt!
+  launches: Int!
+  graduations: Int!
+  tradeCount: Int!
+}
+
+type dayStatPage {
+  items: [dayStat!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input dayStatFilter {
+  AND: [dayStatFilter]
+  OR: [dayStatFilter]
+  date: Int
+  date_not: Int
+  date_in: [Int]
+  date_not_in: [Int]
+  date_gt: Int
+  date_lt: Int
+  date_gte: Int
+  date_lte: Int
+  volumeWei: BigInt
+  volumeWei_not: BigInt
+  volumeWei_in: [BigInt]
+  volumeWei_not_in: [BigInt]
+  volumeWei_gt: BigInt
+  volumeWei_lt: BigInt
+  volumeWei_gte: BigInt
+  volumeWei_lte: BigInt
+  feesWei: BigInt
+  feesWei_not: BigInt
+  feesWei_in: [BigInt]
+  feesWei_not_in: [BigInt]
+  feesWei_gt: BigInt
+  feesWei_lt: BigInt
+  feesWei_gte: BigInt
+  feesWei_lte: BigInt
+  revenueWei: BigInt
+  revenueWei_not: BigInt
+  revenueWei_in: [BigInt]
+  revenueWei_not_in: [BigInt]
+  revenueWei_gt: BigInt
+  revenueWei_lt: BigInt
+  revenueWei_gte: BigInt
+  revenueWei_lte: BigInt
+  launches: Int
+  launches_not: Int
+  launches_in: [Int]
+  launches_not_in: [Int]
+  launches_gt: Int
+  launches_lt: Int
+  launches_gte: Int
+  launches_lte: Int
+  graduations: Int
+  graduations_not: Int
+  graduations_in: [Int]
+  graduations_not_in: [Int]
+  graduations_gt: Int
+  graduations_lt: Int
+  graduations_gte: Int
+  graduations_lte: Int
+  tradeCount: Int
+  tradeCount_not: Int
+  tradeCount_in: [Int]
+  tradeCount_not_in: [Int]
+  tradeCount_gt: Int
+  tradeCount_lt: Int
+  tradeCount_gte: Int
+  tradeCount_lte: Int
+}
+
+type tokenDay {
+  token: String!
+  date: Int!
+  volumeWei: BigInt!
+  tradeCount: Int!
+}
+
+type tokenDayPage {
+  items: [tokenDay!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input tokenDayFilter {
+  AND: [tokenDayFilter]
+  OR: [tokenDayFilter]
+  token: String
+  token_not: String
+  token_in: [String]
+  token_not_in: [String]
+  token_contains: String
+  token_not_contains: String
+  token_starts_with: String
+  token_ends_with: String
+  token_not_starts_with: String
+  token_not_ends_with: String
+  date: Int
+  date_not: Int
+  date_in: [Int]
+  date_not_in: [Int]
+  date_gt: Int
+  date_lt: Int
+  date_gte: Int
+  date_lte: Int
+  volumeWei: BigInt
+  volumeWei_not: BigInt
+  volumeWei_in: [BigInt]
+  volumeWei_not_in: [BigInt]
+  volumeWei_gt: BigInt
+  volumeWei_lt: BigInt
+  volumeWei_gte: BigInt
+  volumeWei_lte: BigInt
+  tradeCount: Int
+  tradeCount_not: Int
+  tradeCount_in: [Int]
+  tradeCount_not_in: [Int]
+  tradeCount_gt: Int
+  tradeCount_lt: Int
+  tradeCount_gte: Int
+  tradeCount_lte: Int
 }
 
 type holderStats {

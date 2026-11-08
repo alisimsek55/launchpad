@@ -27,5 +27,15 @@ export const robinhoodTestnet = defineChain({
   blockExplorers: {
     default: { name: "Explorer", url: "https://explorer.testnet.chain.robinhood.com" },
   },
+  // Multicall3 testnet'te de standart adreste (2026-11-09'da zincirde doğrulandı)
+  contracts: {
+    multicall3: { address: "0xcA11bde05977b3631167028862bE2a173976CA11" },
+  },
   testnet: true,
 });
+
+/// Deploy dosyasındaki chainId + RPC'ye göre viem zinciri (yerel fork mainnet id'sini korur).
+export function chainFor(chainId: number, rpcUrl: string) {
+  const base = chainId === robinhoodTestnet.id ? robinhoodTestnet : robinhood;
+  return defineChain({ ...base, rpcUrls: { default: { http: [rpcUrl] } } });
+}

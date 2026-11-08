@@ -1,0 +1,38 @@
+name: DCA keeper
+
+# Sunucu yerine GitHub Actions: 30 dakikada bir zamanı gelen DCA planlarını çalıştırır.
+# Gerekli secret: KEEPER_PRIVATE_KEY (sadece testnet gas'ı tutan ayrı bir cüzdan;
+# DeployTestnet.s.sol'da KEEPER=<adres> ile yetkilendirilir). Secret yoksa iş atlanır.
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: keeper
+  cancel-in-progress: false
+
+jobs:
+  keeper:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      KEEPER_PRIVATE_KEY: ${{ secrets.KEEPER_PRIVATE_KEY }}
+      LAUNCHPAD_NETWORK: testnet
+    steps:
+      - name: Secret kontrolü
+        id: check
+        run: echo "enabled=${{ env.KEEPER_PRIVATE_KEY != '' }}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v5
+        if: steps.check.outputs.enabled == 'true'
+      - uses: pnpm/action-setup@v4
+        if: steps.check.outputs.enabled == 'true'
+      - uses: actions/setup-node@v5
+        if: steps.check.outputs.enabled == 'true'
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter @launchpad/keeper...
+        if: steps.check.outputs.enabled == 'true'
+      - run: pnpm --filter @launchpad/keeper once
+        if: steps.check.outputs.enabled == 'true'

@@ -44,3 +44,7 @@ Thumbs.db
 
 # API yerel dosya deposu
 /apps/api/.data/
+
+# Yerel testnet-fork deploy denemeleri
+/packages/shared/deployments/*.anvil.json
+/packages/contracts/broadcast/DeployTestnet.s.sol/46630/run-*.json

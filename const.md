@@ -50,7 +50,8 @@ Production'da public RPC yerine Alchemy vb. özel RPC kullanılmalı (Robinhood 
 | Kontrat | Adres | Durum |
 |---|---|---|
 | WETH | `0x7943e237c7F95DA44E0301572D358911207852Fa` | ✅ |
-| Uniswap v3 | — | ❌ Testnet'te deploy yok |
+| Uniswap v3 | `packages/shared/deployments/testnet.json` | Resmi Uniswap'ın testnet deploy'u yok; `DeployTestnet.s.sol` resmi npm artefaktlarından kendimiz kuruyoruz (pool init code hash standartla aynı: `0xe34f…8b54`, doğrulandı) |
+| Multicall3 | `0xcA11bde05977b3631167028862bE2a173976CA11` | ✅ zincirde doğrulandı (2026-11-09) |
 | USDG | — | ❌ Testnet'te yok |
 
 **Sonuç:** Uniswap testnet'te olmadığı için graduation testleri **mainnet fork** ile yapılacak (`anvil --fork-url` / Foundry fork testleri).

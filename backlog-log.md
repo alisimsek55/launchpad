@@ -11,6 +11,29 @@ Format:
 
 ---
 
+## 2026-11-09 — Goldsky subgraph deploy'u
+- Olay: İPTAL
+- Not: Tüm veri Ponder indexer'a taşındı; subgraph isteğe bağlı olarak repoda duruyor.
+
+## 2026-11-09 — Privy ile gerçek giriş testi
+- Olay: İPTAL
+- Not: Privy artık isteğe bağlı; varsayılan hesapsız tarayıcı cüzdanı. Yerine "MetaMask bağlantı testi" eklendi.
+
+## 2026-11-09 — Faz 5 — Lansman: kullanıcı adımları
+- Olay: İPTAL
+- Not: Mainnet + audit planı ücretsiz testnet yayınıyla değiştirildi (yukarıya bkz.). Mainnet rehberi reports/deploy-runbook.md'de duruyor.
+
+## 2026-11-09 — Ücretsiz mimariye geçiş
+- Olay: TAMAMLANDI
+- Not: Kullanıcının bütçesi yok, proje portföy amaçlı. Mainnet+audit yerine Robinhood testnet; DeployTestnet.s.sol resmi artefaktlardan kendi Uniswap v3'ümüzü kurar (testnet kopyasında deploy+graduation+swap doğrulandı). Hono API + R2 kaldırıldı → metadata zincir üstünde (data: URI, 128px WebP, ~2 KB). Goldsky yerine tek backend Ponder (token/trade/mum/analytics/holders + REST API). Keeper → GitHub Actions cron. Tarayıcı cüzdanı (injected) varsayılan, Privy isteğe bağlı. Render blueprint + Neon. Rapor: reports/2026-11-09-ucretsiz-mimari.md.
+
+## 2026-11-09 — Testnet'e ücretsiz yayın: kullanıcı adımları
+- Olay: EKLENDİ
+- Not: Rehber: reports/testnet-deploy.md.
+
+## 2026-11-09 — Tarayıcı cüzdanıyla (MetaMask) gerçek bağlantı testi
+- Olay: EKLENDİ
+
 ## 2026-11-03 — Karar: creator fee payı
 - Olay: TAMAMLANDI
 - Not: Kullanıcı onayıyla fee bölüşümü %0.7/%0.3 → %0.5 protokol / %0.5 creator (işlem fee'si, sniper fee'si ve Uniswap LP fee'leri). Constants.sol, shared/curve.ts, subgraph, web, docs, const.md, notes.md güncellendi; 40 test geçiyor.

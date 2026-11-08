@@ -9,7 +9,12 @@ evm_version = "cancun"
 optimizer = true
 optimizer_runs = 200
 via_ir = true
-fs_permissions = [{ access = "write", path = "../shared/deployments/local.json" }]
+fs_permissions = [
+  { access = "write", path = "../shared/deployments" },
+  { access = "read", path = "./node_modules/@uniswap" },
+  # pnpm: node_modules/@uniswap kök node_modules/.pnpm altına sembolik bağlantı
+  { access = "read", path = "../../node_modules/.pnpm" },
+]
 remappings = [
   "forge-std/=lib/forge-std/src/",
   "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",

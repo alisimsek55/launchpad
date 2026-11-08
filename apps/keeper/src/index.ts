@@ -1,21 +1,23 @@
 /// DCA keeper: zamanı gelen planları DCAVault.execute ile çalıştırır.
-///   LAUNCHPAD_NETWORK=local|mainnet   adresler packages/shared/deployments'tan
+///   LAUNCHPAD_NETWORK=local|testnet|mainnet  adresler packages/shared/deployments'tan (boşsa testnet)
 ///   KEEPER_PRIVATE_KEY                keeper hesabı (DCAVault.setKeeper ile yetkilendirilmiş olmalı)
 ///   KEEPER_RPC_URL                    (isteğe bağlı) RPC
 ///   POLL_MS=30000  SLIPPAGE_BPS=300   döngü aralığı ve keeper'ın teklif üstüne uyguladığı slippage
-/// `--once`: tek tur çalışıp çıkar (test için).
-import { addresses, bondingCurveAbi, dcaVaultAbi, getDeployment, robinhood } from "@launchpad/shared";
-import { createPublicClient, createWalletClient, defineChain, formatEther, http, parseAbi, type Hex } from "viem";
+/// `--once`: tek tur çalışıp çıkar (GitHub Actions cron bu modu kullanır, bkz. .github/workflows/keeper.yml).
+import { bondingCurveAbi, chainFor, dcaVaultAbi, getDeployment } from "@launchpad/shared";
+import { createPublicClient, createWalletClient, formatEther, http, parseAbi, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 const deployment = getDeployment(process.env.LAUNCHPAD_NETWORK);
-const chain = defineChain({
-  ...robinhood,
-  rpcUrls: { default: { http: [process.env.KEEPER_RPC_URL ?? deployment.rpcUrl] } },
-});
+const chain = chainFor(deployment.chainId, process.env.KEEPER_RPC_URL ?? deployment.rpcUrl);
 const POLL_MS = Number(process.env.POLL_MS ?? 30_000);
 const SLIPPAGE_BPS = BigInt(process.env.SLIPPAGE_BPS ?? 300);
 const BACKOFF_MS = 10 * 60_000; // başarısız plan 10 dk dinlenir (ör. maxPrice aşıldı)
+
+if (/^0x0+$/.test(deployment.dcaVault)) {
+  console.log(`DCAVault ${deployment.network} ağında henüz deploy edilmemiş; yapılacak iş yok.`);
+  process.exit(0);
+}
 
 const key = process.env.KEEPER_PRIVATE_KEY as Hex | undefined;
 if (!key) throw new Error("KEEPER_PRIVATE_KEY gerekli");
@@ -27,7 +29,8 @@ const quoterAbi = parseAbi([
   "struct QuoteExactInputSingleParams { address tokenIn; address tokenOut; uint256 amountIn; uint24 fee; uint160 sqrtPriceLimitX96; }",
   "function quoteExactInputSingle(QuoteExactInputSingleParams params) returns (uint256 amountOut, uint160, uint32, uint256)",
 ]);
-const UNI = addresses[4663];
+// Ağın WETH/Uniswap adresleri deploy dosyasından
+const UNI = { weth: deployment.weth, uniQuoterV2: deployment.uniQuoterV2 };
 const failedUntil = new Map<bigint, number>();
 const log = (...a: unknown[]) => console.log(new Date().toISOString(), ...a);
 

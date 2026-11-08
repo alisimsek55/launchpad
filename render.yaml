@@ -1,0 +1,19 @@
+# Render Blueprint: indexer'ı ücretsiz planda çalıştırır (render.com → New → Blueprint → bu repo).
+# Veritabanı Neon Free (süresiz, 1 GB): Render'ın ücretsiz Postgres'i 30 günde silindiği için kullanılmıyor.
+# Ücretsiz servis 15 dk trafik yoksa uyur; ilk istekte ~1 dk'da uyanır ve kaldığı bloktan devam eder.
+services:
+  - type: web
+    name: launchpad-indexer
+    runtime: node
+    plan: free
+    buildCommand: npm install -g pnpm@12 && pnpm install --frozen-lockfile --filter "@launchpad/indexer..."
+    # Her deploy yeni bir şemaya baştan indeksler (testnet'te hızlı); eski şemalar Neon'da elle silinebilir
+    startCommand: DATABASE_SCHEMA=lp_${RENDER_GIT_COMMIT:0:12} pnpm --filter @launchpad/indexer start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: LAUNCHPAD_NETWORK
+        value: testnet
+      - key: DATABASE_URL
+        sync: false # Neon bağlantı adresi (Render panelinde girilir)

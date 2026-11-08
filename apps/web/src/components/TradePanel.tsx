@@ -1,6 +1,6 @@
 "use client";
 
-import { addresses, bondingCurveAbi, launchTokenAbi } from "@launchpad/shared";
+import { bondingCurveAbi, launchTokenAbi } from "@launchpad/shared";
 import { useState } from "react";
 import { encodeFunctionData, erc20Abi, formatEther, maxUint256, parseEther, type Address } from "viem";
 import { useAccount, useBalance, useReadContract, useSimulateContract } from "wagmi";
@@ -11,7 +11,12 @@ import { useTx, useWrite } from "@/lib/useTx";
 import { useWalletUI } from "@/wallet/context";
 import { DcaPanel } from "./DcaPanel";
 
-const UNI = addresses[4663];
+// Ağın WETH/Uniswap adresleri deploy dosyasından (testnet'te kendi Uniswap deploy'umuz)
+const UNI = {
+  weth: deployment.weth,
+  uniSwapRouter02: deployment.uniSwapRouter02,
+  uniQuoterV2: deployment.uniQuoterV2,
+};
 const deadline = () => BigInt(Math.floor(Date.now() / 1000) + 300);
 const withSlippage = (v: bigint, bps: number) => (v * BigInt(10_000 - bps)) / 10_000n;
 

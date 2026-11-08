@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { formatEther, parseEther, parseEventLogs } from "viem";
 import { useAccount } from "wagmi";
 import { deployment } from "@/config";
-import { uploadMetadata } from "@/data/hooks";
+import { buildMetadataURI, compressImage } from "@/lib/metadata";
 import { fmtCompact } from "@/lib/format";
 import { useTx, useWrite } from "@/lib/useTx";
 import { useWalletUI } from "@/wallet/context";
@@ -77,10 +77,9 @@ export function CreateTokenForm() {
     setUploading(true);
     let uri: string;
     try {
-      const form = new FormData();
-      Object.entries({ name, symbol, description, x, telegram, website }).forEach(([k, v]) => form.append(k, v.trim()));
-      form.append("image", image);
-      uri = (await uploadMetadata(form)).uri;
+      // Görsel + metadata zincire yazılır (data: URI); sunucu yok
+      const compressed = await compressImage(image);
+      uri = buildMetadataURI({ name, symbol, description, x, telegram, website }, compressed);
     } catch (e) {
       setError((e as Error).message);
       return;
@@ -133,7 +132,7 @@ export function CreateTokenForm() {
                   <span className="rounded-full border border-line px-4 py-1.5 text-sm">Choose image</span>
                   <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={(e) => pickImage(e.target.files?.[0])} />
                 </label>
-                <p className="mt-1 text-xs text-muted">Kare, en fazla 5 MB</p>
+                <p className="mt-1 text-xs text-muted">Kare önerilir; 128×128 boyutuna küçültülüp zincire yazılır</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -194,7 +193,7 @@ export function CreateTokenForm() {
                     disabled={uploading || tx.busy || devEth < 0n || devTooLarge}
                     className="rounded-xl bg-accent px-6 py-2.5 font-semibold text-black disabled:opacity-40"
                   >
-                    {uploading ? "Yükleniyor…" : tx.busy ? "İmzala / bekle…" : "Launch"}
+                    {uploading ? "Hazırlanıyor…" : tx.busy ? "İmzala / bekle…" : "Launch"}
                   </button>
                 ) : (
                   <button onClick={wallet.connect} disabled={!!wallet.unavailableReason} title={wallet.unavailableReason} className="rounded-xl bg-accent px-6 py-2.5 font-semibold text-black disabled:opacity-40">

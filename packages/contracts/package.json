@@ -7,5 +7,10 @@
     "test:fast": "forge test --no-match-contract Invariant",
     "fmt": "forge fmt",
     "abis": "forge build && node export-abis.mjs"
+  },
+  "devDependencies": {
+    "@uniswap/swap-router-contracts": "1.3.1",
+    "@uniswap/v3-core": "1.0.1",
+    "@uniswap/v3-periphery": "1.4.4"
   }
 }

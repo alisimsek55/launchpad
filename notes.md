@@ -152,6 +152,8 @@ event DCAPlanCancelled(uint256 indexed planId, uint256 refund);
 
 ### 12. Veri katmanı
 
+> **Güncelleme (2026-11-09):** Ücretsiz mimariye geçildi: tek backend **Ponder** (tüm veri + REST API), metadata **zincir üstünde**, Hono API ve R2 kaldırıldı, Goldsky isteğe bağlı. Ayrıntı: `reports/2026-11-09-ucretsiz-mimari.md`. Aşağıdaki bölüm ilk tasarımdır.
+
 **Akış:** Sözleşmeler → (Goldsky subgraph + Ponder indexer) → API → Frontend
 
 **Goldsky subgraph (trades + chart + analytics):**
@@ -236,16 +238,17 @@ event DCAPlanCancelled(uint256 indexed planId, uint256 refund);
 - Zincir: **Robinhood Chain**
 - Cüzdan: **Privy**
 - Chart: **TradingView Lightweight Charts** (v1), Advanced Charts faz 2
-- Trades → Goldsky subgraph, Holders → **Ponder + Postgres** (snapshot gerekmez)
+- ~~Trades → Goldsky subgraph~~ → **Tüm veri Ponder + Postgres** (2026-11-09, ücretsiz mimari)
 - v1: Market + DCA; limit emirler faz 2
-- Subgraph sağlayıcı: **Goldsky**
+- Subgraph (Goldsky): isteğe bağlı, web kullanmıyor
 - Graduation hedefi: **Uniswap v3** (Robinhood Chain'de canlı), %1 fee tier, full-range, LP kilitli
 - Bonding curve: sanal rezervli constant product, 80/20 bölüşüm, 4.20 ETH eşik
 - Fee: %1 (%0.5 protokol / %0.5 creator), graduation fee'si yok
 - MEV: zorunlu slippage + 60 sn azalan sniper fee'si + creator dev buy (max %5)
 - Sözleşmeler: Solidity + Foundry, upgrade edilemez, admin multisig
 - DCA: v1'de kendi keeper servisimiz (whitelist) + `maxPrice` koruması. TWAP, permissionless keeper'a geçerken (faz 2.0) eklenecek.
-- Stack: pnpm/Turborepo monorepo — Next.js, Hono, Ponder, Foundry, Goldsky
+- Stack: pnpm/Turborepo monorepo — Next.js, Ponder, Foundry
+- **Ücretsiz yayın (2026-11-09):** Robinhood testnet + kendi Uniswap v3 deploy'umuz, Vercel Hobby (web), Render free (indexer), Neon Free (Postgres), GitHub Actions (keeper), tarayıcı cüzdanı (Privy isteğe bağlı), metadata zincir üstünde. Audit yok çünkü gerçek para yok; mainnet'e çıkılırsa audit şart.
 - Mainnet öncesi bağımsız audit zorunlu (kapsam: reports/audit-scope.md, deploy: reports/deploy-runbook.md)
 - Graduation fiyat düzeltme swap'ı bakiyenin en fazla yarısını kullanır (derin likidite DoS'una karşı)
 - Deploy adresleri: `packages/shared/deployments/*.json` (tek kaynak)

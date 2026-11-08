@@ -3,6 +3,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { BaseError, type Abi, type Address, type Hash, type TransactionReceipt } from "viem";
+import { useAccount, usePublicClient, useSwitchChain, useWriteContract } from "wagmi";
+import { chain } from "@/config";
 
 type WriteParams = {
   address: Address;
@@ -11,17 +13,20 @@ type WriteParams = {
   args?: readonly unknown[];
   value?: bigint;
 };
-import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 
-/// Kontrat yazma + %20 gas payı. Tahmin edilen limit, iç içe ETH transferli çağrılarda
-/// (ör. Uniswap multicall → WETH.withdraw → router.receive) 63/64 kuralı yüzünden yetmeyebiliyor.
+/// Kontrat yazma:
+/// - Cüzdan başka ağdaysa önce Robinhood Chain'e geçirir (ağ cüzdanda yoksa eklemeyi önerir).
+/// - %20 gas payı ekler: tahmin edilen limit, iç içe ETH transferli çağrılarda
+///   (ör. Uniswap multicall → WETH.withdraw → router.receive) 63/64 kuralı yüzünden yetmeyebiliyor.
 export function useWrite() {
-  const client = usePublicClient();
-  const { address } = useAccount();
+  const client = usePublicClient({ chainId: chain.id });
+  const { address, chainId } = useAccount();
+  const { switchChainAsync } = useSwitchChain();
   const { mutateAsync } = useWriteContract();
   return async (params: WriteParams): Promise<Hash> => {
+    if (chainId !== chain.id) await switchChainAsync({ chainId: chain.id });
     const estimate = await client!.estimateContractGas({ ...params, account: address } as never);
-    return mutateAsync({ ...params, gas: (estimate * 12n) / 10n } as never);
+    return mutateAsync({ ...params, chainId: chain.id, gas: (estimate * 12n) / 10n } as never);
   };
 }
 
@@ -29,7 +34,7 @@ type Status = "idle" | "pending" | "confirming" | "success" | "error";
 
 /// İşlem gönder → onay bekle → verileri tazele. Kullanıcıya okunabilir hata mesajı döner.
 export function useTx() {
-  const client = usePublicClient();
+  const client = usePublicClient({ chainId: chain.id });
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string>();

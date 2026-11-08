@@ -2,12 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { Address } from "viem";
-import { API_URL, INDEXER_URL, SUBGRAPH_URL } from "@/config";
-import { rpcSource } from "./rpc";
-import { subgraphSource } from "./subgraph";
+import { INDEXER_URL } from "@/config";
+import { indexerSource } from "./indexer";
 import type { DataSource, TokenSort } from "./types";
 
-const source: DataSource = SUBGRAPH_URL ? subgraphSource : rpcSource;
+const source: DataSource = indexerSource;
 const LIVE = { refetchInterval: 5_000 };
 
 export const useTokens = (sort: TokenSort, limit = 60) =>
@@ -90,14 +89,7 @@ export const useMetadata = (uri: string | undefined) =>
       if (!res.ok) return null;
       return (await res.json()) as TokenMetadata;
     },
-    // Sadece kendi API'mizin http(s) URI'lerini çöz
-    enabled: !!uri && /^https?:\/\//.test(uri),
+    // Zincir üstü data: URI (token oluşturma formu böyle yazar) veya http(s)
+    enabled: !!uri && /^(data:application\/json|https?:\/\/)/.test(uri),
     staleTime: Infinity,
   });
-
-export async function uploadMetadata(form: FormData): Promise<{ uri: string; image: string }> {
-  const res = await fetch(`${API_URL}/metadata`, { method: "POST", body: form });
-  const json = (await res.json()) as { uri?: string; image?: string; error?: string };
-  if (!res.ok || !json.uri) throw new Error(json.error ?? "Metadata yüklenemedi");
-  return { uri: json.uri, image: json.image! };
-}

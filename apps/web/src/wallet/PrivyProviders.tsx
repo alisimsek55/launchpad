@@ -10,7 +10,8 @@ import { WalletUIContext } from "./context";
 
 const wagmiConfig = createConfig({
   chains: [chain],
-  transports: { [chain.id]: http() },
+  // chain.id deploy dosyasına göre 4663 veya 46630; tek ağ yapılandırılır
+  transports: { [chain.id]: http() } as Record<typeof chain.id, ReturnType<typeof http>>,
 });
 
 function PrivyWalletUI({ children }: { children: ReactNode }) {

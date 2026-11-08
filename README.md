@@ -1,23 +1,40 @@
 # Launchpad
 
-Robinhood Chain üzerinde bonding curve tabanlı token launchpad. Token'lar curve üzerinde işlem görür, 4.20 ETH eşiğinde Uniswap v3'e graduate olur.
+Robinhood Chain üzerinde bonding curve tabanlı bir token launchpad'i (pump.fun / Pons benzeri). Herkes birkaç saniyede token çıkarır; token önce bonding curve'de işlem görür, **4.2 ETH** toplanınca likidite otomatik olarak **Uniswap v3**'e taşınır ve sonsuza kadar kilitlenir.
 
-## Dokümanlar
-- [notes.md](notes.md) — kararlar, mimari, yol haritası
-- [const.md](const.md) — sabitler (chain ID, adresler, parametreler)
-- [backlog.md](backlog.md) — açık işler
-- [reports/](reports/) — raporlar
+> ⚠️ **Öğrenme / portföy projesi.** Sözleşmeler bağımsız bir denetimden (audit) geçmedi. Herkese açık demo **Robinhood Chain testnet**'inde çalışır; gerçek parayla kullanmayın.
 
-## Yapı
+## Özellikler
+- **Bonding curve:** sanal rezervli `x·y=k`, arzın %80'i curve'de; graduation fiyatı Uniswap açılış fiyatına birebir eşit (fiyat sıçraması yok).
+- **Graduation:** tek işlemde Uniswap v3'e full-range likidite; LP NFT kilitli (rug pull yok). Fiyat manipülasyonuna ve kilitleme (DoS) saldırısına karşı korumalı.
+- **Adil başlangıç:** ilk 60 sn alım fee'si %20 → %1 düşer (sniper koruması); creator launch işleminde en fazla %5 alabilir.
+- **Fee:** %1 (%0.5 protokol / %0.5 creator), graduation sonrası Uniswap LP fee'leri de yarı yarıya.
+- **DCA:** periyodik alım planı; keeper zamanı gelince curve'den veya Uniswap'ten alır.
+- **Web:** token listesi, TradingView Lightweight Charts, alım-satım (curve + Uniswap), trades/holders, 2 adımlı token oluşturma (görsel **zincir üstünde**), profil/claim, analytics, docs.
+- **Tamamen ücretsiz altyapı:** backend olarak tek bir indexer; sunucusuz metadata; keeper GitHub Actions'ta.
+
+## Mimari
 ```
-apps/web            Next.js frontend
-apps/api            Hono API
-apps/indexer        Ponder: holders indexer + holders API
-apps/keeper         DCA keeper servisi
-packages/contracts  Solidity + Foundry
-packages/shared     Ortak TS: chain tanımları, adresler, curve matematiği, ABI'ler
-packages/subgraph   Goldsky subgraph: trades, mumlar, analytics
+                 ┌──────────── Robinhood Chain (testnet 46630) ────────────┐
+ Tarayıcı ──tx──▶│ TokenFactory · BondingCurve · Graduator · LPLocker      │
+ (MetaMask)      │ FeeVault · DCAVault · LaunchToken · Uniswap v3 (kendi)  │
+    │            └───────────────┬─────────────────────────────────────────┘
+    │                 event'ler   │                       ▲ execute (30 dk)
+    ▼                             ▼                       │
+ Next.js (Vercel) ◀──REST── Ponder indexer (Render) ── Neon Postgres
+                                                     GitHub Actions keeper
 ```
+
+| Klasör | İçerik |
+|---|---|
+| `packages/contracts` | Solidity + Foundry: sözleşmeler, 40 test (unit/fuzz/invariant, mainnet fork), deploy script'leri |
+| `packages/shared` | Ortak TS: zincir tanımları, deploy adresleri, curve matematiği (sözleşmeyle birebir), ABI'ler |
+| `apps/indexer` | Ponder: tokenlar, işlemler, mumlar, holders, analytics + REST API |
+| `apps/web` | Next.js 16 frontend |
+| `apps/keeper` | DCA keeper (GitHub Actions'ta `--once`) |
+| `packages/subgraph` | İsteğe bağlı Goldsky subgraph (web kullanmıyor) |
+
+Kararlar ve gerekçeleri: [notes.md](notes.md), [reports/](reports/). Sabitler: [const.md](const.md).
 
 ## Gereksinimler
 - Node 24+, pnpm 12+
@@ -28,26 +45,12 @@ packages/subgraph   Goldsky subgraph: trades, mumlar, analytics
 git clone --recurse-submodules https://github.com/alisimsek55/launchpad.git
 cd launchpad
 pnpm install
-cp env.example .env   # değerleri doldur
-```
-
-## Komutlar
-```bash
-pnpm --filter @launchpad/web dev        # frontend: http://localhost:3000
-pnpm --filter @launchpad/api dev        # api: http://localhost:4000/health
-LAUNCHPAD_NETWORK=local KEEPER_PRIVATE_KEY=0x... pnpm --filter @launchpad/keeper start  # DCA keeper
-pnpm --filter @launchpad/shared test    # curve matematiği testleri
-pnpm --filter @launchpad/contracts test # Solidity testleri (mainnet fork, ~3 dk)
-pnpm --filter @launchpad/contracts test:fast  # invariant hariç (~15 sn)
-pnpm --filter @launchpad/contracts abis # sözleşme değişince ABI'leri shared + subgraph'a aktar
-pnpm --filter @launchpad/subgraph build # subgraph'ı derle
-pnpm build                              # tüm paketleri derle
 ```
 
 ## Yerel geliştirme (anvil fork, tüm sistem)
-Gerçek ağın yerel kopyasında sözleşmeler + örnek veri + indexer + API + site. Her komut ayrı terminalde:
+Gerçek ağın yerel kopyasında sözleşmeler + örnek veri + indexer + site. Her komut ayrı terminalde:
 
-1. Yerel zincir (1 sn blok süresi, gerçek ağ gibi zaman ilerlesin):
+1. Yerel zincir (1 sn blok süresi):
 ```bash
 anvil --fork-url https://rpc.mainnet.chain.robinhood.com --block-time 1
 ```
@@ -55,23 +58,30 @@ anvil --fork-url https://rpc.mainnet.chain.robinhood.com --block-time 1
 ```bash
 cd packages/contracts && forge script script/Simulate.s.sol --rpc-url http://127.0.0.1:8545 --broadcast --slow
 ```
-3. Indexer (holders), API (görsel/metadata), site:
+3. Indexer ve site:
 ```bash
 cd apps/indexer && rm -rf .ponder && LAUNCHPAD_NETWORK=local npx ponder dev
 ```
 ```bash
-pnpm --filter @launchpad/api dev
-```
-```bash
 pnpm --filter @launchpad/web dev
 ```
-DCA keeper (yerelde anvil hesabı #0 keeper olarak yetkili; herkese açık test anahtarı, sadece yerelde kullan):
+4. (İsteğe bağlı) DCA keeper; yerelde anvil hesabı #0 yetkili (herkese açık test anahtarı, sadece yerelde):
 ```bash
 cd apps/keeper && LAUNCHPAD_NETWORK=local POLL_MS=5000 KEEPER_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 npx tsx src/index.ts
 ```
-`http://localhost:3000` → **Connect** yerelde anvil test hesabı #1'i bağlar (Privy app ID yoksa). Yerelde subgraph yok; trades ve chart zincirden okunur (graduation sonrası Uniswap işlemleri listede görünmez).
+`http://localhost:3000` → **Connect** yerelde anvil test hesabını bağlar.
 
-Indexer uçları: `http://localhost:42069/tokens/<token>/holders`, `/users/<adres>/balances`, `/graphql`.
+## Testnet'e ücretsiz yayın
+Adım adım rehber: [reports/testnet-deploy.md](reports/testnet-deploy.md). Özet: faucet'ten test ETH'si → `DeployTestnet.s.sol` (kendi Uniswap v3'ümüzü de kurar) → indexer Render + Neon → web Vercel → keeper GitHub Actions secret'ı.
+
+## Komutlar
+```bash
+pnpm --filter @launchpad/contracts test       # Solidity testleri (mainnet fork, ~3 dk)
+pnpm --filter @launchpad/contracts test:fast  # invariant hariç (~15 sn)
+pnpm --filter @launchpad/contracts abis       # sözleşme değişince ABI'leri aktar
+pnpm --filter @launchpad/shared test          # curve matematiği testleri
+pnpm build                                    # tüm paketleri derle
+```
 
 ## Ortam değişkenleri
-Gizli anahtarlar `.env` dosyasında tutulur ve `.gitignore` ile repoya girmez. Gizli olmayan sabitler `const.md`'dedir. Şablon: [env.example](env.example).
+Şablon: [env.example](env.example). Gizli değerler `.env`'ye veya barındırma panellerine girilir; repoya girmez.
