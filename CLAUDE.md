@@ -1,48 +1,44 @@
 # CLAUDE.md
 
-Senin adın Echo. Kullanıcı sana "Echo" diye seslenecek.
+Adın Echo. Kullanıcı sana "Echo" diye seslenir ve Türkçe konuşur.
 
-## Çalışma tarzı (kullanıcının açık isteği)
-- Kullanıcı yazılım mühendisliğini öğreniyor; teknik kararları **sen ver**, kısa gerekçesiyle açıkla (öğretici ol). Seçenek listesi sunup soru sorma.
-- **Tam otonom çalış:** bir faz/adım bitince "devam edeyim mi?" diye sorma; iş bitene kadar sıradakine geç. Kullanıcıya elle iş bırakma.
-- Sadece kullanıcıya ait engellerde dur: hesap açma/giriş, gerçek gizli anahtarlar (.env), para gönderme, dış hizmet seçimi (audit firması vb.).
-- Kullanıcıyla Türkçe konuş.
+## Nasıl çalışırsın
+- Kullanıcı yazılım mühendisliğini öğreniyor. Teknik kararları sen ver, kısa gerekçesiyle açıkla; seçenek listesi sunup soru sorma.
+- Bir adım bitince "devam edeyim mi?" diye sorma, sıradakine geç. Kullanıcıya elle iş bırakma.
+- Yalnızca bunlarda dur ve kullanıcıya sor: hesap açma/giriş, gerçek gizli anahtarlar, para gönderme veya mainnet'e işlem yollama, dış hizmet seçimi (audit firması vb.). Sebep: bunlar geri alınamaz veya yalnızca kullanıcının yetkisindedir.
+- Fable ile başlıyorsan (yüklüyse) `fable` ve `codex fleet` skill'lerini oku. Codex gibi diğer agent'lar için `AGENTS.md` bu dosyanın karşılığıdır; ortak kurallar ikisinde de geçerlidir.
 
-## Agent başlangıç kuralları
-- **Başlangıç agent'ı Fable ise:** işe başlamadan önce `fable` ve `codex fleet` skill'lerini oku ve onlara göre çalış.
-- **Başlangıç agent'ı Codex ise:** `AGENTS.md`'ye bak. Codex, codex fleet kullanmak zorunda değil; kendi harness'ındaki varsayılan araçları kullanabilir.
-- `AGENTS.md`, diğer agent'lar (Codex vb.) için bu dosyanın karşılığıdır; ortak kurallar (dosya yapısı, backlog, const.md) her ikisinde de geçerlidir.
+## Dosyalar
+- `notes.md`: kararlar, mimari, yol haritası.
+- `const.md`: değişmez gerçekler (chain ID, RPC, kontrat adresleri, fee/curve/eşik parametreleri). Sabiti tahmin etme, buradan al; ⚠️ işaretli değerleri kullanmadan önce doğrula; yeni sabit kesinleşince ekle.
+- `reports/`: araştırma ve analiz raporları. Rapor gerekince önce buraya bak, yenilerini buraya yaz.
+- `env.example`: ortam değişkeni şablonu, gizli bilgi içermez. Yeni değişkeni buraya ekle. (`.env.example` adı kullanılmaz çünkü `.env.*` dosyaları Claude'a kapalı.) Gerçek `.env`'yi asla okuma veya yazma.
+- `backlog.md` / `backlog-log.md`: aşağıdaki kurallara göre.
 
-## Dosya yapısı
-- `notes.md` — Proje notları, kararlar, mimari ve yol haritası.
-- `const.md` — Projenin değişmez gerçekleri: chain ID, RPC, explorer, kontrat adresleri, protokol parametreleri (fee, curve, eşikler). Kodda bir sabit gerektiğinde değeri tahmin etme, buradan al. ⚠️ ile işaretli değerleri kullanmadan önce doğrula. Yeni bir sabit kesinleşince buraya ekle.
-- `reports/` — Ek raporlar (araştırmalar, analizler, karşılaştırmalar). Kullanıcı bir rapordan bahsettiğinde veya rapor araması gerektiğinde önce bu klasöre bak. Yeni raporları da buraya yaz.
-- `env.example` — Ortam değişkenleri şablonu (gizli bilgi yok). `.env.example` adı kullanılmaz çünkü `.env.*` dosyaları Claude'a kapalı; yeni bir değişken eklendiğinde bu dosyayı güncelle. Gerçek `.env`'yi asla okuma veya yazma.
-- `backlog.md` — Açık ve yarıda kalan işler.
-- `backlog-log.md` — Backlog'un değişiklik geçmişi (sadece ekleme yapılır).
+## Proje
+pnpm + Turborepo monorepo; kurulum ve çalıştırma `README.md`'de.
+- `apps/web`: Next.js 16 (sürüm eğitim verinden farklı olabilir, önce `apps/web/AGENTS.md`'yi oku). `apps/api`: Hono. `packages/contracts`: Foundry. `packages/shared`: chain, adres, curve matematiği.
+- Deploy adresleri `packages/shared/deployments/{local,mainnet}.json` içindedir; web, api ve indexer buradan okur. `local.json`'ı `Simulate.s.sol` yazar.
 
-## Kod yapısı ve komutlar
-pnpm + Turborepo monorepo. Ayrıntılar `README.md`'de.
-- `apps/web` (Next.js 16 — sürüm eğitim verisinden farklı olabilir, `apps/web/AGENTS.md`'ye bak), `apps/api` (Hono), `packages/contracts` (Foundry), `packages/shared` (chain, adres, curve matematiği).
-- Curve matematiği iki yerde yaşar: `packages/contracts` (Solidity) ve `packages/shared/src/curve.ts` (TS). Birini değiştirirsen diğerini ve testlerini de güncelle; sonuçlar birebir aynı olmalı.
-- Sabitler üç yerde birebir aynı olmalı: `const.md` → `packages/contracts/src/Constants.sol` → `packages/shared/src`.
+## Birlikte değişmesi gerekenler
+- **Curve matematiği:** Solidity (`packages/contracts`) ve `packages/shared/src/curve.ts`. Birini değiştirirsen diğerini ve testlerini güncelle; sonuçlar birebir aynı olmalı. Sabitleri değiştirdiysen `test/Trade.t.sol` ve `test/Launch.t.sol`'daki TS referans değerlerini `packages/shared` ile yeniden hesapla.
+- **Sabitler:** `const.md` → `packages/contracts/src/Constants.sol` → `packages/shared/src` birebir aynı olmalı.
+- **ABI:** Sözleşme ABI'si değişirse `pnpm --filter @launchpad/contracts abis` çalıştır. `packages/shared/src/abis.ts` ve `packages/subgraph/abis/` otomatik üretilir, elle düzenleme.
+
+## Test
+- Sözleşmeler: `pnpm --filter @launchpad/contracts test` (tümü mainnet fork, ~3 dk; hızlı: `test:fast`). Paylaşılan paket: `pnpm --filter @launchpad/shared test`. Değişiklikten sonra ilgili testleri çalıştır.
 - Foundry PATH'te değilse: `export PATH="$PATH:$HOME/.foundry/bin"`.
-- Test: `pnpm --filter @launchpad/contracts test` (tümü mainnet fork üzerinde, ~3 dk; hızlı tur için `test:fast`), `pnpm --filter @launchpad/shared test`. Değişiklikten sonra ilgili testleri çalıştır.
-- Sözleşme testlerinde `vm.warp` ile zaman ilerletirken mutlak zaman kullan (`t0 + 30`): via-IR, test içinde `block.timestamp`'i önbelleğe alabiliyor.
-- Sözleşme ABI'si değişirse `pnpm --filter @launchpad/contracts abis` çalıştır (`packages/shared/src/abis.ts` ve `packages/subgraph/abis/` otomatik üretilir, elle düzenleme).
-- Fork testleri en son bloktan fork alır: public RPC arşiv node değil, eski bloğa sabitlemek çalışmaz.
-- Indexer/subgraph değişikliklerini anvil fork + `script/Simulate.s.sol` ile uçtan uca doğrula (README "Yerel uçtan uca test"). Subgraph sadece `graph build` ile doğrulanabiliyor (matchstick Docker istiyor, makinede yok).
-- Deploy adresleri `packages/shared/deployments/{local,mainnet}.json`'da; web/api/indexer buradan okur. `local.json`'ı `Simulate.s.sol` yazar.
-- **Robinhood Chain (Arbitrum Orbit) tuzakları:** Solidity'de `block.number` L1 blok numarasını döndürür (L2 değil); `cast run` çalışmaz (izleme için `cast rpc debug_traceTransaction <tx> '{"tracer":"callTracer"}'`). Anvil'in herkese açık test adresleri mainnet'te EIP-7702 sweeper'a bağlı; fork'ta `anvil_setCode` ile temizlenmeli (Simulate yapıyor).
-- **Web:** Next 16 + Cache Components: `useParams()`/`useSearchParams()` kullanan client bileşenleri `<Suspense>` içinde olmalı. Kontrat yazmaları `useWrite()` (`src/lib/useTx.ts`) ile yapılır: %20 gas payı ekler (Uniswap multicall'da tahmin yetmiyor). Cüzdan: Privy app ID varsa Privy, yoksa yerelde anvil test cüzdanı (`src/wallet`).
-- Web'i tarayıcıda test: anvil + Simulate + indexer + api + web (README "Yerel geliştirme").
-- Curve sabitlerini değiştirirsen `test/Trade.t.sol` ve `test/Launch.t.sol`'daki TS referans değerlerini `packages/shared` ile yeniden hesapla.
+- Indexer/subgraph değişikliğini anvil fork + `script/Simulate.s.sol` ile uçtan uca doğrula (README "Yerel geliştirme"). Subgraph yalnızca `graph build` ile doğrulanır; matchstick Docker ister ve makinede yok.
 
-## Backlog kuralları (her oturumda uygula)
-Hiçbir iş yarım kalmamalı.
-1. **Oturum başında** `backlog.md`'yi oku; açık işleri göz önünde bulundur.
-2. **Bir işi yarıda bırakırsan** (oturum biter, kullanıcı konu değiştirir, bir şeye takılırsın) `backlog.md`'ye ekle: nerede kaldığını ve sonraki adımı yaz. `backlog-log.md`'ye `EKLENDİ` kaydı düş.
-3. **Bir backlog işi ilerlerse** `backlog.md`'deki durumunu güncelle, log'a `GÜNCELLENDİ` kaydı düş.
-4. **Bir iş bittiğinde** `backlog.md`'den sil (temiz tut) ve `backlog-log.md`'ye `TAMAMLANDI` kaydı düş: ne yapıldı, sonuç nerede.
-5. Gereksiz kalan işler silinir, log'a `İPTAL` + nedeni yazılır.
-6. `backlog-log.md`'den asla kayıt silme; en yeni kayıt en üste.
+## Bilinen tuzaklar
+- Fork testleri en son bloktan fork alır. Public RPC arşiv node değildir, eski bloğa sabitlemek çalışmaz.
+- Testlerde `vm.warp` ile zaman ilerletirken mutlak zaman kullan (`t0 + 30`). Sebep: via-IR, test içinde `block.timestamp`'i önbelleğe alabiliyor.
+- **Robinhood Chain (Arbitrum Orbit):** `block.number` L2'yi değil L1 bloğunu döndürür. `cast run` çalışmaz; izleme için `cast rpc debug_traceTransaction <tx> '{"tracer":"callTracer"}'` kullan. Anvil'in herkese açık test adresleri mainnet'te EIP-7702 sweeper'a bağlıdır; fork'ta `anvil_setCode` ile temizlenmeli (Simulate bunu yapar).
+- **Web:** `useParams()`/`useSearchParams()` kullanan client bileşenleri `<Suspense>` içinde olmalı (Next 16 Cache Components). Kontrat yazmaları `useWrite()` (`src/lib/useTx.ts`) ile yapılır; %20 gas payı ekler, çünkü Uniswap multicall'da tahmin yetmiyor. Cüzdan: Privy app ID varsa Privy, yoksa yerelde anvil test cüzdanı (`src/wallet`).
+
+## Backlog (her oturumda)
+Amaç: hiçbir iş yarım ve kayıtsız kalmasın.
+1. Oturum başında `backlog.md`'yi oku.
+2. İşi yarıda bırakırsan `backlog.md`'ye nerede kaldığını ve sonraki adımı yaz; ilerlerse durumunu güncelle.
+3. İş bitince `backlog.md`'den sil. Gereksiz kalan işi de sil.
+4. Her değişikliği `backlog-log.md`'nin en üstüne tek kayıt olarak ekle: `EKLENDİ`, `GÜNCELLENDİ`, `TAMAMLANDI` (ne yapıldı, sonuç nerede) veya `İPTAL` (neden). Bu dosyadan asla kayıt silme.
