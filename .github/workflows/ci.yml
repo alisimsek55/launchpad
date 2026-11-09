@@ -22,11 +22,11 @@ jobs:
         run: forge lint src
       - name: Test (Robinhood mainnet fork)
         working-directory: packages/contracts
-        run: forge test --no-match-contract Invariant --fork-retries 10 --fork-retry-backoff 2000
+        # Public RPC ara sıra rate-limit uygular: geçici hatada 30 sn bekleyip en fazla 3 kez dener
+        run: for i in 1 2 3; do forge test --no-match-contract Invariant && exit 0; echo "deneme $i başarısız, tekrar"; sleep 30; done; exit 1
       - name: Invariant
         working-directory: packages/contracts
-        # Public RPC rate-limit uygular; invariant çok istek attığı için yeniden deneme + istek hızı sınırı
-        run: forge test --match-contract Invariant --fork-retries 10 --fork-retry-backoff 2000 --compute-units-per-second 100
+        run: for i in 1 2 3; do forge test --match-contract Invariant && exit 0; echo "deneme $i başarısız, tekrar"; sleep 30; done; exit 1
 
   typescript:
     name: TypeScript (web, api, indexer, keeper, subgraph)
