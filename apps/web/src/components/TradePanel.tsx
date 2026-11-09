@@ -4,7 +4,7 @@ import { bondingCurveAbi, launchTokenAbi } from "@launchpad/shared";
 import { useState } from "react";
 import { encodeFunctionData, erc20Abi, formatEther, maxUint256, parseEther, type Address } from "viem";
 import { useAccount, useBalance, useReadContract, useSimulateContract } from "wagmi";
-import { DEFAULT_SLIPPAGE_BPS, deployment } from "@/config";
+import { DEFAULT_SLIPPAGE_BPS, GRADUATION_ETH, deployment } from "@/config";
 import { fmtEth } from "@/lib/format";
 import { ADDRESS_THIS, UNI_FEE_TIER, quoterV2Abi, swapRouter02Abi } from "@/lib/uniswap";
 import { useTx, useWrite } from "@/lib/useTx";
@@ -198,7 +198,7 @@ export function TradePanel({ token, symbol, graduated }: { token: Address; symbo
     <div className="space-y-4 rounded-2xl border border-line bg-surface p-4">
       {modeTabs}
       <p className="text-xs text-muted">
-        {graduated ? "Graduated · Uniswap v3 pool'unda işlem görüyor." : "Bonding curve · 4.2 ETH'de Uniswap v3'e geçer."}
+        {graduated ? "Graduated · Uniswap v3 pool'unda işlem görüyor." : `Bonding curve · ${GRADUATION_ETH} ETH'de Uniswap v3'e geçer.`}
       </p>
 
       <div className="grid grid-cols-2 rounded-full bg-surface-2 p-1 text-sm font-medium">

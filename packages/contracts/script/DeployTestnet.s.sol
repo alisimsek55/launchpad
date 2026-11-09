@@ -4,13 +4,15 @@ pragma solidity ^0.8.28;
 import {Script, console} from "forge-std/Script.sol";
 import {DeployLib, Deployment} from "./Deploy.s.sol";
 import {ISwapRouter02} from "../src/DCAVault.sol";
+import {Constants as C} from "../src/Constants.sol";
 import {INonfungiblePositionManager, IWETH9} from "../src/interfaces/IUniswapV3.sol";
 
 /// Robinhood Chain TESTNET (46630) deploy'u. Testnet'te Uniswap v3 olmadığı için önce resmi npm
 /// artefaktlarından (aynı bytecode → aynı pool init code hash) kendi Uniswap v3'ümüzü kurar,
 /// sonra protokolü deploy edip packages/shared/deployments/testnet.json'u yazar.
 ///
-///   forge script script/DeployTestnet.s.sol --rpc-url robinhood_testnet --broadcast --account <keystore>
+///   FOUNDRY_PROFILE=testnet forge script script/DeployTestnet.s.sol --rpc-url robinhood_testnet --broadcast --account <keystore>
+/// (testnet profili ETH miktarlarını 1/1000 yapar: graduation 0.0042 ETH, bkz. src/params/testnet)
 ///
 /// Owner, treasury ve DCA keeper'ı deploy eden adrestir (testnet demo). KEEPER env'i verilirse o adres
 /// de keeper olarak yetkilendirilir (GitHub Actions'taki keeper cüzdanı).
@@ -27,6 +29,7 @@ contract DeployTestnet is Script {
 
     function run() external {
         require(block.chainid == TESTNET_CHAIN_ID, "sadece Robinhood testnet (46630)");
+        require(C.GRADUATION_ETH == 0.0042 ether, "FOUNDRY_PROFILE=testnet ile calistir");
         // Arbitrum Orbit: block.number L1 bloğu; L2 bloğunu RPC'den al
         bytes memory raw = vm.rpc("eth_blockNumber", "[]");
         uint256 startBlock = uint256(bytes32(raw)) >> (256 - raw.length * 8);
@@ -72,7 +75,11 @@ contract DeployTestnet is Script {
         vm.serializeAddress(k, "uniV3Factory", factory);
         vm.serializeAddress(k, "uniPositionManager", npm);
         vm.serializeAddress(k, "uniSwapRouter02", router);
-        string memory json = vm.serializeAddress(k, "uniQuoterV2", quoter);
+        vm.serializeAddress(k, "uniQuoterV2", quoter);
+        // Ağa göre değişen curve parametreleri (wei, string: JS number hassasiyeti yetmez)
+        vm.serializeString(k, "virtualEth", vm.toString(C.VIRTUAL_ETH));
+        vm.serializeString(k, "graduationEth", vm.toString(C.GRADUATION_ETH));
+        string memory json = vm.serializeString(k, "launchFee", vm.toString(C.LAUNCH_FEE));
         vm.writeJson(json, vm.envOr("DEPLOYMENT_OUT", string("../shared/deployments/testnet.json")));
     }
 }

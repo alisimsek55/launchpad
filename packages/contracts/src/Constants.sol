@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
+// Ağa göre değişen ETH miktarları: varsayılan profil mainnet, FOUNDRY_PROFILE=testnet testnet değerleri
+// (foundry.toml'daki "params/" remapping'i). Bkz. src/params/{mainnet,testnet}/CurveParams.sol
+import {CurveParams} from "params/CurveParams.sol";
+
 /// @notice Protokol parametreleri. Kaynak: const.md (değişiklik önce orada yapılır).
 library Constants {
     // Token
@@ -9,8 +13,8 @@ library Constants {
     uint256 internal constant LP_SUPPLY = 200_000_000e18; // %20 graduation'da LP'ye
 
     // Bonding curve (sanal rezervli constant product: x * y = k)
-    uint256 internal constant GRADUATION_ETH = 4.2 ether;
-    uint256 internal constant VIRTUAL_ETH = 1.4 ether; // x0
+    uint256 internal constant GRADUATION_ETH = CurveParams.GRADUATION_ETH;
+    uint256 internal constant VIRTUAL_ETH = CurveParams.VIRTUAL_ETH; // x0
     // y0 = 3.2e9 / 3 token; wei cinsinden tam sayı olmadığı için yukarı yuvarlandı.
     uint256 internal constant VIRTUAL_TOKEN = 1_066_666_666_666_666_666_666_666_667; // y0
 
@@ -19,7 +23,7 @@ library Constants {
     uint256 internal constant TRADE_FEE_BPS = 100; // %1
     uint256 internal constant PROTOCOL_FEE_BPS = 50; // %0.5
     uint256 internal constant CREATOR_FEE_BPS = 50; // %0.5
-    uint256 internal constant LAUNCH_FEE = 0.0005 ether;
+    uint256 internal constant LAUNCH_FEE = CurveParams.LAUNCH_FEE;
 
     // MEV koruması
     uint256 internal constant SNIPER_WINDOW = 60; // saniye

@@ -12,9 +12,9 @@ Format:
 
 ## Açık işler
 
-- [ ] **Testnet'e ücretsiz yayın: kullanıcı adımları** (eklenme: 2026-11-09)
-  - Durum: Kod hazır ve yerelde uçtan uca test edildi (testnet kopyasında deploy + graduation + Uniswap swap; mainnet kopyasında indexer + web + zincir üstü metadata). Kalanlar kullanıcıya ait: MetaMask cüzdanları + faucet test ETH'si, `cast wallet import deployer`, Neon/Render/Vercel hesapları (GitHub ile giriş, ücretsiz), GitHub'a `KEEPER_PRIVATE_KEY` secret'ı.
-  - Sonraki adım: `reports/testnet-deploy.md` §1'deki [SEN] adımları; deployer hazır olunca Echo §2 deploy'unu çalıştırır, adresleri commit'ler.
+- [ ] **Testnet'e ücretsiz yayın: kalan servisler** (eklenme: 2026-11-09)
+  - Durum: Sözleşmeler testnet'te (ölçekli parametrelerle, 2026-11-10; adresler testnet.json/const.md). Kalan: Neon (Postgres), Render (indexer), Vercel (web) hesapları ve GitHub'a KEEPER_PRIVATE_KEY secret'ı.
+  - Sonraki adım: reports/testnet-deploy.md §3–6; kullanıcı hesapları açınca Echo bağlar ve canlı test yapar.
 
 - [ ] **Tarayıcı cüzdanıyla (MetaMask) gerçek bağlantı testi** (eklenme: 2026-11-09)
   - Durum: `injected` connector + otomatik ağ geçişi kodu hazır; tarayıcı panelinde eklenti olmadığı için yalnızca yerel test cüzdanıyla denendi.

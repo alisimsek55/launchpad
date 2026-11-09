@@ -1,13 +1,15 @@
-import { CREATOR_FEE_BPS, TRADE_FEE_BPS, getDeployment } from "@launchpad/shared";
+import { CREATOR_FEE_BPS, TRADE_FEE_BPS, VIRTUAL_TOKEN, getDeployment } from "@launchpad/shared";
 import { ponder, type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { formatEther, zeroAddress, type Address, type Hex } from "viem";
 
 const CANDLE_INTERVALS = [60, 300, 3600, 21600, 86400];
 const DAY = 86400;
-const INITIAL_PRICE = 1.4 / (3.2e9 / 3); // VIRTUAL_ETH / VIRTUAL_TOKEN
 const eth = (wei: bigint) => Number(formatEther(wei));
-const WETH = BigInt(getDeployment(process.env.LAUNCHPAD_NETWORK).weth);
+const deployment = getDeployment(process.env.LAUNCHPAD_NETWORK);
+const WETH = BigInt(deployment.weth);
+// Başlangıç spot fiyatı = VIRTUAL_ETH / VIRTUAL_TOKEN (ağın curve parametrelerinden)
+const INITIAL_PRICE = eth(BigInt(deployment.virtualEth)) / eth(VIRTUAL_TOKEN);
 
 // ---------------------------------------------------------------- yardımcılar
 

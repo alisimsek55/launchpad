@@ -14,7 +14,7 @@ export type TokenInfo = {
   marketCapEth: number;
   volumeEth: number;
   tradeCount: number;
-  /// Curve'deki ETH; graduation ilerlemesi = realEth / 4.2
+  /// Curve'deki ETH; graduation ilerlemesi = realEth / graduation eşiği
   realEth: number;
   creatorFeesEth: number;
 };

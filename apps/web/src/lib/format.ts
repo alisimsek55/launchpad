@@ -1,8 +1,10 @@
 /// Görüntüleme yardımcıları. Fiyatlar ETH cinsinden (USD fiyat beslemesi faz 2.0).
 
+/// 1'in altındaki değerlerde anlamlı basamak (testnet'te tutarlar küçük: 0.0042 ETH gibi)
 export function fmtEth(v: number, digits = 4): string {
   if (v === 0) return "0";
-  if (Math.abs(v) < 1e-4) return v.toExponential(2);
+  if (Math.abs(v) < 1e-7) return v.toExponential(2);
+  if (Math.abs(v) < 1) return v.toLocaleString("en-US", { maximumSignificantDigits: Math.max(digits, 3) });
   return v.toLocaleString("en-US", { maximumFractionDigits: digits });
 }
 

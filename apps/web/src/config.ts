@@ -1,4 +1,5 @@
-import { chainFor, getDeployment, type Network } from "@launchpad/shared";
+import { chainFor, curveParamsOf, getDeployment, type Network } from "@launchpad/shared";
+import { formatEther } from "viem";
 
 /// local (anvil fork) | testnet (herkese açık demo) | mainnet
 export const network = (process.env.NEXT_PUBLIC_NETWORK ?? "testnet") as Network;
@@ -14,3 +15,8 @@ export const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "";
 export const INDEXER_URL = process.env.NEXT_PUBLIC_INDEXER_URL ?? "http://localhost:42069";
 
 export const DEFAULT_SLIPPAGE_BPS = 100; // %1
+
+/// Ağa göre değişen curve parametreleri (testnet'te mainnet'in 1/1000'i: graduation 0.0042 ETH)
+export const curveParams = curveParamsOf(deployment);
+export const GRADUATION_ETH = Number(formatEther(curveParams.graduationEth));
+export const LAUNCH_FEE_ETH = formatEther(curveParams.launchFee);

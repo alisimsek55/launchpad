@@ -1,24 +1,23 @@
 "use client";
 
-import { VIRTUAL_ETH, VIRTUAL_TOKEN, initialCurve, quoteBuy, tokenFactoryAbi } from "@launchpad/shared";
+import { initialCurve, maxDevBuyEth, quoteBuy, tokenFactoryAbi } from "@launchpad/shared";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { formatEther, parseEther, parseEventLogs } from "viem";
 import { useAccount } from "wagmi";
-import { deployment } from "@/config";
+import { GRADUATION_ETH, LAUNCH_FEE_ETH, curveParams, deployment } from "@/config";
 import { buildMetadataURI, compressImage } from "@/lib/metadata";
 import { fmtCompact } from "@/lib/format";
 import { useTx, useWrite } from "@/lib/useTx";
 import { useWalletUI } from "@/wallet/context";
 
-const LAUNCH_FEE = parseEther("0.0005");
+const LAUNCH_FEE = curveParams.launchFee;
 const MAX_DEV_BUY_TOKENS = 50_000_000n * 10n ** 18n; // %5
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const LINK = /(https?:\/\/|www\.)/i;
 
-/// %5 token sınırına denk gelen en yüksek dev buy (fee dahil): (k / (y0 - 50M) - x0) / 0.99
-const MAX_DEV_BUY_ETH =
-  (((VIRTUAL_ETH * VIRTUAL_TOKEN) / (VIRTUAL_TOKEN - MAX_DEV_BUY_TOKENS) - VIRTUAL_ETH) * 10_000n) / 9_900n;
+/// %5 token sınırına denk gelen en yüksek dev buy (ağın curve parametrelerine göre)
+const MAX_DEV_BUY_ETH = maxDevBuyEth(curveParams);
 
 function parseEth(s: string): bigint {
   try {
@@ -58,7 +57,7 @@ export function CreateTokenForm() {
   }, [image, name, symbol, description, website]);
 
   const devEth = parseEth(devBuy);
-  const devTokens = devEth > 0n ? quoteBuy(initialCurve(), devEth).tokenOut : 0n;
+  const devTokens = devEth > 0n ? quoteBuy(initialCurve(curveParams), devEth).tokenOut : 0n;
   const devTooLarge = devTokens > MAX_DEV_BUY_TOKENS;
 
   function pickImage(f: File | undefined) {
@@ -181,7 +180,7 @@ export function CreateTokenForm() {
                 </p>
               </div>
               <div className="space-y-1 rounded-xl bg-surface-2 p-3 text-sm">
-                <div className="flex justify-between"><span className="text-muted">Launch fee</span><span>0.0005 ETH</span></div>
+                <div className="flex justify-between"><span className="text-muted">Launch fee</span><span>{LAUNCH_FEE_ETH} ETH</span></div>
                 <div className="flex justify-between"><span className="text-muted">İlk alım</span><span>{devEth > 0n ? formatEther(devEth) : "0"} ETH</span></div>
                 <div className="flex justify-between font-semibold"><span>Toplam</span><span>{formatEther(LAUNCH_FEE + (devEth > 0n ? devEth : 0n))} ETH</span></div>
               </div>
@@ -221,9 +220,9 @@ export function CreateTokenForm() {
           <p className="text-sm text-muted">{description || "Token hakkında bir iki satır."}</p>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div><div className="text-xs text-muted">Supply</div>1,000,000,000</div>
-            <div><div className="text-xs text-muted">Graduates at</div>4.20 ETH</div>
+            <div><div className="text-xs text-muted">Graduates at</div>{GRADUATION_ETH} ETH</div>
             <div><div className="text-xs text-muted">Creator fee</div>0.5% / işlem</div>
-            <div><div className="text-xs text-muted">Launch fee</div>0.0005 ETH</div>
+            <div><div className="text-xs text-muted">Launch fee</div>{LAUNCH_FEE_ETH} ETH</div>
           </div>
         </div>
       </div>

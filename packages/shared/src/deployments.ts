@@ -25,6 +25,10 @@ export type Deployment = {
   uniPositionManager: Address;
   uniSwapRouter02: Address;
   uniQuoterV2: Address;
+  /// Ağa göre değişen curve parametreleri, wei (string; testnet'te mainnet'in 1/1000'i)
+  virtualEth: string;
+  graduationEth: string;
+  launchFee: string;
 };
 
 export const deployments = { local, testnet, mainnet } as Record<Network, Deployment>;

@@ -49,3 +49,5 @@ Thumbs.db
 /packages/shared/deployments/*.anvil.json
 /packages/contracts/broadcast/DeployTestnet.s.sol/46630/run-*.json
 /packages/contracts/broadcast/**/*.lock
+/packages/contracts/out-testnet/
+/packages/contracts/cache-testnet/

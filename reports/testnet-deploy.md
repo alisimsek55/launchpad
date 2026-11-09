@@ -3,7 +3,7 @@
 Tüm hizmetler ücretsiz planlarda; kredi kartı gerekmez. **[SEN]** işaretli adımlar hesap/anahtar gerektirir, gerisini Echo yapar.
 Mimari gerekçesi: [2026-11-09-ucretsiz-mimari.md](2026-11-09-ucretsiz-mimari.md).
 
-## 1. Cüzdanlar ve test ETH'si **[SEN]**
+## 1. Cüzdanlar ve test ETH'si **[SEN]** — ✅ 2026-11-10
 1. Tarayıcına **MetaMask** veya **Rabby** kur, yeni bir cüzdan oluştur (bu proje için ayrı, sadece testnet).
 2. İki hesap kullan:
    - **Deployer**: sözleşmeleri deploy eder (≈0.01 test ETH yeter).
@@ -14,10 +14,12 @@ Mimari gerekçesi: [2026-11-09-ucretsiz-mimari.md](2026-11-09-ucretsiz-mimari.md
 cast wallet import deployer --interactive
 ```
 
-## 2. Sözleşmeleri deploy et (Echo, sen sadece şifreyi girersin)
+## 2. Sözleşmeleri deploy et (Echo, sen sadece şifreyi girersin) — ✅ 2026-11-10
+
+`FOUNDRY_PROFILE=testnet`: ETH miktarları 1/1000 (graduation 0.0042 ETH), faucet'in günlük 0.01 ETH'siyle graduation görülebilsin diye.
 ```bash
 cd packages/contracts
-KEEPER=<keeper cüzdan adresi> forge script script/DeployTestnet.s.sol --rpc-url robinhood_testnet --broadcast --account deployer
+FOUNDRY_PROFILE=testnet KEEPER=<keeper cüzdan adresi> forge script script/DeployTestnet.s.sol --rpc-url robinhood_testnet --broadcast --account deployer
 ```
 - Script önce **kendi Uniswap v3'ümüzü** (resmi bytecode) kurar, sonra protokolü deploy eder, keeper'ı yetkilendirir ve adresleri `packages/shared/deployments/testnet.json`'a yazar.
 - Yerel testnet kopyasında denendi: deploy + graduation + Uniswap swap çalışıyor.

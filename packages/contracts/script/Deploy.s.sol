@@ -4,7 +4,7 @@ pragma solidity ^0.8.28;
 import {Script, console} from "forge-std/Script.sol";
 import {BondingCurve} from "../src/BondingCurve.sol";
 import {DCAVault, ISwapRouter02} from "../src/DCAVault.sol";
-import {RobinhoodMainnet as RH} from "../src/Constants.sol";
+import {Constants, RobinhoodMainnet as RH} from "../src/Constants.sol";
 import {FeeVault} from "../src/FeeVault.sol";
 import {Graduator} from "../src/Graduator.sol";
 import {LPLocker} from "../src/LPLocker.sol";
@@ -44,6 +44,7 @@ contract Deploy is Script {
         address owner = vm.envAddress("OWNER");
         address treasury = vm.envAddress("TREASURY");
         require(block.chainid == RH.CHAIN_ID, "sadece Robinhood mainnet");
+        require(Constants.GRADUATION_ETH == 4.2 ether, "mainnet varsayilan profille derlenmeli");
 
         vm.startBroadcast();
         d = DeployLib.deploy(

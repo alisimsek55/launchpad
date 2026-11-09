@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
-import { deployment } from "@/config";
+import { VIRTUAL_TOKEN } from "@launchpad/shared";
+import { formatEther } from "viem";
+import { GRADUATION_ETH, LAUNCH_FEE_ETH, curveParams, deployment, isTestnet } from "@/config";
+import { fmtEth, fmtPrice } from "@/lib/format";
+
+// Rakamlar ağın curve parametrelerinden hesaplanır (testnet'te ETH miktarları mainnet'in 1/1000'i)
+const VIRTUAL_ETH = Number(formatEther(curveParams.virtualEth));
+const START_PRICE = VIRTUAL_ETH / Number(formatEther(VIRTUAL_TOKEN));
+const GRAD_PRICE = GRADUATION_ETH / 200_000_000;
 
 export const metadata: Metadata = { title: "Docs · Launchpad" };
 
@@ -45,29 +53,34 @@ export default function DocsPage() {
       <article className="max-w-3xl space-y-3 text-sm leading-7 text-zinc-300 [&_li]:ml-5 [&_li]:list-disc [&_strong]:text-foreground">
         <h1 className="text-4xl font-semibold tracking-tight text-foreground">Docs</h1>
         <p>Robinhood Chain üzerinde, herkesin birkaç saniyede token çıkarabildiği ve adil başlangıçlı bir launchpad.</p>
+        {isTestnet && (
+          <p className="rounded-xl border border-line bg-surface p-3">
+            <strong>Testnet demosu:</strong> test ETH&apos;si değersizdir ve faucet&apos;ten ücretsiz alınır. Graduation&apos;ın kolayca görülebilmesi için ETH miktarları mainnet tasarımının 1/1000&apos;i; oranlar, fee yüzdeleri ve sniper koruması aynıdır. Sözleşmeler denetimden (audit) geçmemiştir.
+          </p>
+        )}
 
         <H id="nasil">Nasıl çalışır?</H>
         <ol className="space-y-1">
           <li>Creator token&apos;ı oluşturur: isim, ticker, görsel. Toplam arz her zaman <strong>1.000.000.000</strong>.</li>
           <li>Token önce <strong>bonding curve</strong> üzerinde işlem görür: fiyat matematiksel bir formülle belirlenir, alım fiyatı yükseltir, satım düşürür.</li>
-          <li>Curve&apos;de <strong>4.2 ETH</strong> toplandığında token <strong>graduate</strong> olur: likidite otomatik olarak Uniswap v3&apos;e taşınır ve sonsuza kadar kilitlenir.</li>
+          <li>Curve&apos;de <strong>{GRADUATION_ETH} ETH</strong> toplandığında token <strong>graduate</strong> olur: likidite otomatik olarak Uniswap v3&apos;e taşınır ve sonsuza kadar kilitlenir.</li>
         </ol>
         <p>Ön satış, ekip payı ya da gizli arz yoktur; herkes aynı curve&apos;den alır.</p>
 
         <H id="curve">Bonding curve</H>
         <p>
-          Sanal rezervli sabit çarpım modeli: <code className="text-foreground">x · y = k</code>. Curve 1.4 ETH sanal ETH rezerviyle başlar.
+          Sanal rezervli sabit çarpım modeli: <code className="text-foreground">x · y = k</code>. Curve {VIRTUAL_ETH} ETH sanal ETH rezerviyle başlar.
           Arzın <strong>%80&apos;i (800M)</strong> curve&apos;de satılır; kalan <strong>%20 (200M)</strong> graduation&apos;da Uniswap likiditesine gider.
         </p>
         <ul>
-          <li>Başlangıç fiyatı ≈ 0.0000000013 ETH (market cap ≈ 1.31 ETH)</li>
-          <li>Graduation fiyatı ≈ 0.000000021 ETH (market cap = 21 ETH), başlangıcın 16 katı</li>
+          <li>Başlangıç fiyatı ≈ {fmtPrice(START_PRICE)} ETH (market cap ≈ {fmtEth(START_PRICE * 1e9)} ETH)</li>
+          <li>Graduation fiyatı ≈ {fmtPrice(GRAD_PRICE)} ETH (market cap = {fmtEth(GRAD_PRICE * 1e9)} ETH), başlangıcın 16 katı</li>
           <li>Curve&apos;e her zaman geri satabilirsin; curve her satışı karşılayacak ETH&apos;yi tutar.</li>
         </ul>
 
         <H id="graduation">Graduation</H>
         <p>
-          Eşiği aşan alımda yalnızca kalan token satılır, fazla ETH iade edilir. Aynı işlemde: toplanan 4.2 ETH ve 200M token ile Uniswap v3&apos;te
+          Eşiği aşan alımda yalnızca kalan token satılır, fazla ETH iade edilir. Aynı işlemde: toplanan {GRADUATION_ETH} ETH ve 200M token ile Uniswap v3&apos;te
           <strong> %1 fee tier, tam aralık</strong> pozisyon açılır. Pool fiyatı curve&apos;ün son fiyatına <strong>birebir eşittir</strong>, geçişte fiyat sıçramaz.
           LP NFT&apos;si <strong>LPLocker</strong>&apos;da kilitlidir: likiditeyi çekecek bir fonksiyon yoktur (rug pull mümkün değil).
         </p>
@@ -75,7 +88,7 @@ export default function DocsPage() {
         <H id="fee">Fee&apos;ler</H>
         <ul>
           <li><strong>İşlem fee&apos;si %1</strong>: %0.5 protokol, %0.5 creator. Alım ve satımda ETH tarafından kesilir.</li>
-          <li><strong>Launch fee&apos;si 0.0005 ETH</strong> (spam önleme).</li>
+          <li><strong>Launch fee&apos;si {LAUNCH_FEE_ETH} ETH</strong> (spam önleme).</li>
           <li>Graduation fee&apos;si yok.</li>
           <li>Graduation sonrası Uniswap&apos;in %1 LP fee&apos;i de aynı oranla (%50 / %50) dağıtılır.</li>
         </ul>

@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-10 — Testnet'e ücretsiz yayın: kalan servisler
+- Olay: GÜNCELLENDİ
+- Not: Cüzdanlar + faucet + keystore tamam. Sözleşmeler testnet'e deploy edildi, ardından graduation'ın demoda görülebilmesi için ETH miktarları 1/1000'e ölçeklenip (Foundry testnet profili, graduation 0.0042 ETH) yeniden deploy edildi; bağlantılar ve parametreler zincirde doğrulandı. Toplam maliyet ~0.0005 test ETH. Web/indexer/docs curve parametrelerini deploy dosyasından okuyor.
+
 ## 2026-11-09 — Goldsky subgraph deploy'u
 - Olay: İPTAL
 - Not: Tüm veri Ponder indexer'a taşındı; subgraph isteğe bağlı olarak repoda duruyor.

@@ -18,7 +18,18 @@ fs_permissions = [
 remappings = [
   "forge-std/=lib/forge-std/src/",
   "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+  "params/=src/params/mainnet/",
 ]
+
+# Testnet derlemesi: ETH miktarları 1/1000 (src/params/testnet). Kullanım: FOUNDRY_PROFILE=testnet forge script ...
+[profile.testnet]
+remappings = [
+  "forge-std/=lib/forge-std/src/",
+  "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+  "params/=src/params/testnet/",
+]
+out = "out-testnet"
+cache_path = "cache-testnet"
 
 [fuzz]
 runs = 1000

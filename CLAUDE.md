@@ -24,7 +24,7 @@ pnpm + Turborepo monorepo; kurulum ve çalıştırma `README.md`'de.
 
 ## Birlikte değişmesi gerekenler
 - **Curve matematiği:** Solidity (`packages/contracts`) ve `packages/shared/src/curve.ts`. Birini değiştirirsen diğerini ve testlerini güncelle; sonuçlar birebir aynı olmalı. Sabitleri değiştirdiysen `test/Trade.t.sol` ve `test/Launch.t.sol`'daki TS referans değerlerini `packages/shared` ile yeniden hesapla.
-- **Sabitler:** `const.md` → `packages/contracts/src/Constants.sol` → `packages/shared/src` birebir aynı olmalı.
+- **Sabitler:** `const.md` → `packages/contracts/src/Constants.sol` → `packages/shared/src` birebir aynı olmalı. Ağa göre değişen ETH miktarları (sanal ETH, graduation eşiği, launch fee) `src/params/{mainnet,testnet}/CurveParams.sol`'dadır; deploy script'leri bunları deploy dosyasına yazar, web/indexer oradan okur. Testnet derlemesi `FOUNDRY_PROFILE=testnet` ile yapılır (ETH miktarları 1/1000); testler varsayılan (mainnet) profilde koşar.
 - **ABI:** Sözleşme ABI'si değişirse `pnpm --filter @launchpad/contracts abis` çalıştır. `packages/shared/src/abis.ts` ve `packages/subgraph/abis/` otomatik üretilir, elle düzenleme.
 
 ## Test

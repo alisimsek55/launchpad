@@ -98,7 +98,10 @@ contract Simulate is Script {
         vm.serializeAddress(k, "uniV3Factory", RH.UNI_V3_FACTORY);
         vm.serializeAddress(k, "uniPositionManager", RH.UNI_V3_POSITION_MANAGER);
         vm.serializeAddress(k, "uniSwapRouter02", RH.UNI_SWAP_ROUTER_02);
-        string memory json = vm.serializeAddress(k, "uniQuoterV2", RH.UNI_QUOTER_V2);
+        vm.serializeAddress(k, "uniQuoterV2", RH.UNI_QUOTER_V2);
+        vm.serializeString(k, "virtualEth", vm.toString(C.VIRTUAL_ETH));
+        vm.serializeString(k, "graduationEth", vm.toString(C.GRADUATION_ETH));
+        string memory json = vm.serializeString(k, "launchFee", vm.toString(C.LAUNCH_FEE));
         vm.writeJson(json, "../shared/deployments/local.json");
     }
 

@@ -20,10 +20,30 @@ export type CurveState = {
   virtualToken: bigint; // y
 };
 
-export const initialCurve = (): CurveState => ({
+/// Ağa göre değişen ETH miktarları (testnet'te mainnet'in 1/1000'i). Kaynak: deploy dosyası.
+export type CurveParams = { virtualEth: bigint; graduationEth: bigint; launchFee: bigint };
+
+export const MAINNET_CURVE_PARAMS: CurveParams = {
   virtualEth: VIRTUAL_ETH,
+  graduationEth: GRADUATION_ETH,
+  launchFee: parseEther("0.0005"),
+};
+
+export function curveParamsOf(d: { virtualEth: string; graduationEth: string; launchFee: string }): CurveParams {
+  return { virtualEth: BigInt(d.virtualEth), graduationEth: BigInt(d.graduationEth), launchFee: BigInt(d.launchFee) };
+}
+
+export const initialCurve = (params: CurveParams = MAINNET_CURVE_PARAMS): CurveState => ({
+  virtualEth: params.virtualEth,
   virtualToken: VIRTUAL_TOKEN,
 });
+
+/// Arzın %5'i sınırına denk gelen en yüksek dev buy (fee dahil): (k / (y0 - 50M) - x0) / 0.99
+export function maxDevBuyEth(params: CurveParams = MAINNET_CURVE_PARAMS): bigint {
+  const maxTokens = 50_000_000n * 10n ** 18n;
+  const x0 = params.virtualEth;
+  return (((x0 * VIRTUAL_TOKEN) / (VIRTUAL_TOKEN - maxTokens) - x0) * 10_000n) / 9_900n;
+}
 
 /// Launch'tan bu yana geçen süreye göre alım fee'si (bps): %20'den %1'e lineer düşüş.
 export function buyFeeBps(secondsSinceLaunch: bigint): bigint {
