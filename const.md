@@ -56,6 +56,23 @@ Production'da public RPC yerine Alchemy vb. özel RPC kullanılmalı (Robinhood 
 
 **Sonuç:** Uniswap testnet'te olmadığı için graduation testleri **mainnet fork** ile yapılacak (`anvil --fork-url` / Foundry fork testleri).
 
+## Testnet deploy (2026-11-10)
+
+Deployer: `0x839E3a58f9b1c99dD36ee5E744233215b3363045` (owner/treasury), keeper: `0x986B1bd629Ce476359Fc6e796b7d8EC6dDf40dE0`. Başlangıç bloğu: 151063721. Maliyet: 0.00024 test ETH. Kaynak: `packages/shared/deployments/testnet.json`.
+
+| Kontrat | Adres | Durum |
+|---|---|---|
+| TokenFactory | `0x8FF2FB0CC8d09974747d720006F2A129C1673186` | ✅ zincirde doğrulandı |
+| BondingCurve | `0xfe22881ad78eFB42FA6AEC8e87f0C7192775C93E` | ✅ zincirde doğrulandı |
+| Graduator | `0x3813065cB28ED49b6DF73A93b37C2b379ECB1b37` | ✅ zincirde doğrulandı |
+| LPLocker | `0xB72Aa545d0A0f9fEb963f63547126F8B5122a183` | ✅ zincirde doğrulandı |
+| FeeVault | `0x5dEdBBc46cfaaA9CD597921d7E9a7b52FA948565` | ✅ zincirde doğrulandı |
+| DCAVault | `0x548778117d6a4a2D0AEf544b4BfE49dFeb28ff25` | ✅ zincirde doğrulandı |
+| Uniswap v3 Factory (kendi) | `0x96fFE5de8C8AE57d82cF1E170517D1799eCadd71` | ✅ zincirde doğrulandı |
+| Uniswap NonfungiblePositionManager (kendi) | `0x8d6240991444a03540B538E7740270c29728DBD5` | ✅ zincirde doğrulandı |
+| Uniswap SwapRouter02 (kendi) | `0xB81c36B747969a3a4Dd70a172bBb3f4cbd768358` | ✅ zincirde doğrulandı |
+| Uniswap QuoterV2 (kendi) | `0x982393F48Beb4CB4D2B3FC328A76F42D4a332379` | ✅ zincirde doğrulandı |
+
 ## Protokol parametreleri
 
 Bunlar tasarım kararlarıdır (gerekçeler notes.md §9-10'da). Bir token'ın parametreleri launch anında sabitlenir.
