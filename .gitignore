@@ -48,3 +48,4 @@ Thumbs.db
 # Yerel testnet-fork deploy denemeleri
 /packages/shared/deployments/*.anvil.json
 /packages/contracts/broadcast/DeployTestnet.s.sol/46630/run-*.json
+/packages/contracts/broadcast/**/*.lock
