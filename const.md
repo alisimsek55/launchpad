@@ -9,6 +9,13 @@ Durum etiketleri:
 
 ---
 
+## Canlı servisler (testnet, ücretsiz planlar)
+
+| Servis | Adres |
+|---|---|
+| Web (Vercel Hobby) | https://launchpad-cyan-nu.vercel.app |
+| Indexer API (Render free + Neon Free) | https://launchpad-indexer-uqhu.onrender.com |
+
 ## Repo
 
 | Ad | Değer | Durum |

@@ -25,17 +25,19 @@ FOUNDRY_PROFILE=testnet KEEPER=<keeper cüzdan adresi> forge script script/Deplo
 - Yerel testnet kopyasında denendi: deploy + graduation + Uniswap swap çalışıyor.
 - Sonra: `testnet.json` commit'lenir; `const.md`'ye adresler eklenir.
 
-## 3. Veritabanı: Neon **[SEN: hesap]**
+## 3. Veritabanı: Neon **[SEN: hesap]** — ✅ 2026-11-10
 1. neon.com → GitHub ile giriş → **New project** (bölge: Avrupa).
 2. **Connection string**'i kopyala (`postgresql://...`). Gizli değer: sadece Render paneline girilecek.
 
-## 4. Indexer: Render **[SEN: hesap]**
+## 4. Indexer: Render **[SEN: hesap]** — ✅ https://launchpad-indexer-uqhu.onrender.com
 1. render.com → GitHub ile giriş → **New → Blueprint** → bu repoyu seç (`render.yaml` otomatik okunur).
 2. `DATABASE_URL` alanına Neon adresini yapıştır → **Apply**.
 3. Servis adresini not al (ör. `https://launchpad-indexer.onrender.com`). Kontrol: `/protocol` uç noktası JSON dönmeli.
 - Ücretsiz servis 15 dk trafik yoksa uyur; ilk istekte ~1 dk'da uyanır.
 
-## 5. Web: Vercel **[SEN: hesap]**
+## 5. Web: Vercel **[SEN: hesap]** — ✅ https://launchpad-cyan-nu.vercel.app
+
+Ek ortam değişkeni: `ENABLE_EXPERIMENTAL_COREPACK=1` (Vercel'in pnpm 12 kullanması için).
 1. vercel.com → GitHub ile giriş → **Add New → Project** → bu repo.
 2. **Root Directory:** `apps/web`. Ortam değişkenleri:
    - `NEXT_PUBLIC_NETWORK` = `testnet`

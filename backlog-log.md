@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-10 — Testnet yayını: keeper secret'ı
+- Olay: GÜNCELLENDİ
+- Not: Neon (London, free), Render indexer (https://launchpad-indexer-uqhu.onrender.com, /ready 200) ve Vercel web (https://launchpad-cyan-nu.vercel.app) canlıya alındı ve kontrol edildi. render.yaml start komutu POSIX uyumlu yapıldı, buildFilter eklendi. Kalan: keeper secret'ı ve MetaMask ile canlı test.
+
 ## 2026-11-10 — Testnet'e ücretsiz yayın: kalan servisler
 - Olay: GÜNCELLENDİ
 - Not: Cüzdanlar + faucet + keystore tamam. Sözleşmeler testnet'e deploy edildi, ardından graduation'ın demoda görülebilmesi için ETH miktarları 1/1000'e ölçeklenip (Foundry testnet profili, graduation 0.0042 ETH) yeniden deploy edildi; bağlantılar ve parametreler zincirde doğrulandı. Toplam maliyet ~0.0005 test ETH. Web/indexer/docs curve parametrelerini deploy dosyasından okuyor.

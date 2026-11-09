@@ -12,9 +12,9 @@ Format:
 
 ## Açık işler
 
-- [ ] **Testnet'e ücretsiz yayın: kalan servisler** (eklenme: 2026-11-09)
-  - Durum: Sözleşmeler testnet'te (ölçekli parametrelerle, 2026-11-10; adresler testnet.json/const.md). Kalan: Neon (Postgres), Render (indexer), Vercel (web) hesapları ve GitHub'a KEEPER_PRIVATE_KEY secret'ı.
-  - Sonraki adım: reports/testnet-deploy.md §3–6; kullanıcı hesapları açınca Echo bağlar ve canlı test yapar.
+- [ ] **Testnet yayını: keeper secret'ı** (eklenme: 2026-11-09)
+  - Durum: Sözleşmeler, indexer (Render+Neon) ve web (Vercel) canlıda: https://launchpad-cyan-nu.vercel.app. Kalan: GitHub'a KEEPER_PRIVATE_KEY secret'ı (DCA keeper cron'u).
+  - Sonraki adım: reports/testnet-deploy.md §6; ardından keeper.yml'i elle tetikleyip çalıştığını doğrula.
 
 - [ ] **Tarayıcı cüzdanıyla (MetaMask) gerçek bağlantı testi** (eklenme: 2026-11-09)
   - Durum: `injected` connector + otomatik ağ geçişi kodu hazır; tarayıcı panelinde eklenti olmadığı için yalnızca yerel test cüzdanıyla denendi.

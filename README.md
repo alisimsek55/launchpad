@@ -2,6 +2,8 @@
 
 Robinhood Chain üzerinde bonding curve tabanlı bir token launchpad'i (pump.fun / Pons benzeri). Herkes birkaç saniyede token çıkarır; token önce bonding curve'de işlem görür, **4.2 ETH** toplanınca likidite otomatik olarak **Uniswap v3**'e taşınır ve sonsuza kadar kilitlenir.
 
+**🔗 Canlı demo (Robinhood testnet):** https://launchpad-cyan-nu.vercel.app
+
 > ⚠️ **Öğrenme / portföy projesi.** Sözleşmeler bağımsız bir denetimden (audit) geçmedi. Herkese açık demo **Robinhood Chain testnet**'inde çalışır; gerçek parayla kullanmayın.
 
 ## Özellikler

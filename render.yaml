@@ -11,6 +11,13 @@ services:
     # Şema adı = commit hash'i (43 karakter, Ponder sınırı 45). POSIX sh uyumlu (bash'e özgü sözdizimi yok).
     startCommand: DATABASE_SCHEMA=lp_$RENDER_GIT_COMMIT pnpm --filter @launchpad/indexer start
     healthCheckPath: /health
+    # Sadece indexer'ı etkileyen değişikliklerde yeniden deploy et (her deploy baştan indeksler)
+    buildFilter:
+      paths:
+        - apps/indexer/**
+        - packages/shared/**
+        - pnpm-lock.yaml
+        - render.yaml
     envVars:
       - key: NODE_VERSION
         value: "24"
