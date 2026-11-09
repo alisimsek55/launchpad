@@ -22,10 +22,11 @@ jobs:
         run: forge lint src
       - name: Test (Robinhood mainnet fork)
         working-directory: packages/contracts
-        run: forge test --no-match-contract Invariant
+        run: forge test --no-match-contract Invariant --fork-retries 10 --fork-retry-backoff 2000
       - name: Invariant
         working-directory: packages/contracts
-        run: forge test --match-contract Invariant
+        # Public RPC rate-limit uygular; invariant çok istek attığı için yeniden deneme + istek hızı sınırı
+        run: forge test --match-contract Invariant --fork-retries 10 --fork-retry-backoff 2000 --compute-units-per-second 100
 
   typescript:
     name: TypeScript (web, api, indexer, keeper, subgraph)
