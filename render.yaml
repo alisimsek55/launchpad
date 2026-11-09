@@ -7,8 +7,9 @@ services:
     runtime: node
     plan: free
     buildCommand: npm install -g pnpm@12 && pnpm install --frozen-lockfile --filter "@launchpad/indexer..."
-    # Her deploy yeni bir şemaya baştan indeksler (testnet'te hızlı); eski şemalar Neon'da elle silinebilir
-    startCommand: DATABASE_SCHEMA=lp_${RENDER_GIT_COMMIT:0:12} pnpm --filter @launchpad/indexer start
+    # Her deploy yeni bir şemaya baştan indeksler (testnet'te hızlı); eski şemalar Neon'da elle silinebilir.
+    # Şema adı = commit hash'i (43 karakter, Ponder sınırı 45). POSIX sh uyumlu (bash'e özgü sözdizimi yok).
+    startCommand: DATABASE_SCHEMA=lp_$RENDER_GIT_COMMIT pnpm --filter @launchpad/indexer start
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
