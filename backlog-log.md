@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-10 — Portföy vitrini: İngilizce README, ekran görüntüleri, demo GIF'i
+- Olay: TAMAMLANDI
+- Not: README.md İngilizce yeniden yazıldı (özellik tablosu + ekran görüntüleri, mimari, "Engineering highlights", DEX Screener, yerel çalıştırma, "How it was built"). Türkçe sürüm README.tr.md. Canlı demodan headless Chrome ile docs/screenshots/{home,token,graduated,analytics,create}.jpg + demo.gif (34 kare, 1.9 MB) üretildi; kullanılmayan usd-*.jpg silindi. CLAUDE.md/AGENTS.md README referansları güncellendi. Profil README'si yan oturumda (alisimsek55/alisimsek55).
+
 ## 2026-11-10 — Graduated token'da "You receive" teklifi boş
 - Olay: TAMAMLANDI
 - Not: QuoterV2 zincirde doğru teklif veriyordu (cast + viem simulateContract), sorun wagmi `useSimulateContract`'taydı. Quoter ABI'si `view` olarak tanımlanıp `useReadContract` ile okunuyor (apps/web/src/lib/uniswap.ts, TradePanel.tsx). Yerelde TYGN'de doğrulandı: 0.0001 ETH → 17,832,568 TYGN; 10M TYGN → 0.0000512 ETH.

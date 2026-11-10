@@ -14,7 +14,7 @@ Format:
 
 - [ ] **Faz 2.0 fikirleri** (eklenme: 2026-11-03)
   - Durum: Lansman sonrası.
-  - Sonraki adım: GMGN/Bitquery entegrasyonu + açık quote API (yüksek öncelik; DexScreener adapter'ı hazır, bkz. aşağıdaki iş); fair launch modu (DCA tabanlı); Uniswap v4 graduation; hisse token eşli lansman; limit emirler; permissionless keeper + TWAP; kullanıcı adı düzenleme; README'ye ekran görüntüleri / demo GIF'i.
+  - Sonraki adım: GMGN/Bitquery entegrasyonu + açık quote API (yüksek öncelik; DexScreener adapter'ı hazır, bkz. aşağıdaki iş); fair launch modu (DCA tabanlı); Uniswap v4 graduation; hisse token eşli lansman; limit emirler; permissionless keeper + TWAP; kullanıcı adı düzenleme.
 
 - [ ] **DexScreener listeleme başvurusu** (eklenme: 2026-11-10)
   - Durum: Adapter uç noktaları indexer'da hazır (`/dexscreener/*`, README "DexScreener entegrasyonu"). Testnet DexScreener'da listelenmediği için başvuru bekliyor.

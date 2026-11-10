@@ -16,7 +16,7 @@ Adın Echo. Kullanıcı sana "Echo" diye seslenir ve Türkçe konuşur.
 - `backlog.md` / `backlog-log.md`: aşağıdaki kurallara göre.
 
 ## Proje
-pnpm + Turborepo monorepo; kurulum ve çalıştırma `README.md`'de.
+pnpm + Turborepo monorepo; kurulum ve çalıştırma `README.md`'de (İngilizce; Türkçesi `README.tr.md`).
 - Bu bir **portföy/öğrenme projesi**: bütçe yok, her şey ücretsiz planlarda; herkese açık demo Robinhood **testnet**'inde (gerekçe: `reports/2026-11-09-ucretsiz-mimari.md`). Ücretli hizmet ekleme.
 - `apps/web`: Next.js 16 (sürüm eğitim verinden farklı olabilir, önce `apps/web/AGENTS.md`'yi oku). `apps/indexer`: Ponder, tek backend (tokenlar, işlemler, mumlar, holders, analytics + REST API). `apps/keeper`: DCA keeper (GitHub Actions cron). `packages/contracts`: Foundry. `packages/shared`: chain, deploy adresleri, curve matematiği. `packages/subgraph`: isteğe bağlı, web kullanmıyor.
 - Deploy adresleri (protokol + o ağın WETH/Uniswap v3'ü) `packages/shared/deployments/{local,testnet,mainnet}.json` içindedir; web, indexer ve keeper buradan okur. `local.json`'ı `Simulate.s.sol`, `testnet.json`'ı `DeployTestnet.s.sol` yazar (testnet'te Uniswap yok, script resmi artefaktlardan kendisi kurar).
@@ -30,7 +30,7 @@ pnpm + Turborepo monorepo; kurulum ve çalıştırma `README.md`'de.
 ## Test
 - Sözleşmeler: `pnpm --filter @launchpad/contracts test` (tümü mainnet fork, ~3 dk; hızlı: `test:fast`). Paylaşılan paket: `pnpm --filter @launchpad/shared test`. Değişiklikten sonra ilgili testleri çalıştır.
 - Foundry PATH'te değilse: `export PATH="$PATH:$HOME/.foundry/bin"`.
-- Indexer/subgraph değişikliğini anvil fork + `script/Simulate.s.sol` ile uçtan uca doğrula (README "Yerel geliştirme"). Subgraph yalnızca `graph build` ile doğrulanır; matchstick Docker ister ve makinede yok.
+- Indexer/subgraph değişikliğini anvil fork + `script/Simulate.s.sol` ile uçtan uca doğrula (README.tr.md "Yerel geliştirme", İngilizce README "Running locally"). Subgraph yalnızca `graph build` ile doğrulanır; matchstick Docker ister ve makinede yok.
 
 ## Bilinen tuzaklar
 - Fork testleri en son bloktan fork alır. Public RPC arşiv node değildir, eski bloğa sabitlemek çalışmaz.
