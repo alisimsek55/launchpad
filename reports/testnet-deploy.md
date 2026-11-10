@@ -44,9 +44,9 @@ Ek ortam değişkeni: `ENABLE_EXPERIMENTAL_COREPACK=1` (Vercel'in pnpm 12 kullan
    - `NEXT_PUBLIC_INDEXER_URL` = Render adresi
 3. **Deploy**. Hobby planı kişisel, ticari olmayan projeler için ücretsiz.
 
-## 6. Keeper: GitHub Actions **[SEN: secret]**
+## 6. Keeper: GitHub Actions **[SEN: secret]** — ✅ 2026-11-10
 1. GitHub → repo → **Settings → Secrets and variables → Actions → New repository secret**.
-2. Ad: `KEEPER_PRIVATE_KEY`, değer: keeper cüzdanının özel anahtarı (sadece testnet ETH'si olan cüzdan!).
+2. Ad: `KEEPER_PRIVATE_KEY`, değer: keeper cüzdanının özel anahtarı (sadece testnet ETH'si olan cüzdan!). MetaMask'ın `0x`'siz formatı da kabul edilir.
 3. `.github/workflows/keeper.yml` 30 dakikada bir çalışır; **Actions** sekmesinden elle de tetiklenebilir. Secret yoksa iş kendini atlar.
 - Private repoda ayda 2000 dk ücretsiz; 30 dk aralık ≈1440 dk/ay. Repo public olursa sınırsız.
 

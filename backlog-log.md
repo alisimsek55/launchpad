@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-10 — Testnet yayını: keeper secret'ı
+- Olay: TAMAMLANDI
+- Not: KEEPER_PRIVATE_KEY GitHub secret'ı eklendi. İlk çalıştırma MetaMask'ın 0x'siz anahtar formatı yüzünden düştü; keeper artık iki formatı da kabul ediyor. Elle tetiklenen çalıştırma başarılı (keeper 0x986B…0dE0, vault 0x7759…BE24). Cron 30 dk'da bir çalışıyor. Testnet yayını tamamen bitti.
+
 ## 2026-11-10 — Tarayıcı cüzdanıyla (MetaMask) gerçek bağlantı testi
 - Olay: TAMAMLANDI
 - Not: Canlı sitede MetaMask ile uçtan uca: TYGN token'ı oluşturuldu → 0.0042 ETH alım curve'ü doldurup Uniswap v3'e graduation yaptı (tx 0x3328c4f9…a6a4) → 200M token Uniswap'te 0.00209 ETH'ye satıldı (tx 0xa496c0fa…ec3e). Indexer üç olayı da kaydetti; grafik iki mum (yükseliş + satış düşüşü) gösteriyor. Eski Oregon ve başarısız 3aeb Render servisleri silindi.
