@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## 2026-11-10 — DexScreener adapter
+- Olay: TAMAMLANDI
+- Not: Indexer'a DEX Screener Adapter spec v1.1 uç noktaları eklendi (`apps/indexer/src/api/dexscreener.ts`, `/dexscreener/latest-block|asset|pair|events`). `trade` tablosuna blok/tx/log index, kesin spot fiyat ve rezerv sütunları; graduation için `liquidity_event` (exit/join) tablosu. Anvil fork + Simulate (graduation + Uniswap alım/satım) ve testnet verisiyle doğrulandı. README'de "DexScreener entegrasyonu" bölümü.
+
+## 2026-11-10 — DexScreener listeleme başvurusu
+- Olay: EKLENDİ
+- Not: Testnet DexScreener'da listelenmiyor; başvuru mainnet'e geçince yapılacak.
+
 ## 2026-11-10 — Repo herkese açık (public)
 - Olay: TAMAMLANDI
 - Not: Kullanıcı onayıyla github.com/alisimsek55/launchpad public yapıldı. Öncesinde tüm git geçmişi tarandı (env/keystore/DB adresi/API anahtarı yok; yalnızca anvil'in herkese açık test anahtarı). MIT lisansı eklendi, Solidity SPDX başlıkları MIT'e çevrildi, README'ye CI/lisans rozetleri, repoya açıklama ve konu etiketleri eklendi. test:fast 39/39 geçti.

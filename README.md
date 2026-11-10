@@ -78,6 +78,27 @@ cd apps/keeper && LAUNCHPAD_NETWORK=local POLL_MS=5000 KEEPER_PRIVATE_KEY=0xac09
 ## Testnet'e ücretsiz yayın
 Adım adım rehber: [reports/testnet-deploy.md](reports/testnet-deploy.md). Özet: faucet'ten test ETH'si → `DeployTestnet.s.sol` (kendi Uniswap v3'ümüzü de kurar) → indexer Render + Neon → web Vercel → keeper GitHub Actions secret'ı.
 
+## DexScreener entegrasyonu
+Indexer, [DEX Screener Adapter spesifikasyonunu (v1.1)](https://dexscreener.notion.site/DEX-Screener-Adapter-Specs-cc1223cdf6e74a7799599106b65dcd0e) uygular; DexScreener ve aynı formatı okuyan agregatörler (GMGN vb.) curve ve Uniswap işlemlerini buradan çeker. Kod: `apps/indexer/src/api/dexscreener.ts`.
+
+| Uç nokta | Açıklama |
+| --- | --- |
+| `GET /dexscreener/latest-block` | Ponder'ın tamamen işlediği son blok |
+| `GET /dexscreener/asset?id=<adres>` | Token (ad, sembol, toplam ve dolaşımdaki arz) veya WETH |
+| `GET /dexscreener/pair?id=<adres>` | Curve veya Uniswap v3 pair'i |
+| `GET /dexscreener/events?fromBlock=&toBlock=` | `swap`, `join` ve `exit` event'leri (iki sınır da dahil) |
+
+Testnet adresi: `https://launchpad-indexer-nzgy.onrender.com/dexscreener/latest-block`
+
+Kararlar:
+- **Pair id:** Bonding curve aşamasında pair id **token adresidir**. Bütün curve'ler tek bir `BondingCurve` kontratında yaşar, curve'e özel kontrat adresi yoktur; token adresi her curve'ü tekil ve kalıcı olarak tanımlar (`dexKey: "launchpad"`). Graduation sonrası pair id **Uniswap v3 pool adresidir** (`dexKey: "uniswap"`). İkisi DexScreener'da aynı token'ın iki ayrı pair'i olarak görünür.
+- **Sıra:** `asset0` Uniswap kuralıyla küçük adrestir (token veya WETH), iki pair'de de aynı. `priceNative` = 1 asset0'ın asset1 cinsinden fiyatı (işlem sonrası spot), 50 ondalığa kadar kesin.
+- **Rezervler:** Curve'de **gerçek** rezervler (curve'deki ETH ve satılmamış curve arzı); sanal rezervler likiditeyi şişirirdi. v3 pool'unda likidite tam aralıkta olduğundan rezervler `L/√P` ve `L·√P` ile kesin hesaplanır.
+- **Graduation:** Curve pair'i için `exit` (rezervler 0'a iner), pool için `join` (ilk likidite) event'i yayınlanır. Spec bir blokta `(txnIndex, eventIndex)` çiftinin tekil olmasını istediği için ikisi aynı tx'in farklı log'larına bağlanır.
+- `/events`, henüz indekslenmemiş bir `toBlock` için 400 döner. DexScreener her bloğu bir kez sorduğu için boş yanıt veri kaybı olurdu.
+
+**Listeleme:** Testnet zincirleri DexScreener'da listelenmez. Başvuru (DexScreener'a adapter adresini bildirmek) mainnet'e geçince yapılacak.
+
 ## Komutlar
 ```bash
 pnpm --filter @launchpad/contracts test       # Solidity testleri (mainnet fork, ~3 dk)

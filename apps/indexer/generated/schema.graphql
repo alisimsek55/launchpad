@@ -28,6 +28,8 @@ type Query {
   poolTokens(where: poolTokenFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): poolTokenPage!
   trade(id: String!): trade
   trades(where: tradeFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): tradePage!
+  liquidityEvent(id: String!): liquidityEvent
+  liquidityEvents(where: liquidityEventFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): liquidityEventPage!
   candle(token: String!, interval: Float!, time: Float!): candle
   candles(where: candleFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): candlePage!
   protocolStat(id: Int!): protocolStat
@@ -52,6 +54,8 @@ type token {
   pool: String!
   tokenIsToken0: Boolean!
   createdAt: BigInt!
+  createdBlock: BigInt!
+  createdTxHash: String!
   graduated: Boolean!
   priceEth: Float!
   volumeWei: BigInt!
@@ -159,6 +163,24 @@ input tokenFilter {
   createdAt_lt: BigInt
   createdAt_gte: BigInt
   createdAt_lte: BigInt
+  createdBlock: BigInt
+  createdBlock_not: BigInt
+  createdBlock_in: [BigInt]
+  createdBlock_not_in: [BigInt]
+  createdBlock_gt: BigInt
+  createdBlock_lt: BigInt
+  createdBlock_gte: BigInt
+  createdBlock_lte: BigInt
+  createdTxHash: String
+  createdTxHash_not: String
+  createdTxHash_in: [String]
+  createdTxHash_not_in: [String]
+  createdTxHash_contains: String
+  createdTxHash_not_contains: String
+  createdTxHash_starts_with: String
+  createdTxHash_ends_with: String
+  createdTxHash_not_starts_with: String
+  createdTxHash_not_ends_with: String
   graduated: Boolean
   graduated_not: Boolean
   graduated_in: [Boolean]
@@ -257,6 +279,14 @@ type trade {
   timestamp: BigInt!
   txHash: String!
   source: String!
+  pair: String!
+  blockNumber: BigInt!
+  txIndex: Int!
+  logIndex: Int!
+  priceNum: BigInt!
+  priceDen: BigInt!
+  reserveEthWei: BigInt!
+  reserveTokenWei: BigInt!
 }
 
 type tradePage {
@@ -366,6 +396,236 @@ input tradeFilter {
   source_ends_with_nocase: String
   source_not_starts_with_nocase: String
   source_not_ends_with_nocase: String
+  pair: String
+  pair_not: String
+  pair_in: [String]
+  pair_not_in: [String]
+  pair_contains: String
+  pair_not_contains: String
+  pair_starts_with: String
+  pair_ends_with: String
+  pair_not_starts_with: String
+  pair_not_ends_with: String
+  blockNumber: BigInt
+  blockNumber_not: BigInt
+  blockNumber_in: [BigInt]
+  blockNumber_not_in: [BigInt]
+  blockNumber_gt: BigInt
+  blockNumber_lt: BigInt
+  blockNumber_gte: BigInt
+  blockNumber_lte: BigInt
+  txIndex: Int
+  txIndex_not: Int
+  txIndex_in: [Int]
+  txIndex_not_in: [Int]
+  txIndex_gt: Int
+  txIndex_lt: Int
+  txIndex_gte: Int
+  txIndex_lte: Int
+  logIndex: Int
+  logIndex_not: Int
+  logIndex_in: [Int]
+  logIndex_not_in: [Int]
+  logIndex_gt: Int
+  logIndex_lt: Int
+  logIndex_gte: Int
+  logIndex_lte: Int
+  priceNum: BigInt
+  priceNum_not: BigInt
+  priceNum_in: [BigInt]
+  priceNum_not_in: [BigInt]
+  priceNum_gt: BigInt
+  priceNum_lt: BigInt
+  priceNum_gte: BigInt
+  priceNum_lte: BigInt
+  priceDen: BigInt
+  priceDen_not: BigInt
+  priceDen_in: [BigInt]
+  priceDen_not_in: [BigInt]
+  priceDen_gt: BigInt
+  priceDen_lt: BigInt
+  priceDen_gte: BigInt
+  priceDen_lte: BigInt
+  reserveEthWei: BigInt
+  reserveEthWei_not: BigInt
+  reserveEthWei_in: [BigInt]
+  reserveEthWei_not_in: [BigInt]
+  reserveEthWei_gt: BigInt
+  reserveEthWei_lt: BigInt
+  reserveEthWei_gte: BigInt
+  reserveEthWei_lte: BigInt
+  reserveTokenWei: BigInt
+  reserveTokenWei_not: BigInt
+  reserveTokenWei_in: [BigInt]
+  reserveTokenWei_not_in: [BigInt]
+  reserveTokenWei_gt: BigInt
+  reserveTokenWei_lt: BigInt
+  reserveTokenWei_gte: BigInt
+  reserveTokenWei_lte: BigInt
+}
+
+type liquidityEvent {
+  id: String!
+  kind: String!
+  pair: String!
+  token: String!
+  maker: String!
+  ethWei: BigInt!
+  tokenWei: BigInt!
+  reserveEthWei: BigInt!
+  reserveTokenWei: BigInt!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  txHash: String!
+  txIndex: Int!
+  logIndex: Int!
+}
+
+type liquidityEventPage {
+  items: [liquidityEvent!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input liquidityEventFilter {
+  AND: [liquidityEventFilter]
+  OR: [liquidityEventFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  id_contains_nocase: String
+  id_not_contains_nocase: String
+  id_starts_with_nocase: String
+  id_ends_with_nocase: String
+  id_not_starts_with_nocase: String
+  id_not_ends_with_nocase: String
+  kind: String
+  kind_not: String
+  kind_in: [String]
+  kind_not_in: [String]
+  kind_contains: String
+  kind_not_contains: String
+  kind_starts_with: String
+  kind_ends_with: String
+  kind_not_starts_with: String
+  kind_not_ends_with: String
+  kind_contains_nocase: String
+  kind_not_contains_nocase: String
+  kind_starts_with_nocase: String
+  kind_ends_with_nocase: String
+  kind_not_starts_with_nocase: String
+  kind_not_ends_with_nocase: String
+  pair: String
+  pair_not: String
+  pair_in: [String]
+  pair_not_in: [String]
+  pair_contains: String
+  pair_not_contains: String
+  pair_starts_with: String
+  pair_ends_with: String
+  pair_not_starts_with: String
+  pair_not_ends_with: String
+  token: String
+  token_not: String
+  token_in: [String]
+  token_not_in: [String]
+  token_contains: String
+  token_not_contains: String
+  token_starts_with: String
+  token_ends_with: String
+  token_not_starts_with: String
+  token_not_ends_with: String
+  maker: String
+  maker_not: String
+  maker_in: [String]
+  maker_not_in: [String]
+  maker_contains: String
+  maker_not_contains: String
+  maker_starts_with: String
+  maker_ends_with: String
+  maker_not_starts_with: String
+  maker_not_ends_with: String
+  ethWei: BigInt
+  ethWei_not: BigInt
+  ethWei_in: [BigInt]
+  ethWei_not_in: [BigInt]
+  ethWei_gt: BigInt
+  ethWei_lt: BigInt
+  ethWei_gte: BigInt
+  ethWei_lte: BigInt
+  tokenWei: BigInt
+  tokenWei_not: BigInt
+  tokenWei_in: [BigInt]
+  tokenWei_not_in: [BigInt]
+  tokenWei_gt: BigInt
+  tokenWei_lt: BigInt
+  tokenWei_gte: BigInt
+  tokenWei_lte: BigInt
+  reserveEthWei: BigInt
+  reserveEthWei_not: BigInt
+  reserveEthWei_in: [BigInt]
+  reserveEthWei_not_in: [BigInt]
+  reserveEthWei_gt: BigInt
+  reserveEthWei_lt: BigInt
+  reserveEthWei_gte: BigInt
+  reserveEthWei_lte: BigInt
+  reserveTokenWei: BigInt
+  reserveTokenWei_not: BigInt
+  reserveTokenWei_in: [BigInt]
+  reserveTokenWei_not_in: [BigInt]
+  reserveTokenWei_gt: BigInt
+  reserveTokenWei_lt: BigInt
+  reserveTokenWei_gte: BigInt
+  reserveTokenWei_lte: BigInt
+  blockNumber: BigInt
+  blockNumber_not: BigInt
+  blockNumber_in: [BigInt]
+  blockNumber_not_in: [BigInt]
+  blockNumber_gt: BigInt
+  blockNumber_lt: BigInt
+  blockNumber_gte: BigInt
+  blockNumber_lte: BigInt
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+  txHash: String
+  txHash_not: String
+  txHash_in: [String]
+  txHash_not_in: [String]
+  txHash_contains: String
+  txHash_not_contains: String
+  txHash_starts_with: String
+  txHash_ends_with: String
+  txHash_not_starts_with: String
+  txHash_not_ends_with: String
+  txIndex: Int
+  txIndex_not: Int
+  txIndex_in: [Int]
+  txIndex_not_in: [Int]
+  txIndex_gt: Int
+  txIndex_lt: Int
+  txIndex_gte: Int
+  txIndex_lte: Int
+  logIndex: Int
+  logIndex_not: Int
+  logIndex_in: [Int]
+  logIndex_not_in: [Int]
+  logIndex_gt: Int
+  logIndex_lt: Int
+  logIndex_gte: Int
+  logIndex_lte: Int
 }
 
 type candle {
