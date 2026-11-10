@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-10 — Tarayıcı cüzdanıyla (MetaMask) gerçek bağlantı testi
+- Olay: TAMAMLANDI
+- Not: Canlı sitede MetaMask ile uçtan uca: TYGN token'ı oluşturuldu → 0.0042 ETH alım curve'ü doldurup Uniswap v3'e graduation yaptı (tx 0x3328c4f9…a6a4) → 200M token Uniswap'te 0.00209 ETH'ye satıldı (tx 0xa496c0fa…ec3e). Indexer üç olayı da kaydetti; grafik iki mum (yükseliş + satış düşüşü) gösteriyor. Eski Oregon ve başarısız 3aeb Render servisleri silindi.
+
 ## 2026-11-10 — Fiyat grafiği: mumlar spot fiyatla
 - Olay: TAMAMLANDI
 - Not: İlk canlı alım (0.0042 ETH, TYGN graduation yaptı) grafikte düz çizgi göründü: mumlar ortalama işlem fiyatıyla open = close oluyordu. Artık mum işlem öncesi spot fiyattan açılıp işlem sonrası spot fiyatla kapanıyor (apps/indexer/src/index.ts). Testnet verisiyle yerelde doğrulandı: open 1.31e-12 → close 2.1e-11.

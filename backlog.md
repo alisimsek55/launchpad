@@ -16,11 +16,6 @@ Format:
   - Durum: Sözleşmeler, indexer (Render+Neon) ve web (Vercel) canlıda: https://launchpad-cyan-nu.vercel.app. Kalan: GitHub'a KEEPER_PRIVATE_KEY secret'ı (DCA keeper cron'u).
   - Sonraki adım: reports/testnet-deploy.md §6; ardından keeper.yml'i elle tetikleyip çalıştığını doğrula.
 
-- [ ] **Tarayıcı cüzdanıyla (MetaMask) gerçek bağlantı testi** (eklenme: 2026-11-09)
-  - Durum: `injected` connector + otomatik ağ geçişi kodu hazır; tarayıcı panelinde eklenti olmadığı için yalnızca yerel test cüzdanıyla denendi.
-  - Durum güncellemesi: token oluşturma MetaMask ile çalıştı (blok 151087032).
-  - Sonraki adım: Vercel'de NEXT_PUBLIC_INDEXER_URL=https://launchpad-indexer-nzgy.onrender.com + redeploy; Render'da eski Oregon servisi (launchpad-indexer) ve başarısız launchpad-indexer-3aeb silinir; sonra al (graduation) → Uniswap'te sat.
-
 - [ ] **Faz 2.0 fikirleri** (eklenme: 2026-11-03)
   - Durum: Lansman sonrası.
   - Sonraki adım: DexScreener/GMGN/Bitquery entegrasyonu + açık quote API (yüksek öncelik); fair launch modu (DCA tabanlı); Uniswap v4 graduation; hisse token eşli lansman; limit emirler; permissionless keeper + TWAP; USD fiyatlar; kullanıcı adı düzenleme; README'ye ekran görüntüleri / demo GIF'i.
