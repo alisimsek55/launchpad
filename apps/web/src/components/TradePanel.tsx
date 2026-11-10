@@ -5,11 +5,13 @@ import { useState } from "react";
 import { encodeFunctionData, erc20Abi, formatEther, maxUint256, parseEther, type Address } from "viem";
 import { useAccount, useBalance, useReadContract, useSimulateContract } from "wagmi";
 import { DEFAULT_SLIPPAGE_BPS, GRADUATION_ETH, deployment } from "@/config";
+import { useToken } from "@/data/hooks";
 import { fmtEth } from "@/lib/format";
 import { ADDRESS_THIS, UNI_FEE_TIER, quoterV2Abi, swapRouter02Abi } from "@/lib/uniswap";
 import { useTx, useWrite } from "@/lib/useTx";
 import { useWalletUI } from "@/wallet/context";
 import { DcaPanel } from "./DcaPanel";
+import { Usd } from "./Usd";
 
 // Ağın WETH/Uniswap adresleri deploy dosyasından (testnet'te kendi Uniswap deploy'umuz)
 const UNI = {
@@ -84,6 +86,15 @@ export function TradePanel({ token, symbol, graduated }: { token: Address; symbo
     ? uniQuote.data?.result[0]
     : (curveQuote.data as readonly [bigint, bigint] | undefined)?.[0];
   const minOut = quoteOut !== undefined ? withSlippage(quoteOut, slippageBps) : undefined;
+
+  // USD göstergesi için ETH karşılıkları; token tarafı anlık spot fiyatla değerlenir
+  const priceEth = useToken(token).data?.priceEth;
+  const amountNum = Number(formatEther(amount));
+  const quoteNum = quoteOut !== undefined ? Number(formatEther(quoteOut)) : undefined;
+  const toEth = (v: number | undefined, isEth: boolean) =>
+    v === undefined ? undefined : isEth ? v : priceEth !== undefined ? v * priceEth : undefined;
+  const payEth = amount > 0n ? toEth(amountNum, side === "buy") : undefined;
+  const receiveEth = toEth(quoteNum, side === "sell");
 
   const balance = side === "buy" ? ethBal?.value : tokenBal;
   const insufficient = balance !== undefined && amount > balance;
@@ -235,6 +246,7 @@ export function TradePanel({ token, symbol, graduated }: { token: Address; symbo
           />
           <span className="text-lg font-semibold text-muted">{inSymbol}</span>
         </div>
+        <Usd eth={payEth} className="block text-xs text-muted" />
         <div className="flex gap-2">
           {[25, 50, 75, 100].map((p) => (
             <button
@@ -254,6 +266,7 @@ export function TradePanel({ token, symbol, graduated }: { token: Address; symbo
           {quoteOut !== undefined ? fmtEth(Number(formatEther(quoteOut)), 4) : "0"}{" "}
           <span className="text-sm text-muted">{outSymbol}</span>
         </div>
+        <Usd eth={receiveEth} className="block text-xs text-muted" />
       </div>
 
       <div className="flex items-center justify-between text-xs text-muted">

@@ -3,6 +3,7 @@
 import { nameFromAddress } from "@launchpad/shared";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import type { ReactNode } from "react";
 import { getAddress, isAddress, type Address } from "viem";
 import { chain } from "@/config";
 import { useMetadata, useToken, useHolders } from "@/data/hooks";
@@ -13,6 +14,7 @@ import { PriceChart } from "./PriceChart";
 import { TokenImage } from "./TokenImage";
 import { TokenTabs } from "./TokenTabs";
 import { TradePanel } from "./TradePanel";
+import { Usd, UsdFirst } from "./Usd";
 
 export function TokenView() {
   const params = useParams<{ address: string }>();
@@ -28,12 +30,21 @@ function TokenViewInner({ token }: { token: Address }) {
   if (!t) return <p className="text-muted">Token bulunamadı.</p>;
 
   const explorer = chain.blockExplorers?.default.url;
-  const stats = [
-    { label: "Market cap", value: `${fmtEth(t.marketCapEth, 2)} ETH` },
+  const usdBelow = "block text-xs font-normal text-muted";
+  const stats: { label: string; value: ReactNode }[] = [
+    { label: "Market cap", value: <UsdFirst eth={t.marketCapEth} digits={2} secondaryClass={usdBelow} /> },
     { label: "Holders", value: holders ? String(holders.holderCount) : "–" },
     { label: "Trades", value: String(t.tradeCount) },
     { label: "Supply", value: "1B" },
-    { label: "Creator earned", value: `${fmtEth(t.creatorFeesEth)} ETH` },
+    {
+      label: "Creator earned",
+      value: (
+        <>
+          {fmtEth(t.creatorFeesEth)} ETH
+          <Usd eth={t.creatorFeesEth} className={usdBelow} />
+        </>
+      ),
+    },
   ];
 
   return (
@@ -57,7 +68,10 @@ function TokenViewInner({ token }: { token: Address }) {
           </div>
           <div className="text-right">
             <div className="text-2xl font-semibold">{fmtPrice(t.priceEth)} ETH</div>
-            <div className="text-xs text-muted">token başına</div>
+            <div className="text-xs text-muted">
+              token başına
+              <Usd eth={t.priceEth} prefix=" · " />
+            </div>
           </div>
         </div>
 

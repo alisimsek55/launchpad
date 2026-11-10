@@ -10,6 +10,7 @@ import { buildMetadataURI, compressImage } from "@/lib/metadata";
 import { fmtCompact } from "@/lib/format";
 import { useTx, useWrite } from "@/lib/useTx";
 import { useWalletUI } from "@/wallet/context";
+import { Usd } from "./Usd";
 
 const LAUNCH_FEE = curveParams.launchFee;
 const MAX_DEV_BUY_TOKENS = 50_000_000n * 10n ** 18n; // %5
@@ -182,7 +183,13 @@ export function CreateTokenForm() {
               <div className="space-y-1 rounded-xl bg-surface-2 p-3 text-sm">
                 <div className="flex justify-between"><span className="text-muted">Launch fee</span><span>{LAUNCH_FEE_ETH} ETH</span></div>
                 <div className="flex justify-between"><span className="text-muted">İlk alım</span><span>{devEth > 0n ? formatEther(devEth) : "0"} ETH</span></div>
-                <div className="flex justify-between font-semibold"><span>Toplam</span><span>{formatEther(LAUNCH_FEE + (devEth > 0n ? devEth : 0n))} ETH</span></div>
+                <div className="flex justify-between font-semibold">
+                  <span>Toplam</span>
+                  <span className="text-right">
+                    {formatEther(LAUNCH_FEE + (devEth > 0n ? devEth : 0n))} ETH
+                    <Usd eth={Number(formatEther(LAUNCH_FEE + (devEth > 0n ? devEth : 0n)))} className="block text-xs font-normal text-muted" />
+                  </span>
+                </div>
               </div>
               <div className="flex items-center justify-between gap-3">
                 <button onClick={() => setStep(1)} className="text-sm text-muted hover:text-foreground">← Geri</button>
@@ -220,7 +227,7 @@ export function CreateTokenForm() {
           <p className="text-sm text-muted">{description || "Token hakkında bir iki satır."}</p>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div><div className="text-xs text-muted">Supply</div>1,000,000,000</div>
-            <div><div className="text-xs text-muted">Graduates at</div>{GRADUATION_ETH} ETH</div>
+            <div><div className="text-xs text-muted">Graduates at</div>{GRADUATION_ETH} ETH <Usd eth={GRADUATION_ETH} className="text-xs text-muted" /></div>
             <div><div className="text-xs text-muted">Creator fee</div>0.5% / işlem</div>
             <div><div className="text-xs text-muted">Launch fee</div>{LAUNCH_FEE_ETH} ETH</div>
           </div>
