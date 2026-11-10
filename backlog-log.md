@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-10 — Fiyat grafiği: mumlar spot fiyatla
+- Olay: TAMAMLANDI
+- Not: İlk canlı alım (0.0042 ETH, TYGN graduation yaptı) grafikte düz çizgi göründü: mumlar ortalama işlem fiyatıyla open = close oluyordu. Artık mum işlem öncesi spot fiyattan açılıp işlem sonrası spot fiyatla kapanıyor (apps/indexer/src/index.ts). Testnet verisiyle yerelde doğrulandı: open 1.31e-12 → close 2.1e-11.
+
 ## 2026-11-10 — Indexer'ı Frankfurt'ta yeniden oluştur
 - Olay: TAMAMLANDI
 - Not: Yeni servis https://launchpad-indexer-nzgy.onrender.com (Frankfurt) kullanıcının token'ını indeksledi (tokenCount 1); ölçüm: indexer 11 blok/sn, zincir ~5-7 blok/sn, aradaki fark kapanıyor. const.md ve reports/testnet-deploy.md güncellendi. Blueprint'in "Failed sync" görünmesi, silinen ikinci denemeden kalan launchpad-indexer-3aeb servisinden.

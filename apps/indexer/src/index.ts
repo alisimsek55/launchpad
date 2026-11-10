@@ -98,6 +98,11 @@ async function recordTrade(
     source: t.source,
   });
 
+  // Mumlar spot fiyatla çizilir: işlem öncesi fiyat → işlem sonrası fiyat. (Ortalama işlem fiyatı
+  // tek işlemlik mumu open = close düz bir çizgiye çevirir ve fiyat hareketini göstermez.)
+  const before = (await context.db.find(schema.token, { address: t.token }))?.priceEth ?? t.spotPrice;
+  const after = t.spotPrice;
+
   await context.db.update(schema.token, { address: t.token }).set((r) => ({
     priceEth: t.spotPrice,
     volumeWei: r.volumeWei + t.ethWei,
@@ -110,11 +115,20 @@ async function recordTrade(
     const time = Math.floor(Number(t.timestamp) / interval) * interval;
     await context.db
       .insert(schema.candle)
-      .values({ token: t.token, interval, time, open: price, high: price, low: price, close: price, volumeWei: t.ethWei })
+      .values({
+        token: t.token,
+        interval,
+        time,
+        open: before,
+        high: Math.max(before, after),
+        low: Math.min(before, after),
+        close: after,
+        volumeWei: t.ethWei,
+      })
       .onConflictDoUpdate((r) => ({
-        high: Math.max(r.high, price),
-        low: Math.min(r.low, price),
-        close: price,
+        high: Math.max(r.high, after),
+        low: Math.min(r.low, after),
+        close: after,
         volumeWei: r.volumeWei + t.ethWei,
       }));
   }
