@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-10 — Canlı demoyu demo verisiyle doldur
+- Olay: TAMAMLANDI
+- Not: `apps/keeper/src/seed.ts` (pnpm --filter @launchpad/keeper seed init|run|trade|sweep) yazıldı; anvil fork'ta denendi (DevBuyTooLarge, wei/ETH karışıklığı, satış öncesi approve hataları bulunup düzeltildi). Testnet'te 12 token (SVG logolu, farklı creator'lar) + 30 dk'da 131 işlem (89 alım/42 satış, 0 hata), 8 demo cüzdan. Toplam 13 token, 145 işlem. Demo cüzdanlarının anahtarları apps/keeper/.seed-wallets.json'da (gitignore); kalan ETH ile `seed trade` yeniden çalıştırılabilir. Aynı oturumda USD fiyatları (PR #1) ve DexScreener adapter'ı (PR #2) yan oturumlarda yapılıp merge edildi.
+
 ## 2026-11-10 — DexScreener adapter
 - Olay: TAMAMLANDI
 - Not: Indexer'a DEX Screener Adapter spec v1.1 uç noktaları eklendi (`apps/indexer/src/api/dexscreener.ts`, `/dexscreener/latest-block|asset|pair|events`). `trade` tablosuna blok/tx/log index, kesin spot fiyat ve rezerv sütunları; graduation için `liquidity_event` (exit/join) tablosu. Anvil fork + Simulate (graduation + Uniswap alım/satım) ve testnet verisiyle doğrulandı. README'de "DexScreener entegrasyonu" bölümü.

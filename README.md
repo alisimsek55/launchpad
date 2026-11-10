@@ -99,6 +99,14 @@ Kararlar:
 
 **Listeleme:** Testnet zincirleri DexScreener'da listelenmez. Başvuru (DexScreener'a adapter adresini bildirmek) mainnet'e geçince yapılacak.
 
+## Demo verisi
+Canlı demo boş görünmesin diye testnet'e örnek tokenlar ve işlemler basan script (sadece testnet/local):
+```bash
+pnpm --filter @launchpad/keeper seed init    # demo cüzdanları (.seed-wallets.json, gitignore'da)
+pnpm --filter @launchpad/keeper seed run     # fonla → 12 token oluştur → DURATION_MIN dk işlem
+pnpm --filter @launchpad/keeper seed trade   # mevcut demo tokenlarında yeni işlem turu
+```
+
 ## Komutlar
 ```bash
 pnpm --filter @launchpad/contracts test       # Solidity testleri (mainnet fork, ~3 dk)
