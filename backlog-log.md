@@ -11,6 +11,14 @@ Format:
 
 ---
 
+## 2026-11-10 — DexScreener adapter
+- Olay: TAMAMLANDI
+- Not: Indexer'a DEX Screener Adapter spec v1.1 uç noktaları eklendi (`apps/indexer/src/api/dexscreener.ts`, `/dexscreener/latest-block|asset|pair|events`). `trade` tablosuna blok/tx/log index, kesin spot fiyat ve rezerv sütunları; graduation için `liquidity_event` (exit/join) tablosu. Anvil fork + Simulate (graduation + Uniswap alım/satım) ve testnet verisiyle doğrulandı. README'de "DexScreener entegrasyonu" bölümü.
+
+## 2026-11-10 — DexScreener listeleme başvurusu
+- Olay: EKLENDİ
+- Not: Testnet DexScreener'da listelenmiyor; başvuru mainnet'e geçince yapılacak.
+
 ## 2026-11-10 — Graduated token'da "You receive" teklifi boş
 - Olay: EKLENDİ
 - Not: USD işi doğrulanırken bulundu; canlı sitede de var (bu değişiklikten bağımsız). Ayrıntı backlog.md'de.

@@ -13,6 +13,8 @@ export const token = onchainTable(
     pool: t.hex().notNull(),
     tokenIsToken0: t.boolean().notNull(),
     createdAt: t.bigint().notNull(),
+    createdBlock: t.bigint().notNull(),
+    createdTxHash: t.hex().notNull(),
     graduated: t.boolean().notNull(),
     priceEth: t.doublePrecision().notNull(),
     volumeWei: t.bigint().notNull(),
@@ -47,9 +49,46 @@ export const trade = onchainTable(
     timestamp: t.bigint().notNull(),
     txHash: t.hex().notNull(),
     source: t.text().notNull(), // curve | uniswap
+    // DexScreener adapter alanları (src/api/dexscreener.ts)
+    pair: t.hex().notNull(), // curve: token adresi, uniswap: pool adresi
+    blockNumber: t.bigint().notNull(),
+    txIndex: t.integer().notNull(),
+    logIndex: t.integer().notNull(),
+    // İşlem sonrası spot fiyat (token başına ETH) = priceNum / priceDen; kesin oran, yuvarlamasız
+    priceNum: t.bigint().notNull(),
+    priceDen: t.bigint().notNull(),
+    // İşlem sonrası rezervler. Curve: gerçek (sanal değil) rezervler; v3: tam aralık L/√P, L·√P
+    reserveEthWei: t.bigint().notNull(),
+    reserveTokenWei: t.bigint().notNull(),
   }),
   (table) => ({
     byTokenTime: index().on(table.token, table.timestamp),
+    byBlock: index().on(table.blockNumber),
+  }),
+);
+
+/// Likidite olayları (DexScreener join/exit): graduation'da curve'den çıkış ve Uniswap pool'una giriş.
+export const liquidityEvent = onchainTable(
+  "liquidity_event",
+  (t) => ({
+    id: t.text().primaryKey(),
+    kind: t.text().notNull(), // join | exit
+    pair: t.hex().notNull(),
+    token: t.hex().notNull(),
+    maker: t.hex().notNull(),
+    ethWei: t.bigint().notNull(),
+    tokenWei: t.bigint().notNull(),
+    reserveEthWei: t.bigint().notNull(),
+    reserveTokenWei: t.bigint().notNull(),
+    blockNumber: t.bigint().notNull(),
+    timestamp: t.bigint().notNull(),
+    txHash: t.hex().notNull(),
+    txIndex: t.integer().notNull(),
+    logIndex: t.integer().notNull(),
+  }),
+  (table) => ({
+    byBlock: index().on(table.blockNumber),
+    byPair: index().on(table.pair),
   }),
 );
 

@@ -1,4 +1,4 @@
-import { CREATOR_FEE_BPS, TRADE_FEE_BPS, VIRTUAL_TOKEN, getDeployment } from "@launchpad/shared";
+import { CREATOR_FEE_BPS, CURVE_SUPPLY, TRADE_FEE_BPS, VIRTUAL_TOKEN, getDeployment } from "@launchpad/shared";
 import { ponder, type Context } from "ponder:registry";
 import schema from "ponder:schema";
 import { formatEther, zeroAddress, type Address, type Hex } from "viem";
@@ -10,6 +10,11 @@ const deployment = getDeployment(process.env.LAUNCHPAD_NETWORK);
 const WETH = BigInt(deployment.weth);
 // Başlangıç spot fiyatı = VIRTUAL_ETH / VIRTUAL_TOKEN (ağın curve parametrelerinden)
 const INITIAL_PRICE = eth(BigInt(deployment.virtualEth)) / eth(VIRTUAL_TOKEN);
+// Curve'deki gerçek token rezervi = sanal rezerv - bu sabit (sanal offset; satılmamış curve arzı)
+const VIRTUAL_TOKEN_OFFSET = VIRTUAL_TOKEN - CURVE_SUPPLY;
+const Q96 = 2n ** 96n;
+const bondingCurve = deployment.bondingCurve.toLowerCase();
+const graduator = deployment.graduator.toLowerCase();
 
 // ---------------------------------------------------------------- yardımcılar
 
@@ -79,6 +84,15 @@ async function recordTrade(
     timestamp: bigint;
     txHash: Hex;
     source: "curve" | "uniswap";
+    pair: Address;
+    blockNumber: bigint;
+    txIndex: number;
+    logIndex: number;
+    /// İşlem sonrası spot fiyat (token başına ETH) kesin oran olarak
+    priceNum: bigint;
+    priceDen: bigint;
+    reserveEthWei: bigint;
+    reserveTokenWei: bigint;
     realEthWei?: bigint;
     creatorFeeWei?: bigint;
   },
@@ -96,6 +110,14 @@ async function recordTrade(
     timestamp: t.timestamp,
     txHash: t.txHash,
     source: t.source,
+    pair: t.pair,
+    blockNumber: t.blockNumber,
+    txIndex: t.txIndex,
+    logIndex: t.logIndex,
+    priceNum: t.priceNum,
+    priceDen: t.priceDen,
+    reserveEthWei: t.reserveEthWei,
+    reserveTokenWei: t.reserveTokenWei,
   });
 
   // Mumlar spot fiyatla çizilir: işlem öncesi fiyat → işlem sonrası fiyat. (Ortalama işlem fiyatı
@@ -158,6 +180,8 @@ ponder.on("TokenFactory:TokenCreated", async ({ event, context }) => {
     pool,
     tokenIsToken0,
     createdAt: timestamp,
+    createdBlock: event.block.number,
+    createdTxHash: event.transaction.hash,
     graduated: false,
     priceEth: INITIAL_PRICE,
     volumeWei: 0n,
@@ -183,13 +207,39 @@ ponder.on("BondingCurve:Trade", async ({ event, context }) => {
     timestamp: a.timestamp,
     txHash: event.transaction.hash,
     source: "curve",
+    pair: a.token,
+    blockNumber: event.block.number,
+    txIndex: event.transaction.transactionIndex,
+    logIndex: event.log.logIndex,
+    priceNum: a.virtualEth,
+    priceDen: a.virtualToken,
+    reserveEthWei: a.realEth,
+    reserveTokenWei: a.virtualToken - VIRTUAL_TOKEN_OFFSET,
     realEthWei: a.realEth,
     creatorFeeWei: a.creatorFee,
   });
 });
 
 ponder.on("Graduator:Graduated", async ({ event, context }) => {
-  await context.db.update(schema.token, { address: event.args.token }).set({ graduated: true });
+  const { token, pool, ethLiquidity, tokenLiquidity } = event.args;
+  await context.db.update(schema.token, { address: token }).set({ graduated: true });
+  // Uniswap pool'una ilk likidite girişi (DexScreener "join")
+  await context.db.insert(schema.liquidityEvent).values({
+    id: `${event.transaction.hash}-${event.log.logIndex}`,
+    kind: "join",
+    pair: pool,
+    token,
+    maker: event.transaction.from,
+    ethWei: ethLiquidity,
+    tokenWei: tokenLiquidity,
+    reserveEthWei: ethLiquidity,
+    reserveTokenWei: tokenLiquidity,
+    blockNumber: event.block.number,
+    timestamp: event.block.timestamp,
+    txHash: event.transaction.hash,
+    txIndex: event.transaction.transactionIndex,
+    logIndex: event.log.logIndex,
+  });
   await bumpProtocol(context, { graduated: 1 });
   await bumpDay(context, event.block.timestamp, { graduations: 1 });
 });
@@ -197,13 +247,18 @@ ponder.on("Graduator:Graduated", async ({ event, context }) => {
 ponder.on("UniswapPool:Swap", async ({ event, context }) => {
   const p = await context.db.find(schema.poolToken, { pool: event.log.address });
   if (!p) return;
-  const { amount0, amount1, sqrtPriceX96 } = event.args;
+  const { amount0, amount1, sqrtPriceX96, liquidity } = event.args;
   // Tutarlar pool açısından: pozitif = pool'a giren
   const tokenDelta = p.tokenIsToken0 ? amount0 : amount1;
   const ethDelta = p.tokenIsToken0 ? amount1 : amount0;
   const abs = (v: bigint) => (v < 0n ? -v : v);
   const sqrt = Number(sqrtPriceX96) / 2 ** 96;
   const price1Per0 = sqrt * sqrt; // ikisi de 18 ondalık
+  // Kesin oran: price1Per0 = sqrtP² / 2^192. Tam aralık pozisyonda rezervler x = L/√P, y = L·√P.
+  const sq = sqrtPriceX96 * sqrtPriceX96;
+  const Q192 = Q96 * Q96;
+  const reserve0 = (liquidity * Q96) / sqrtPriceX96;
+  const reserve1 = (liquidity * sqrtPriceX96) / Q96;
   await recordTrade(context, {
     id: `${event.transaction.hash}-${event.log.logIndex}`,
     token: p.token,
@@ -215,6 +270,14 @@ ponder.on("UniswapPool:Swap", async ({ event, context }) => {
     timestamp: event.block.timestamp,
     txHash: event.transaction.hash,
     source: "uniswap",
+    pair: event.log.address,
+    blockNumber: event.block.number,
+    txIndex: event.transaction.transactionIndex,
+    logIndex: event.log.logIndex,
+    priceNum: p.tokenIsToken0 ? sq : Q192,
+    priceDen: p.tokenIsToken0 ? Q192 : sq,
+    reserveEthWei: p.tokenIsToken0 ? reserve1 : reserve0,
+    reserveTokenWei: p.tokenIsToken0 ? reserve0 : reserve1,
   });
 });
 
@@ -238,6 +301,31 @@ ponder.on("LaunchToken:Transfer", async ({ event, context }) => {
   const { from, to, value } = event.args;
   if (value === 0n || from === to) return;
   const token = event.log.address;
+
+  // Graduation: curve tüm token'ları Graduator'a aktarır. Bu log, curve likiditesinin çıkışı
+  // (DexScreener "exit") olarak kaydedilir; Graduated log'u ise pool'a girişi (join) temsil eder.
+  // Ayrı log'lar kullanılır çünkü spec bir blokta (txnIndex, eventIndex) çiftinin tekil olmasını ister.
+  if (from.toLowerCase() === bondingCurve && to.toLowerCase() === graduator) {
+    const info = await context.db.find(schema.token, { address: token });
+    if (info) {
+      await context.db.insert(schema.liquidityEvent).values({
+        id: `${event.transaction.hash}-${event.log.logIndex}`,
+        kind: "exit",
+        pair: token,
+        token,
+        maker: event.transaction.from,
+        ethWei: info.realEthWei,
+        tokenWei: 0n, // son alımla curve arzı tükendi; aktarılan token'lar LP payıdır, curve rezervi değil
+        reserveEthWei: 0n,
+        reserveTokenWei: 0n,
+        blockNumber: event.block.number,
+        timestamp: event.block.timestamp,
+        txHash: event.transaction.hash,
+        txIndex: event.transaction.transactionIndex,
+        logIndex: event.log.logIndex,
+      });
+    }
+  }
 
   // holderCount değişimi: bakiye 0'dan çıkan +1, 0'a inen -1
   let holderDelta = 0;

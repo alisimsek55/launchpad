@@ -5,6 +5,7 @@ import { getDeployment } from "@launchpad/shared";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { formatEther, getAddress, isAddress } from "viem";
+import dexscreener from "./dexscreener";
 
 /// Web'in kullandığı REST API. Tutarlar ETH cinsinden number (görüntüleme), adresler checksum.
 const TOTAL_SUPPLY = 1_000_000_000n * 10n ** 18n;
@@ -48,6 +49,8 @@ const int = (v: string | undefined, def: number, max: number) => Math.max(0, Mat
 const app = new Hono();
 app.use("*", cors());
 app.use("/graphql", graphql({ db, schema }));
+// DEX Screener Adapter uç noktaları (src/api/dexscreener.ts)
+app.route("/dexscreener", dexscreener);
 
 // ---------------------------------------------------------------- tokenlar
 
