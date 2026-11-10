@@ -29,7 +29,7 @@ FOUNDRY_PROFILE=testnet KEEPER=<keeper cüzdan adresi> forge script script/Deplo
 1. neon.com → GitHub ile giriş → **New project** (bölge: Avrupa).
 2. **Connection string**'i kopyala (`postgresql://...`). Gizli değer: sadece Render paneline girilecek.
 
-## 4. Indexer: Render **[SEN: hesap]** — ✅ https://launchpad-indexer-uqhu.onrender.com
+## 4. Indexer: Render **[SEN: hesap]** — ✅ https://launchpad-indexer-nzgy.onrender.com
 1. render.com → GitHub ile giriş → **New → Blueprint** → bu repoyu seç (`render.yaml` otomatik okunur).
 2. `DATABASE_URL` alanına Neon adresini yapıştır → **Apply**.
 3. Servis adresini not al (ör. `https://launchpad-indexer.onrender.com`). Kontrol: `/protocol` uç noktası JSON dönmeli.

@@ -12,17 +12,14 @@ Format:
 
 ## Açık işler
 
-- [ ] **Indexer'ı Frankfurt'ta yeniden oluştur** (eklenme: 2026-11-10)
-  - Durum: Kod düzeltmesi push edildi (region: frankfurt, cacheRpcRequests: false). Render bölgesi sonradan değişmediği için mevcut Oregon servisi silinip Blueprint yeniden uygulanmalı.
-  - Sonraki adım: Kullanıcı Render'da eski Blueprint'i silip yenisini oluşturur (DATABASE_URL) → yeni adres Vercel'de NEXT_PUBLIC_INDEXER_URL'e yazılıp redeploy → Echo /status ile zincire yetiştiğini doğrular.
-
 - [ ] **Testnet yayını: keeper secret'ı** (eklenme: 2026-11-09)
   - Durum: Sözleşmeler, indexer (Render+Neon) ve web (Vercel) canlıda: https://launchpad-cyan-nu.vercel.app. Kalan: GitHub'a KEEPER_PRIVATE_KEY secret'ı (DCA keeper cron'u).
   - Sonraki adım: reports/testnet-deploy.md §6; ardından keeper.yml'i elle tetikleyip çalıştığını doğrula.
 
 - [ ] **Tarayıcı cüzdanıyla (MetaMask) gerçek bağlantı testi** (eklenme: 2026-11-09)
   - Durum: `injected` connector + otomatik ağ geçişi kodu hazır; tarayıcı panelinde eklenti olmadığı için yalnızca yerel test cüzdanıyla denendi.
-  - Sonraki adım: Testnet yayınından sonra kullanıcının MetaMask'ıyla bağlan → ağ ekleme/geçiş → al/sat.
+  - Durum güncellemesi: token oluşturma MetaMask ile çalıştı (blok 151087032).
+  - Sonraki adım: Vercel'de NEXT_PUBLIC_INDEXER_URL=https://launchpad-indexer-nzgy.onrender.com + redeploy; Render'da eski Oregon servisi (launchpad-indexer) ve başarısız launchpad-indexer-3aeb silinir; sonra al (graduation) → Uniswap'te sat.
 
 - [ ] **Faz 2.0 fikirleri** (eklenme: 2026-11-03)
   - Durum: Lansman sonrası.

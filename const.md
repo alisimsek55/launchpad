@@ -14,7 +14,7 @@ Durum etiketleri:
 | Servis | Adres |
 |---|---|
 | Web (Vercel Hobby) | https://launchpad-cyan-nu.vercel.app |
-| Indexer API (Render free + Neon Free) | https://launchpad-indexer-uqhu.onrender.com |
+| Indexer API (Render free + Neon Free) | https://launchpad-indexer-nzgy.onrender.com |
 
 ## Repo
 

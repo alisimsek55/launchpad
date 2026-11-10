@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-10 — Indexer'ı Frankfurt'ta yeniden oluştur
+- Olay: TAMAMLANDI
+- Not: Yeni servis https://launchpad-indexer-nzgy.onrender.com (Frankfurt) kullanıcının token'ını indeksledi (tokenCount 1); ölçüm: indexer 11 blok/sn, zincir ~5-7 blok/sn, aradaki fark kapanıyor. const.md ve reports/testnet-deploy.md güncellendi. Blueprint'in "Failed sync" görünmesi, silinen ikinci denemeden kalan launchpad-indexer-3aeb servisinden.
+
 ## 2026-11-10 — Testnet yayını: indexer zincire yetişemiyor
 - Olay: EKLENDİ
 - Not: İlk canlı token (blok 151087032) zincirde oluştu ama sitede görünmedi. Ölçüm: testnet ~6-7 blok/sn, Render (Oregon) indexer ~2 blok/sn → sürekli geride kalıyor. Aynı indexer yerelde 9 blok/sn ve token'ı yakaladı → darboğaz Oregon↔Londra (Neon) gecikmesi. Düzeltme: render.yaml region=frankfurt, Ponder cacheRpcRequests=false. Render bölgesi sonradan değiştirilemediği için servis yeniden oluşturulmalı (kullanıcı adımı), ardından Vercel'de NEXT_PUBLIC_INDEXER_URL güncellenmeli.
