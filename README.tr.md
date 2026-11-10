@@ -2,47 +2,66 @@
 
 🇬🇧 [English](README.md) · 🇹🇷 Türkçe
 
-[![CI](https://github.com/alisimsek55/launchpad/actions/workflows/ci.yml/badge.svg)](https://github.com/alisimsek55/launchpad/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/alisimsek55/launchpad/actions/workflows/ci.yml/badge.svg)](https://github.com/alisimsek55/launchpad/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) ![Solidity](https://img.shields.io/badge/Solidity-0.8-363636?logo=solidity) ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 
-Robinhood Chain üzerinde bonding curve tabanlı bir token launchpad'i (pump.fun / Pons benzeri). Herkes birkaç saniyede token çıkarır; token önce bonding curve'de işlem görür, **4.2 ETH** (testnet'te 0.0042) toplanınca likidite otomatik olarak **Uniswap v3**'e taşınır ve sonsuza kadar kilitlenir.
+**Robinhood Chain** (bir Arbitrum Orbit L2) üzerinde, pump.fun tarzında bonding curve tabanlı bir token launchpad'i. Herkes birkaç saniyede token çıkarabilir. Token önce bonding curve'de işlem görür; curve hedefine ulaşınca (mainnet'te 4.2 ETH, testnet'te 0.0042) likidite **otomatik olarak Uniswap v3'e taşınır** ve LP pozisyonu **sonsuza kadar kilitlenir**.
 
-**🔗 Canlı demo (Robinhood testnet):** https://launchpad-cyan-nu.vercel.app
+**🔗 Canlı demo (Robinhood Chain testnet): https://launchpad-cyan-nu.vercel.app**
 
 ![Demo](docs/screenshots/demo.gif)
 
-> ⚠️ **Öğrenme / portföy projesi.** Sözleşmeler bağımsız bir denetimden (audit) geçmedi. Herkese açık demo **Robinhood Chain testnet**'inde çalışır; gerçek parayla kullanmayın.
+> ⚠️ Öğrenme / portföy projesi. Sözleşmeler bağımsız bir denetimden (audit) geçmedi. Herkese açık demo **testnet**'te çalışır; gerçek parayla kullanmayın.
 
-## Özellikler
-- **Bonding curve:** sanal rezervli `x·y=k`, arzın %80'i curve'de; graduation fiyatı Uniswap açılış fiyatına birebir eşit (fiyat sıçraması yok).
-- **Graduation:** tek işlemde Uniswap v3'e full-range likidite; LP NFT kilitli (rug pull yok). Fiyat manipülasyonuna ve kilitleme (DoS) saldırısına karşı korumalı.
-- **Adil başlangıç:** ilk 60 sn alım fee'si %20 → %1 düşer (sniper koruması); creator launch işleminde en fazla %5 alabilir.
-- **Fee:** %1 (%0.5 protokol / %0.5 creator), graduation sonrası Uniswap LP fee'leri de yarı yarıya.
-- **DCA:** periyodik alım planı; keeper zamanı gelince curve'den veya Uniswap'ten alır.
-- **Web:** token listesi, TradingView Lightweight Charts, alım-satım (curve + Uniswap), trades/holders, 2 adımlı token oluşturma (görsel **zincir üstünde**), profil/claim, analytics, docs.
-- **Tamamen ücretsiz altyapı:** backend olarak tek bir indexer; sunucusuz metadata; keeper GitHub Actions'ta.
+## Neler yapıyor
+
+| | |
+|---|---|
+| ![Token listesi](docs/screenshots/home.jpg) | ![Token sayfası](docs/screenshots/token.jpg) |
+| **Token listesi:** canlı market cap (USD + ETH), curve ilerlemesi, yeni / market cap / hacme göre sıralama | **Token sayfası:** TradingView mumları, canlı teklif ve slippage ile alım-satım, işlemler ve holder'lar |
+| ![Analytics](docs/screenshots/analytics.jpg) | ![Token oluşturma](docs/screenshots/create.jpg) |
+| **Analytics:** protokol hacmi, fee'ler, lansmanlar, graduation'lar, en iyi tokenlar | **Token oluşturma:** iki adımlı lansman; görsel ve metadata **tamamen zincir üstünde** |
+
+- **Bonding curve:** sanal rezervli `x·y=k`; arzın %80'i curve'de satılır, %20'si Uniswap pool'unu besler. Graduation fiyatı Uniswap açılış fiyatına birebir eşittir, taşınma anında fiyat sıçraması olmaz.
+- **Tek işlemde graduation:** Curve'ü tamamlayan alım, full-range Uniswap v3 pozisyonunu da oluşturur ve LP NFT'sini `LPLocker`'a kilitler. Creator likiditeyi çekemez (rug pull yok).
+- **Adil başlangıç:** ilk 60 saniyede sniper fee'si %20'den %1'e düşer; creator'ın lansman alımı arzın %5'iyle sınırlıdır.
+- **Fee:** işlem başına %1, protokol ve creator arasında yarı yarıya. Graduation sonrası Uniswap LP fee'leri de aynı şekilde bölünür.
+- **DCA:** kullanıcılar periyodik alım planlar; bir keeper (GitHub Actions cron) bunları curve'de veya Uniswap'te çalıştırır.
+- **Entegrasyonlar:** USD fiyatları (Coinbase, yedek CoinGecko) ve agregatörler için bir [DEX Screener Adapter](#dexscreener-entegrasyonu) API'si.
 
 ## Mimari
+
 ```
-                 ┌──────────── Robinhood Chain (testnet 46630) ────────────┐
- Tarayıcı ──tx──▶│ TokenFactory · BondingCurve · Graduator · LPLocker      │
- (MetaMask)      │ FeeVault · DCAVault · LaunchToken · Uniswap v3 (kendi)  │
-    │            └───────────────┬─────────────────────────────────────────┘
-    │                 event'ler   │                       ▲ execute (30 dk)
-    ▼                             ▼                       │
+                 ┌──────────── Robinhood Chain (testnet 46630) ─────────────┐
+ Tarayıcı ──tx──▶│ TokenFactory · BondingCurve · Graduator · LPLocker       │
+ (MetaMask)      │ FeeVault · DCAVault · LaunchToken · Uniswap v3 (kendi)   │
+    │            └───────────────┬──────────────────────────────────────────┘
+    │                   event'ler │                       ▲ execute (30 dk'da bir)
+    ▼                            ▼                       │
  Next.js (Vercel) ◀──REST── Ponder indexer (Render) ── Neon Postgres
                                                      GitHub Actions keeper
 ```
 
-| Klasör | İçerik |
-|---|---|
-| `packages/contracts` | Solidity + Foundry: sözleşmeler, 40 test (unit/fuzz/invariant, mainnet fork), deploy script'leri |
-| `packages/shared` | Ortak TS: zincir tanımları, deploy adresleri, curve matematiği (sözleşmeyle birebir), ABI'ler |
-| `apps/indexer` | Ponder: tokenlar, işlemler, mumlar, holders, analytics + REST API |
-| `apps/web` | Next.js 16 frontend |
-| `apps/keeper` | DCA keeper (GitHub Actions'ta `--once`) |
-| `packages/subgraph` | İsteğe bağlı Goldsky subgraph (web kullanmıyor) |
+| Paket | Teknoloji | İçerik |
+|---|---|---|
+| `packages/contracts` | Solidity 0.8, Foundry, OpenZeppelin | 7 sözleşme; mainnet fork'ta koşan 40 test (unit, fuzz, invariant); deploy script'leri |
+| `packages/shared` | TypeScript | Zincir tanımları, deploy adresleri, Solidity ile birebir aynı curve matematiği, üretilmiş ABI'ler |
+| `apps/indexer` | Ponder, Hono, Postgres | Tokenlar, işlemler, OHLC mumları, holder'lar, analytics; REST + GraphQL + DEX Screener API |
+| `apps/web` | Next.js 16, React 19, wagmi/viem, Tailwind, Lightweight Charts | Alım-satım arayüzü, token oluşturma, profil, analytics, docs |
+| `apps/keeper` | Node, viem | DCA keeper (cron için `--once` modu) ve demo verisi script'i |
+| `packages/subgraph` | The Graph | İsteğe bağlı Goldsky subgraph (web kullanmıyor) |
 
-Kararlar ve gerekçeleri: [notes.md](notes.md), [reports/](reports/). Sabitler: [const.md](const.md).
+**Her şey ücretsiz planlarda çalışıyor:** Vercel Hobby (web), Render free (indexer), Neon free (Postgres), GitHub Actions (keeper + CI). Token metadata'sı zincir üstünde `data:` URI olarak durur, dosya deposu gerekmez. Gerekçe: [reports/2026-11-09-ucretsiz-mimari.md](reports/2026-11-09-ucretsiz-mimari.md). Diğer kararlar: [notes.md](notes.md), [reports/](reports/). Sabitler: [const.md](const.md).
+
+## Mühendislik notları
+
+Dokümantasyonu okumanın yetmediği problemler:
+
+- **Arbitrum'da `block.number` sandığın şey değil.** Robinhood Chain'de Solidity'nin `block.number`'ı *L1* bloğunu döndürür. Bunu indexer'ın başlangıç bloğu olarak kaydeden bir deploy script'i, indexer'a başka bir zincirin blok numarasını verirdi. Script'ler L2 bloğunu RPC'den (`eth_blockNumber`) okuyor.
+- **Graduation'ı sonsuza kadar engelleyebilecek bir saldırı.** Uniswap pool'u lansmanda oluşturulduğu için bir saldırgan, graduation'dan önce fiyatını hedeften uzaklaştırabilir. Graduator fiyatı bir swap ile düzeltir. Ama tek taraflı derin likidite koyan bir saldırgan, bu swap'ın bütün token'ları tüketip revert etmesine yol açabiliyordu. Çözüm: düzeltme swap'ı bakiyenin en fazla yarısını kullanır. Bir fuzz testi (`Manipulation.t.sol`) rastgele manipülasyonlarla bunu sınar. Graduation'a kadar pool'a token transferi de engellidir.
+- **Saniyede 7 blok üreten bir zincirin gerisinde kalan indexer.** Canlı indexer zincirin giderek daha gerisine düşüyordu: Oregon'daki servis her blokta Londra'daki veritabanına yazıyordu (üretilen ~7 bloğa karşı saniyede ~2 blok). Yerelde ölçtüm (saniyede 9 blok), servisi veritabanının yanına (Frankfurt) taşıdım ve her bloktaki RPC önbellek yazmalarını kapattım. Artık her şeyi başlangıç bloğundan ~3 dakikada yeniden indeksliyor.
+- **Tek curve, iki dil.** Fiyat matematiği hem Solidity'de (zincir üstü) hem TypeScript'te (arayüz teklifleri) var. İkisi aynı yuvarlamayı kullanır ve Solidity testleri TypeScript sonuçlarını referans değer olarak kontrol eder. Böylece ikisi birbirinden sapamaz.
+- **Uniswap olmayan bir ağa Uniswap v3 kurmak.** Robinhood testnet'inde Uniswap yok. Testnet deploy script'i v3'ü resmi npm bytecode artefaktlarından kuruyor. Pool init code hash'i resmi olanla aynı olduğu için pool adresleri standart yöntemle hesaplanabiliyor.
+- **Alım-satım arayüzünde önemli küçük detaylar:** mumlar işlem öncesi spot fiyattan açılır, böylece tek bir işlem de gerçek bir mum çizer. Uniswap multicall'larında gas tahmini yetmediği için swap işlemine %20 gas payı eklenir. Graduate olmuş tokenların teklifi QuoterV2 üzerinden alınır.
 
 ## Gereksinimler
 - Node 24+, pnpm 12+
@@ -122,6 +141,10 @@ pnpm build                                    # tüm paketleri derle
 
 ## Ortam değişkenleri
 Şablon: [env.example](env.example). Gizli değerler `.env`'ye veya barındırma panellerine girilir; repoya girmez.
+
+## Nasıl geliştirildi
+
+[Ali Şimşek](https://github.com/alisimsek55) tarafından, AI pair programmer olarak [Claude Code](https://claude.com/claude-code) ile geliştirildi. Ürün yönünü ben belirledim, kararları inceledim ve ana akışları gerçek bir cüzdanla canlı ağda test ettim; kodun büyük kısmını AI yazdı. Tasarımın nasıl evrildiği commit geçmişinde ve `reports/` klasöründe görülebilir.
 
 ## Lisans
 [MIT](LICENSE)

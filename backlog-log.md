@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-10 — Türkçe README'yi İngilizceyle eşitle
+- Olay: TAMAMLANDI
+- Not: README.tr.md, İngilizce README ile aynı yapıya getirildi: rozetler, ekran görüntüsü tablosu, paket/teknoloji tablosu, "Mühendislik notları", "Nasıl geliştirildi". Türkçeye özel ayrıntılı bölümler (yerel geliştirme, DexScreener kararları, demo verisi, komutlar) korundu.
+
 ## 2026-11-10 — Portföy vitrini: İngilizce README, ekran görüntüleri, demo GIF'i
 - Olay: TAMAMLANDI
 - Not: README.md İngilizce yeniden yazıldı (özellik tablosu + ekran görüntüleri, mimari, "Engineering highlights", DEX Screener, yerel çalıştırma, "How it was built"). Türkçe sürüm README.tr.md. Canlı demodan headless Chrome ile docs/screenshots/{home,token,graduated,analytics,create}.jpg + demo.gif (34 kare, 1.9 MB) üretildi; kullanılmayan usd-*.jpg silindi. CLAUDE.md/AGENTS.md README referansları güncellendi. Profil README'si yan oturumda (alisimsek55/alisimsek55).
