@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-10 — Repo herkese açık (public)
+- Olay: TAMAMLANDI
+- Not: Kullanıcı onayıyla github.com/alisimsek55/launchpad public yapıldı. Öncesinde tüm git geçmişi tarandı (env/keystore/DB adresi/API anahtarı yok; yalnızca anvil'in herkese açık test anahtarı). MIT lisansı eklendi, Solidity SPDX başlıkları MIT'e çevrildi, README'ye CI/lisans rozetleri, repoya açıklama ve konu etiketleri eklendi. test:fast 39/39 geçti.
+
 ## 2026-11-10 — Testnet yayını: keeper secret'ı
 - Olay: TAMAMLANDI
 - Not: KEEPER_PRIVATE_KEY GitHub secret'ı eklendi. İlk çalıştırma MetaMask'ın 0x'siz anahtar formatı yüzünden düştü; keeper artık iki formatı da kabul ediyor. Elle tetiklenen çalıştırma başarılı (keeper 0x986B…0dE0, vault 0x7759…BE24). Cron 30 dk'da bir çalışıyor. Testnet yayını tamamen bitti.

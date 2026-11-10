@@ -1,5 +1,7 @@
 # Launchpad
 
+[![CI](https://github.com/alisimsek55/launchpad/actions/workflows/ci.yml/badge.svg)](https://github.com/alisimsek55/launchpad/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Robinhood Chain üzerinde bonding curve tabanlı bir token launchpad'i (pump.fun / Pons benzeri). Herkes birkaç saniyede token çıkarır; token önce bonding curve'de işlem görür, **4.2 ETH** toplanınca likidite otomatik olarak **Uniswap v3**'e taşınır ve sonsuza kadar kilitlenir.
 
 **🔗 Canlı demo (Robinhood testnet):** https://launchpad-cyan-nu.vercel.app
@@ -87,3 +89,6 @@ pnpm build                                    # tüm paketleri derle
 
 ## Ortam değişkenleri
 Şablon: [env.example](env.example). Gizli değerler `.env`'ye veya barındırma panellerine girilir; repoya girmez.
+
+## Lisans
+[MIT](LICENSE)

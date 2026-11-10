@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
 // Ağa göre değişen ETH miktarları: varsayılan profil mainnet, FOUNDRY_PROFILE=testnet testnet değerleri
