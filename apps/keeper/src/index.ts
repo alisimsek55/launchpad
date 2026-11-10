@@ -19,9 +19,13 @@ if (/^0x0+$/.test(deployment.dcaVault)) {
   process.exit(0);
 }
 
-const key = process.env.KEEPER_PRIVATE_KEY as Hex | undefined;
-if (!key) throw new Error("KEEPER_PRIVATE_KEY gerekli");
+// MetaMask özel anahtarı "0x" öneki olmadan verir; kopyalarken boşluk/satır sonu da gelebilir.
+const rawKey = process.env.KEEPER_PRIVATE_KEY?.trim();
+if (!rawKey) throw new Error("KEEPER_PRIVATE_KEY gerekli");
+const key = (rawKey.startsWith("0x") ? rawKey : `0x${rawKey}`) as Hex;
+if (!/^0x[0-9a-fA-F]{64}$/.test(key)) throw new Error("KEEPER_PRIVATE_KEY 32 baytlık hex olmalı (64 karakter)");
 const account = privateKeyToAccount(key);
+console.log(`Keeper: ${account.address} (${deployment.network})`);
 const publicClient = createPublicClient({ chain, transport: http() });
 const wallet = createWalletClient({ chain, account, transport: http() });
 
