@@ -7,6 +7,7 @@ import { useDays, useProtocol, useTokens, useTopTokens } from "@/data/hooks";
 import type { DayStat } from "@/data/types";
 import { fmtCompact, fmtEth } from "@/lib/format";
 import { TokenImage } from "./TokenImage";
+import { Usd } from "./Usd";
 
 const RANGES = [
   { label: "24h", days: 1 },
@@ -57,11 +58,11 @@ export function Analytics() {
     };
   }, [range, protocol.data, days.data, since]);
 
-  const stats = [
-    { label: "Volume", value: `${fmtEth(summary.volume, 3)} ETH` },
+  const stats: { label: string; value: string; eth?: number }[] = [
+    { label: "Volume", value: `${fmtEth(summary.volume, 3)} ETH`, eth: summary.volume },
     { label: "Launches", value: fmtCompact(summary.launches) },
-    { label: "Fees", value: `${fmtEth(summary.fees, 4)} ETH` },
-    { label: "Protocol revenue", value: `${fmtEth(summary.revenue, 4)} ETH` },
+    { label: "Fees", value: `${fmtEth(summary.fees, 4)} ETH`, eth: summary.fees },
+    { label: "Protocol revenue", value: `${fmtEth(summary.revenue, 4)} ETH`, eth: summary.revenue },
   ];
   const chartTotal = (allDays.data ?? []).reduce((s, d) => s + d[metric.key], 0);
 
@@ -86,7 +87,10 @@ export function Analytics() {
         {stats.map((s) => (
           <div key={s.label} className="bg-background p-4">
             <div className="text-2xl font-semibold">{s.value}</div>
-            <div className="text-xs text-muted">{s.label}</div>
+            <div className="text-xs text-muted">
+              {s.label}
+              {s.eth !== undefined && <Usd eth={s.eth} prefix=" · ≈ " />}
+            </div>
           </div>
         ))}
       </div>
@@ -97,7 +101,10 @@ export function Analytics() {
             <div className="text-2xl font-semibold">
               {metric.eth ? `${fmtEth(chartTotal, 3)} ETH` : fmtCompact(chartTotal)}
             </div>
-            <div className="text-xs text-muted">{metric.label}, son 56 gün</div>
+            <div className="text-xs text-muted">
+              {metric.label}, son 56 gün
+              {metric.eth && <Usd eth={chartTotal} prefix=" · ≈ " />}
+            </div>
           </div>
           <div className="flex flex-wrap gap-1 rounded-full bg-surface-2 p-1 text-xs">
             {METRICS.map((m) => (
@@ -128,7 +135,10 @@ export function Analytics() {
             </div>
             <div>
               <div className="text-xl font-semibold">{summary.trades ? fmtEth(summary.volume / summary.trades, 4) : "0"} ETH</div>
-              <div className="text-xs text-muted">Average trade</div>
+              <div className="text-xs text-muted">
+                Average trade
+                {summary.trades > 0 && <Usd eth={summary.volume / summary.trades} prefix=" · ≈ " />}
+              </div>
             </div>
           </div>
           {protocol.data && (
@@ -154,7 +164,10 @@ export function Analytics() {
                         {t?.name ?? v.token.slice(0, 8)}
                       </Link>
                     </td>
-                    <td className="text-right">{fmtEth(v.volumeEth, 3)} ETH</td>
+                    <td className="text-right">
+                      {fmtEth(v.volumeEth, 3)} ETH
+                      <Usd eth={v.volumeEth} prefix="" className="block text-xs text-muted" />
+                    </td>
                     <td className="text-right text-muted">{fmtCompact(v.tradeCount)}</td>
                   </tr>
                 );

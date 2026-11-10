@@ -1,4 +1,4 @@
-/// Görüntüleme yardımcıları. Fiyatlar ETH cinsinden (USD fiyat beslemesi faz 2.0).
+/// Görüntüleme yardımcıları. Tutarlar ETH cinsinden; USD karşılığı src/lib/ethUsd.ts + fmtUsd ile.
 
 /// 1'in altındaki değerlerde anlamlı basamak (testnet'te tutarlar küçük: 0.0042 ETH gibi)
 export function fmtEth(v: number, digits = 4): string {
@@ -24,6 +24,18 @@ export function fmtPrice(v: number): string {
 
 export function fmtCompact(v: number): string {
   return Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 2 }).format(v);
+}
+
+/// USD: 100k ve üstü kısaltılmış ($123.4K), 1-100k arası 2 ondalık, 1'in altı 3 anlamlı
+/// basamak, çok küçükler fmtPrice gibi alt simgeli ($0.0₈213). Testnet tutarları küçük olduğu için.
+export function fmtUsd(v: number): string {
+  const a = Math.abs(v);
+  const sign = v < 0 ? "-" : "";
+  if (a === 0) return "$0";
+  if (a >= 100_000) return `${sign}$${fmtCompact(a)}`;
+  if (a >= 1) return `${sign}$${a.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (a >= 0.001) return `${sign}$${a.toLocaleString("en-US", { maximumSignificantDigits: 3 })}`;
+  return `${sign}$${fmtPrice(a)}`;
 }
 
 export function shortAddr(a: string): string {

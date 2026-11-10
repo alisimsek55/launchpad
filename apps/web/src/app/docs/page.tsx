@@ -55,7 +55,7 @@ export default function DocsPage() {
         <p>Robinhood Chain üzerinde, herkesin birkaç saniyede token çıkarabildiği ve adil başlangıçlı bir launchpad.</p>
         {isTestnet && (
           <p className="rounded-xl border border-line bg-surface p-3">
-            <strong>Testnet demosu:</strong> test ETH&apos;si değersizdir ve faucet&apos;ten ücretsiz alınır. Graduation&apos;ın kolayca görülebilmesi için ETH miktarları mainnet tasarımının 1/1000&apos;i; oranlar, fee yüzdeleri ve sniper koruması aynıdır. Sözleşmeler denetimden (audit) geçmemiştir.
+            <strong>Testnet demosu:</strong> test ETH&apos;si değersizdir ve faucet&apos;ten ücretsiz alınır. Graduation&apos;ın kolayca görülebilmesi için ETH miktarları mainnet tasarımının 1/1000&apos;i; oranlar, fee yüzdeleri ve sniper koruması aynıdır. Sözleşmeler denetimden (audit) geçmemiştir. Sitedeki USD tutarları yalnızca gösterge amaçlıdır: mainnet ETH/USD fiyatıyla (Coinbase, yedek CoinGecko) hesaplanır.
           </p>
         )}
 

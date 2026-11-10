@@ -6,6 +6,16 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@launchpad/web", "dev"],
       "port": 3000
+    },
+    {
+      "name": "web-testnet",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@launchpad/web", "dev", "--port", "3010"],
+      "env": {
+        "NEXT_PUBLIC_NETWORK": "testnet",
+        "NEXT_PUBLIC_INDEXER_URL": "https://launchpad-indexer-nzgy.onrender.com"
+      },
+      "port": 3010
     }
   ]
 }

@@ -12,6 +12,7 @@ import { useTx, useWrite } from "@/lib/useTx";
 import { Avatar } from "./Avatar";
 import { GraduationBar } from "./GraduationBar";
 import { TokenImage } from "./TokenImage";
+import { Usd } from "./Usd";
 
 export function ProfileView() {
   const params = useParams<{ address: string }>();
@@ -51,6 +52,7 @@ function Profile({ user }: { user: Address }) {
                   <div className="font-semibold">{t.name}</div>
                   <div className="text-xs text-muted">
                     ${t.symbol} · creator kazancı {fmtEth(t.creatorFeesEth)} ETH
+                    <Usd eth={t.creatorFeesEth} prefix=" · ≈ " />
                   </div>
                 </div>
               </div>
@@ -80,7 +82,12 @@ function Profile({ user }: { user: Address }) {
                 </div>
                 <div className="text-right text-sm">
                   <div>{fmtCompact(amount)}</div>
-                  {t && <div className="text-xs text-muted">≈ {fmtEth(amount * t.priceEth)} ETH</div>}
+                  {t && (
+                    <div className="text-xs text-muted">
+                      ≈ {fmtEth(amount * t.priceEth)} ETH
+                      <Usd eth={amount * t.priceEth} prefix=" · ≈ " />
+                    </div>
+                  )}
                 </div>
               </Link>
             );
@@ -109,6 +116,7 @@ function CreatorFees({ user, isMe, graduated }: { user: Address; isMe: boolean; 
       <div>
         <div className="text-xs text-muted">Çekilebilir creator kazancı</div>
         <div className="text-xl font-semibold">{fmtEth(Number(formatEther(claimable ?? 0n)), 6)} ETH</div>
+        <Usd eth={Number(formatEther(claimable ?? 0n))} className="text-xs text-muted" />
       </div>
       {isMe && (
         <div className="ml-auto flex gap-2">

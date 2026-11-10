@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { formatEther, type Address } from "viem";
 import { useHolders, useTrades } from "@/data/hooks";
-import { fmtCompact, fmtEth, fmtPrice, timeAgo } from "@/lib/format";
+import { USD_NOTE, useEthUsd } from "@/lib/ethUsd";
+import { fmtCompact, fmtEth, fmtPrice, fmtUsd, timeAgo } from "@/lib/format";
 import { Avatar } from "./Avatar";
 
 export function TokenTabs({ token, symbol }: { token: Address; symbol: string }) {
@@ -41,6 +42,7 @@ function Trader({ address }: { address: Address }) {
 
 function Trades({ token, symbol }: { token: Address; symbol: string }) {
   const { data } = useTrades(token);
+  const usd = useEthUsd();
   if (!data?.length) return <p className="py-6 text-center text-sm text-muted">Henüz işlem yok</p>;
   return (
     <table className="w-full text-sm">
@@ -49,6 +51,11 @@ function Trades({ token, symbol }: { token: Address; symbol: string }) {
           <th className="py-2 font-normal">Side</th>
           <th className="font-normal">Trader</th>
           <th className="text-right font-normal">ETH</th>
+          {usd !== undefined && (
+            <th className="text-right font-normal" title={USD_NOTE}>
+              USD
+            </th>
+          )}
           <th className="text-right font-normal">{symbol}</th>
           <th className="text-right font-normal">Price</th>
           <th className="text-right font-normal">Age</th>
@@ -62,6 +69,7 @@ function Trades({ token, symbol }: { token: Address; symbol: string }) {
               <Trader address={t.trader} />
             </td>
             <td className="text-right">{fmtEth(t.ethAmount)}</td>
+            {usd !== undefined && <td className="text-right text-muted">{fmtUsd(t.ethAmount * usd)}</td>}
             <td className="text-right">{fmtCompact(t.tokenAmount)}</td>
             <td className="text-right">{fmtPrice(t.priceEth)}</td>
             <td className="text-right text-muted">{timeAgo(t.timestamp)}</td>

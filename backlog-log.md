@@ -19,6 +19,14 @@ Format:
 - Olay: EKLENDİ
 - Not: Testnet DexScreener'da listelenmiyor; başvuru mainnet'e geçince yapılacak.
 
+## 2026-11-10 — Graduated token'da "You receive" teklifi boş
+- Olay: EKLENDİ
+- Not: USD işi doğrulanırken bulundu; canlı sitede de var (bu değişiklikten bağımsız). Ayrıntı backlog.md'de.
+
+## 2026-11-10 — USD fiyatlar (Faz 2.0 fikirlerinden)
+- Olay: TAMAMLANDI
+- Not: Web'de ETH tutarlarının yanına USD karşılığı eklendi: token kartları (market cap USD birincil), token sayfası (fiyat, market cap, creator earned), TradePanel (ödenen/alınan ≈ $), trades tablosunda USD sütunu, Analytics, GraduationBar, profil, DCA, token oluşturma, header'da ETH fiyatı. Kaynak Coinbase (yedek CoinGecko), 60 sn önbellek; kaynak düşünce USD gizlenir (yerelde bozuk URL ile doğrulandı). Gerekçe notes.md "Kararlar". typecheck, lint, build geçti.
+
 ## 2026-11-10 — Repo herkese açık (public)
 - Olay: TAMAMLANDI
 - Not: Kullanıcı onayıyla github.com/alisimsek55/launchpad public yapıldı. Öncesinde tüm git geçmişi tarandı (env/keystore/DB adresi/API anahtarı yok; yalnızca anvil'in herkese açık test anahtarı). MIT lisansı eklendi, Solidity SPDX başlıkları MIT'e çevrildi, README'ye CI/lisans rozetleri, repoya açıklama ve konu etiketleri eklendi. test:fast 39/39 geçti.
