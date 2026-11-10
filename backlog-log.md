@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-10 — Graduated token'da "You receive" teklifi boş
+- Olay: TAMAMLANDI
+- Not: QuoterV2 zincirde doğru teklif veriyordu (cast + viem simulateContract), sorun wagmi `useSimulateContract`'taydı. Quoter ABI'si `view` olarak tanımlanıp `useReadContract` ile okunuyor (apps/web/src/lib/uniswap.ts, TradePanel.tsx). Yerelde TYGN'de doğrulandı: 0.0001 ETH → 17,832,568 TYGN; 10M TYGN → 0.0000512 ETH.
+
 ## 2026-11-10 — Canlı demoyu demo verisiyle doldur
 - Olay: TAMAMLANDI
 - Not: `apps/keeper/src/seed.ts` (pnpm --filter @launchpad/keeper seed init|run|trade|sweep) yazıldı; anvil fork'ta denendi (DevBuyTooLarge, wei/ETH karışıklığı, satış öncesi approve hataları bulunup düzeltildi). Testnet'te 12 token (SVG logolu, farklı creator'lar) + 30 dk'da 131 işlem (89 alım/42 satış, 0 hata), 8 demo cüzdan. Toplam 13 token, 145 işlem. Demo cüzdanlarının anahtarları apps/keeper/.seed-wallets.json'da (gitignore); kalan ETH ile `seed trade` yeniden çalıştırılabilir. Aynı oturumda USD fiyatları (PR #1) ve DexScreener adapter'ı (PR #2) yan oturumlarda yapılıp merge edildi.

@@ -3,7 +3,7 @@
 import { bondingCurveAbi, launchTokenAbi } from "@launchpad/shared";
 import { useState } from "react";
 import { encodeFunctionData, erc20Abi, formatEther, maxUint256, parseEther, type Address } from "viem";
-import { useAccount, useBalance, useReadContract, useSimulateContract } from "wagmi";
+import { useAccount, useBalance, useReadContract } from "wagmi";
 import { DEFAULT_SLIPPAGE_BPS, GRADUATION_ETH, deployment } from "@/config";
 import { useToken } from "@/data/hooks";
 import { fmtEth } from "@/lib/format";
@@ -67,7 +67,7 @@ export function TradePanel({ token, symbol, graduated }: { token: Address; symbo
     args: [token, amount],
     query: { enabled: !graduated && amount > 0n, refetchInterval: 5_000 },
   });
-  const uniQuote = useSimulateContract({
+  const uniQuote = useReadContract({
     address: UNI.uniQuoterV2,
     abi: quoterV2Abi,
     functionName: "quoteExactInputSingle",
@@ -83,7 +83,7 @@ export function TradePanel({ token, symbol, graduated }: { token: Address; symbo
     query: { enabled: graduated && amount > 0n, refetchInterval: 5_000 },
   });
   const quoteOut: bigint | undefined = graduated
-    ? uniQuote.data?.result[0]
+    ? uniQuote.data?.[0]
     : (curveQuote.data as readonly [bigint, bigint] | undefined)?.[0];
   const minOut = quoteOut !== undefined ? withSlippage(quoteOut, slippageBps) : undefined;
 
