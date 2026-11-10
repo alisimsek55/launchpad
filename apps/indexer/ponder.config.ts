@@ -21,6 +21,9 @@ export default createConfig({
     robinhood: {
       id: d.chainId,
       rpc: process.env[`PONDER_RPC_URL_${d.chainId}`] ?? d.rpcUrl,
+      // Testnet saniyede ~7 blok üretiyor. RPC önbelleği her blokta veritabanına yazar; ücretsiz
+      // sunucuda (0.1 CPU, uzak Postgres) bu yazmalar indexer'ı zincirin gerisinde bırakıyordu.
+      cacheRpcRequests: false,
     },
   },
   contracts: {

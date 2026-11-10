@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-10 — Testnet yayını: indexer zincire yetişemiyor
+- Olay: EKLENDİ
+- Not: İlk canlı token (blok 151087032) zincirde oluştu ama sitede görünmedi. Ölçüm: testnet ~6-7 blok/sn, Render (Oregon) indexer ~2 blok/sn → sürekli geride kalıyor. Aynı indexer yerelde 9 blok/sn ve token'ı yakaladı → darboğaz Oregon↔Londra (Neon) gecikmesi. Düzeltme: render.yaml region=frankfurt, Ponder cacheRpcRequests=false. Render bölgesi sonradan değiştirilemediği için servis yeniden oluşturulmalı (kullanıcı adımı), ardından Vercel'de NEXT_PUBLIC_INDEXER_URL güncellenmeli.
+
 ## 2026-11-10 — Testnet yayını: keeper secret'ı
 - Olay: GÜNCELLENDİ
 - Not: Neon (London, free), Render indexer (https://launchpad-indexer-uqhu.onrender.com, /ready 200) ve Vercel web (https://launchpad-cyan-nu.vercel.app) canlıya alındı ve kontrol edildi. render.yaml start komutu POSIX uyumlu yapıldı, buildFilter eklendi. Kalan: keeper secret'ı ve MetaMask ile canlı test.

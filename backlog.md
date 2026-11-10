@@ -12,6 +12,10 @@ Format:
 
 ## Açık işler
 
+- [ ] **Indexer'ı Frankfurt'ta yeniden oluştur** (eklenme: 2026-11-10)
+  - Durum: Kod düzeltmesi push edildi (region: frankfurt, cacheRpcRequests: false). Render bölgesi sonradan değişmediği için mevcut Oregon servisi silinip Blueprint yeniden uygulanmalı.
+  - Sonraki adım: Kullanıcı Render'da eski Blueprint'i silip yenisini oluşturur (DATABASE_URL) → yeni adres Vercel'de NEXT_PUBLIC_INDEXER_URL'e yazılıp redeploy → Echo /status ile zincire yetiştiğini doğrular.
+
 - [ ] **Testnet yayını: keeper secret'ı** (eklenme: 2026-11-09)
   - Durum: Sözleşmeler, indexer (Render+Neon) ve web (Vercel) canlıda: https://launchpad-cyan-nu.vercel.app. Kalan: GitHub'a KEEPER_PRIVATE_KEY secret'ı (DCA keeper cron'u).
   - Sonraki adım: reports/testnet-deploy.md §6; ardından keeper.yml'i elle tetikleyip çalıştığını doğrula.
