@@ -8,6 +8,7 @@ import { deployment } from "@/config";
 import { fmtEth } from "@/lib/format";
 import { useTx, useWrite } from "@/lib/useTx";
 import { useWalletUI } from "@/wallet/context";
+import { Usd } from "./Usd";
 
 const INTERVALS = [
   { label: "1 saat", seconds: 3600 },
@@ -89,7 +90,10 @@ export function DcaPanel({ token, symbol }: { token: Address; symbol: string }) 
       </div>
       <div className="flex justify-between rounded-xl bg-surface-2 p-3 text-sm">
         <span className="text-muted">Toplam yatırılacak</span>
-        <span className="font-semibold">{fmtEth(Number(formatEther(total)))} ETH</span>
+        <span className="text-right font-semibold">
+          {fmtEth(Number(formatEther(total)))} ETH
+          <Usd eth={Number(formatEther(total))} className="block text-xs font-normal text-muted" />
+        </span>
       </div>
       {wallet.connected ? (
         <button

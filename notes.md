@@ -252,6 +252,7 @@ event DCAPlanCancelled(uint256 indexed planId, uint256 refund);
 - Mainnet öncesi bağımsız audit zorunlu (kapsam: reports/audit-scope.md, deploy: reports/deploy-runbook.md)
 - Graduation fiyat düzeltme swap'ı bakiyenin en fazla yarısını kullanır (derin likidite DoS'una karşı)
 - Deploy adresleri: `packages/shared/deployments/*.json` (tek kaynak)
+- **USD fiyatlar (2026-11-10):** ETH/USD tarayıcıdan, anahtarsız. Birincil **Coinbase** `api.coinbase.com/v2/prices/ETH-USD/spot` (CORS `*`, public uçlarda IP başına ~10k istek/saat), yedek **CoinGecko** `simple/price` (CORS `*`, anahtarsız demo limiti dakikada ~5-30, IP'ler arasında paylaşılabildiği için yedekte). Kraken da çalışıyor ama CORS'u origin'e göre döndürüyor, ekstra kaynak gerekmedi. Kendi sunucumuzda proxy yok: istek kullanıcının tarayıcısından gider, rate limit kullanıcı başına kalır ve ücretsiz plan kotası harcanmaz. Tek hook `apps/web/src/lib/ethUsd.ts` (`useEthUsd`, react-query, 60 sn), formatlama `fmtUsd` (`src/lib/format.ts`), gösterim `components/Usd.tsx`. İki kaynak da düşerse USD hiç çizilmez, site ETH ile çalışır. Market cap USD birincil / ETH ikincil (pump.fun gibi); fiyat, hacim, işlem tutarları ETH birincil, USD "≈" ile ikincil. Testnet ETH'sinin değeri yok: mainnet fiyatıyla **gösterge** USD (tooltip + Docs notu).
 
 ## Açık sorular
 - Faz 2 limit emirler: on-chain mi, off-chain keeper mı?

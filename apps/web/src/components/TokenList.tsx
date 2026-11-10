@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useState } from "react";
 import { useTokens } from "@/data/hooks";
 import type { TokenSort } from "@/data/types";
-import { fmtEth, timeAgo } from "@/lib/format";
+import { timeAgo } from "@/lib/format";
 import { GraduationBar } from "./GraduationBar";
 import { TokenImage } from "./TokenImage";
+import { UsdFirst } from "./Usd";
 
 const SORTS: { key: TokenSort; label: string }[] = [
   { key: "new", label: "New" },
@@ -55,7 +56,9 @@ export function TokenList() {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted">Market cap</span>
-              <span>{fmtEth(t.marketCapEth, 2)} ETH</span>
+              <span className="font-medium">
+                <UsdFirst eth={t.marketCapEth} digits={2} />
+              </span>
             </div>
             <GraduationBar realEth={t.realEth} graduated={t.graduated} />
           </Link>

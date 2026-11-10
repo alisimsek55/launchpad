@@ -3,12 +3,15 @@
 import Link from "next/link";
 import { useAccount } from "wagmi";
 import { isLocal } from "@/config";
+import { USD_NOTE, useEthUsd } from "@/lib/ethUsd";
+import { fmtUsd } from "@/lib/format";
 import { useWalletUI } from "@/wallet/context";
 import { Avatar } from "./Avatar";
 
 export function Header() {
   const wallet = useWalletUI();
   const { address } = useAccount();
+  const ethUsd = useEthUsd();
 
   return (
     <header className="border-b border-line">
@@ -33,6 +36,11 @@ export function Header() {
           )}
         </nav>
         <div className="ml-auto flex items-center gap-3">
+          {ethUsd !== undefined && (
+            <span className="hidden text-xs text-muted sm:inline" title={USD_NOTE}>
+              ETH {fmtUsd(ethUsd)}
+            </span>
+          )}
           {isLocal && (
             <span className="rounded-full border border-line px-2 py-0.5 text-xs text-muted">local anvil</span>
           )}

@@ -12,6 +12,10 @@ Format:
 
 ## Açık işler
 
+- [ ] **Graduated token'da "You receive" teklifi boş** (eklenme: 2026-11-10)
+  - Durum: Graduate olmuş TYGN'de (Uniswap v3) alım kutusuna tutar girince teklif 0 kalıyor; canlı sitede de aynı, USD değişikliğinden önce de vardı. `TradePanel` → `useSimulateContract(QuoterV2.quoteExactInputSingle)` sonuç döndürmüyor (cüzdan bağlı değilken denendi).
+  - Sonraki adım: `cast call` ile testnet QuoterV2'yi aynı parametrelerle çağır; revert mi, RPC hatası mı, yoksa wagmi simulate'in hesapsız çağrısı mı ayırt et.
+
 - [ ] **Faz 2.0 fikirleri** (eklenme: 2026-11-03)
   - Durum: Lansman sonrası.
-  - Sonraki adım: DexScreener/GMGN/Bitquery entegrasyonu + açık quote API (yüksek öncelik); fair launch modu (DCA tabanlı); Uniswap v4 graduation; hisse token eşli lansman; limit emirler; permissionless keeper + TWAP; USD fiyatlar; kullanıcı adı düzenleme; README'ye ekran görüntüleri / demo GIF'i.
+  - Sonraki adım: DexScreener/GMGN/Bitquery entegrasyonu + açık quote API (yüksek öncelik); fair launch modu (DCA tabanlı); Uniswap v4 graduation; hisse token eşli lansman; limit emirler; permissionless keeper + TWAP; kullanıcı adı düzenleme; README'ye ekran görüntüleri / demo GIF'i.
