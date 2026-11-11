@@ -247,6 +247,12 @@ ponder.on("Graduator:Graduated", async ({ event, context }) => {
 ponder.on("UniswapPool:Swap", async ({ event, context }) => {
   const p = await context.db.find(schema.poolToken, { pool: event.log.address });
   if (!p) return;
+  // Graduation öncesi swap'lar kullanıcı işlemi değildir: Graduator, Graduated'dan ÖNCE aynı tx'te
+  // fiyat düzeltme swap'ı yapabilir; saldırganın boş pool'da fiyat itmesi de aynı blokta olabilir.
+  // Ponder factory child log'larını blok bazında eşler (log sırasına bakmaz), yani bunlar da gelir.
+  // Event'ler log sırasıyla işlendiğinden graduated bayrağı yalnızca Graduated log'undan sonra true olur.
+  const info = await context.db.find(schema.token, { address: p.token });
+  if (!info?.graduated) return;
   const { amount0, amount1, sqrtPriceX96, liquidity } = event.args;
   // Tutarlar pool açısından: pozitif = pool'a giren
   const tokenDelta = p.tokenIsToken0 ? amount0 : amount1;
