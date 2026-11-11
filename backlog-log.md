@@ -11,6 +11,34 @@ Format:
 
 ---
 
+## 2026-11-12 — Çapraz kontrol (Codex) düzeltmeleri
+- Olay: TAMAMLANDI
+- Not: Codex (gpt-5.6-sol) projeyi üç şeritte inceledi, Claude bulguları doğruladı, güvenli olanlar düzeltildi (shared `quoteBuy` terminal dalı + 7 test, indexer pre-graduation Swap guard'ı, keeper revert/ayar doğrulaması, web indexer URL/metadata doğrulama/hata durumları), Codex ikinci geçişte APPROVE verdi. 2 bulgu reddedildi, 11 madde ertelendi. Sonuç ve bulgu tablosu: reports/2026-11-12-capraz-kontrol-codex.md. Değişiklikler commit edilmedi.
+
+## 2026-11-12 — Çapraz kontrol: sözleşme bulguları (mainnet öncesi)
+- Olay: EKLENDİ
+- Not: Graduation gas-DoS, DCA TWAP, on-chain quoteBuy, DCA maxPrice iadesi, creator fee recipient. Redeploy ister; ayrıntı backlog.md ve reports/2026-11-12-capraz-kontrol-codex.md.
+
+## 2026-11-12 — Mainnet kontrol listesi: DCAVault keeper yetkisi
+- Olay: EKLENDİ
+- Not: Mainnet deploy sonrası Safe'ten `DCAVault.setKeeper(keeper, true)` gerekir; Deploy.s.sol çağıramaz.
+
+## 2026-11-12 — Keeper ölçeği: plan taraması ve kalıcı backoff
+- Olay: EKLENDİ
+- Not: Tüm planların her turda taranması ve bellekte tutulan backoff; yalnızca ölçekte önemli.
+
+## 2026-11-12 — Çapraz kontrol: subgraph mumları ve metadata gizliliği
+- Olay: EKLENDİ
+- Not: Subgraph mumları ortalama fiyat kullanıyor; https metadata URL'leri ziyaretçi IP'sini sızdırıyor (yalnız `data:` kararı bekliyor).
+
+## 2026-11-12 — Indexer Swap guard'ı uçtan uca doğrula
+- Olay: EKLENDİ
+- Not: Guard yalnızca typecheck ve akıl yürütmeyle doğrulandı; anvil + Simulate.s.sol koşusu gerekiyor.
+
+## 2026-11-12 — DexScreener listeleme başvurusu
+- Olay: GÜNCELLENDİ
+- Not: Çapraz kontrolden iki ön koşul notu eklendi: v3 rezerv hesabı ve `/dexscreener/events` üst sınırı, mainnet başvurusundan önce çözülmeli.
+
 ## 2026-11-10 — Türkçe README'yi İngilizceyle eşitle
 - Olay: TAMAMLANDI
 - Not: README.tr.md, İngilizce README ile aynı yapıya getirildi: rozetler, ekran görüntüsü tablosu, paket/teknoloji tablosu, "Mühendislik notları", "Nasıl geliştirildi". Türkçeye özel ayrıntılı bölümler (yerel geliştirme, DexScreener kararları, demo verisi, komutlar) korundu.
