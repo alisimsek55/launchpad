@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-12 — Ana sayfa hero bölümü
+- Olay: TAMAMLANDI
+- Not: Ana sayfaya arka plan görselli hero bölümü eklendi (apps/web/src/components/Hero.tsx, page.tsx). Görsel Codex/gpt-image-2 ile üretildi, 1672×941 WebP'ye (~18 KB) çevrildi: apps/web/public/hero-bg.webp. typecheck/lint/build geçti, masaüstü ve 375 px mobilde görsel kontrol yapıldı. Değişiklikler commit edilmedi.
+
 ## 2026-11-12 — Çapraz kontrol (Codex) düzeltmeleri
 - Olay: TAMAMLANDI
 - Not: Codex (gpt-5.6-sol) projeyi üç şeritte inceledi, Claude bulguları doğruladı, güvenli olanlar düzeltildi (shared `quoteBuy` terminal dalı + 7 test, indexer pre-graduation Swap guard'ı, keeper revert/ayar doğrulaması, web indexer URL/metadata doğrulama/hata durumları), Codex ikinci geçişte APPROVE verdi. 2 bulgu reddedildi, 11 madde ertelendi. Sonuç ve bulgu tablosu: reports/2026-11-12-capraz-kontrol-codex.md. Değişiklikler commit edilmedi.
