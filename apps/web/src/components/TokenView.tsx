@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { getAddress, isAddress, type Address } from "viem";
-import { chain } from "@/config";
+import { chain, INDEXER_URL_MISSING } from "@/config";
 import { useMetadata, useToken, useHolders } from "@/data/hooks";
 import { fmtEth, fmtPrice, shortAddr } from "@/lib/format";
 import { Avatar } from "./Avatar";
@@ -23,10 +23,29 @@ export function TokenView() {
 }
 
 function TokenViewInner({ token }: { token: Address }) {
-  const { data: t, isLoading } = useToken(token);
+  const { data: t, isLoading, isError, isFetching, refetch } = useToken(token);
   const { data: meta } = useMetadata(t?.metadataURI);
   const { data: holders } = useHolders(token);
   if (isLoading) return <p className="text-muted">Yükleniyor…</p>;
+  // Indexer 404 değil `null` döner (bulunamadı); hata ise ulaşılamadı demektir, ikisi ayrı gösterilir.
+  // Önceden yüklenmiş veri varken arka plan yenilemesi hata verirse sayfa olduğu gibi kalır.
+  if (!t && isError)
+    return (
+      <div className="space-y-2 text-sm">
+        <p className="text-muted">
+          {INDEXER_URL_MISSING
+            ? "Indexer adresi yapılandırılmamış (NEXT_PUBLIC_INDEXER_URL)."
+            : "Indexer'a ulaşılamadı; token bilgisi şu an yüklenemiyor."}
+        </p>
+        <button
+          onClick={() => refetch()}
+          disabled={isFetching}
+          className="rounded-lg border border-line px-3 py-1 hover:bg-surface-2 disabled:opacity-50"
+        >
+          {isFetching ? "Deneniyor…" : "Tekrar dene"}
+        </button>
+      </div>
+    );
   if (!t) return <p className="text-muted">Token bulunamadı.</p>;
 
   const explorer = chain.blockExplorers?.default.url;

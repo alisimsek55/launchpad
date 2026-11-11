@@ -20,6 +20,9 @@ const LINK = /(https?:\/\/|www\.)/i;
 /// %5 token sınırına denk gelen en yüksek dev buy (ağın curve parametrelerine göre)
 const MAX_DEV_BUY_ETH = maxDevBuyEth(curveParams);
 
+const utf8 = new TextEncoder();
+const byteLen = (s: string) => utf8.encode(s).length;
+
 function parseEth(s: string): bigint {
   try {
     return s ? parseEther(s) : 0n;
@@ -50,8 +53,12 @@ export function CreateTokenForm() {
 
   const identityError = useMemo(() => {
     if (!image) return "Görsel seç";
-    if (!name.trim() || name.length > 32) return "İsim 1-32 karakter";
-    if (!symbol.trim() || symbol.length > 10) return "Ticker 1-10 karakter";
+    // Kontrat UTF-8 bayt uzunluğunu sınar (TokenFactory: name ≤ 32, symbol ≤ 10), karakter sayısını değil.
+    // Gönderilen değerler: name.trim(), symbol.trim().toUpperCase()
+    const nameBytes = byteLen(name.trim());
+    const symbolBytes = byteLen(symbol.trim().toUpperCase());
+    if (nameBytes === 0 || nameBytes > 32) return "İsim 1-32 bayt olmalı (emoji/özel harf birden fazla bayttır)";
+    if (symbolBytes === 0 || symbolBytes > 10) return "Ticker 1-10 bayt olmalı (emoji/özel harf birden fazla bayttır)";
     if (LINK.test(description)) return "Açıklamada link olamaz";
     if (website && !website.startsWith("https://")) return "Website https:// ile başlamalı";
     return null;
@@ -138,12 +145,12 @@ export function CreateTokenForm() {
                 <div>
                   <label className="mb-1 block text-xs text-muted">Name</label>
                   <input className={input} maxLength={32} placeholder="Pons Coin" value={name} onChange={(e) => setName(e.target.value)} />
-                  <p className="mt-1 text-xs text-muted">{name.length}/32</p>
+                  <p className="mt-1 text-xs text-muted">{byteLen(name.trim())}/32 bayt</p>
                 </div>
                 <div>
                   <label className="mb-1 block text-xs text-muted">Ticker</label>
                   <input className={input} maxLength={10} placeholder="PONS" value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} />
-                  <p className="mt-1 text-xs text-muted">{symbol.length}/10</p>
+                  <p className="mt-1 text-xs text-muted">{byteLen(symbol.trim().toUpperCase())}/10 bayt</p>
                 </div>
               </div>
               <div>

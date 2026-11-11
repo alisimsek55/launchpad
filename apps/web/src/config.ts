@@ -11,8 +11,19 @@ export const chain = chainFor(deployment.chainId, deployment.rpcUrl);
 
 /// İsteğe bağlı: varsa Privy ile giriş, yoksa tarayıcı cüzdanı (MetaMask/Rabby)
 export const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "";
-/// Ponder indexer (tüm veri: tokenlar, işlemler, mumlar, holders, analytics)
-export const INDEXER_URL = process.env.NEXT_PUBLIC_INDEXER_URL ?? "http://localhost:42069";
+/// Ponder indexer (tüm veri: tokenlar, işlemler, mumlar, holders, analytics).
+/// Boş/boşluk değer "yok" sayılır (env.example boş bırakır; "" olsaydı istekler Next'in kendi
+/// /tokens yollarına giderdi). localhost varsayılanı yalnızca yerel ağda veya `next dev`'de kullanılır.
+/// Diğer durumlarda build kırılmasın diye (değişken build anında olmayabilir) çözülmesi garanti
+/// olmayan `.invalid` adresine (RFC 2606) düşer: istekler hızlıca hata verir, arayüz hata durumunu
+/// gösterir ve konsola açık bir mesaj yazılır.
+const indexerEnv = process.env.NEXT_PUBLIC_INDEXER_URL?.trim().replace(/\/+$/, "") ?? "";
+export const INDEXER_URL_MISSING = !indexerEnv && !isLocal && process.env.NODE_ENV !== "development";
+export const INDEXER_URL =
+  indexerEnv || (INDEXER_URL_MISSING ? "https://indexer-url-missing.invalid" : "http://localhost:42069");
+if (INDEXER_URL_MISSING && typeof window !== "undefined") {
+  console.error(`NEXT_PUBLIC_INDEXER_URL tanımlı değil (ağ: ${network}); indexer verisi yüklenemez.`);
+}
 
 export const DEFAULT_SLIPPAGE_BPS = 100; // %1
 

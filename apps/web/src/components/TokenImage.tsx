@@ -18,8 +18,21 @@ export function TokenImage({
   const { data } = useMetadata(metadataURI);
   const [a, b] = colorsFromAddress(address);
   if (data?.image) {
-    // eslint-disable-next-line @next/next/no-img-element -- kullanıcı görselleri harici depolamada
-    return <img src={data.image} alt={symbol} width={size} height={size} className="shrink-0 rounded-xl object-cover" style={{ width: size, height: size }} />;
+    // Görsel saldırgan kontrolündeki bir https adresi olabilir: referer gönderilmez (ziyaretçi sayfası sızmaz)
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- kullanıcı görselleri zincir üstü data: URI veya harici adres
+      <img
+        src={data.image}
+        alt={symbol}
+        width={size}
+        height={size}
+        referrerPolicy="no-referrer"
+        loading="lazy"
+        decoding="async"
+        className="shrink-0 rounded-xl object-cover"
+        style={{ width: size, height: size }}
+      />
+    );
   }
   return (
     <span

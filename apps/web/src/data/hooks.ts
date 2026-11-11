@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { Address } from "viem";
 import { INDEXER_URL } from "@/config";
 import { indexerSource } from "./indexer";
+import { fetchMetadata, isSupportedMetadataURI } from "./metadata";
 import type { DataSource, TokenSort } from "./types";
 
 const source: DataSource = indexerSource;
@@ -52,7 +53,9 @@ export const useHolders = (token: Address) =>
     queryKey: ["holders", token],
     queryFn: async () => {
       const res = await fetch(`${INDEXER_URL}/tokens/${token}/holders?limit=100`);
-      if (!res.ok) return { holderCount: 0, holders: [] as HolderRow[] };
+      // Hata "boş liste" gibi gösterilmez; React Query yeniden dener ve isError verir.
+      // (Henüz indekslenmemiş token için indexer zaten 200 + boş liste döner.)
+      if (!res.ok) throw new Error(`Indexer ${res.status}: holders`);
       return (await res.json()) as { holderCount: number; holders: HolderRow[] };
     },
     ...LIVE,
@@ -63,33 +66,24 @@ export const useWalletBalances = (holder: Address | undefined) =>
     queryKey: ["balances", holder],
     queryFn: async () => {
       const res = await fetch(`${INDEXER_URL}/users/${holder}/balances`);
-      if (!res.ok) return [];
+      // 503 vb. "hiç token yok" gibi görünmesin: fırlat, tüketici isError ile ayırt etsin
+      if (!res.ok) throw new Error(`Indexer ${res.status}: balances`);
       return ((await res.json()) as { balances: { token: Address; balance: string }[] }).balances;
     },
     enabled: !!holder,
   });
 
-// ---------------------------------------------------------------- metadata (api)
+// ---------------------------------------------------------------- metadata
 
-export type TokenMetadata = {
-  name: string;
-  symbol: string;
-  description: string;
-  image: string;
-  x?: string;
-  telegram?: string;
-  website?: string;
-};
+export type { TokenMetadata } from "./metadata";
 
 export const useMetadata = (uri: string | undefined) =>
   useQuery({
     queryKey: ["metadata", uri],
-    queryFn: async () => {
-      const res = await fetch(uri!);
-      if (!res.ok) return null;
-      return (await res.json()) as TokenMetadata;
-    },
-    // Zincir üstü data: URI (token oluşturma formu böyle yazar) veya http(s)
-    enabled: !!uri && /^(data:application\/json|https?:\/\/)/.test(uri),
-    staleTime: Infinity,
+    // Doğrulama ve boyut sınırı ./metadata.ts'de (içerik güvenilmez: kontrata herkes yazabilir)
+    queryFn: () => fetchMetadata(uri!),
+    // Zincir üstü data: URI (token oluşturma formu böyle yazar) veya https
+    enabled: isSupportedMetadataURI(uri),
+    // data: URI değişmez; https içeriği değişebilir ve geçici hatalar yeniden denenmeli
+    staleTime: uri?.startsWith("data:") ? Infinity : 5 * 60_000,
   });

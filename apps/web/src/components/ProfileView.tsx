@@ -125,9 +125,11 @@ function CreatorFees({ user, isMe, graduated }: { user: Address; isMe: boolean; 
               disabled={tx.busy}
               onClick={async () => {
                 for (const token of graduated) {
-                  await tx.run(() =>
+                  const receipt = await tx.run(() =>
                     mutateAsync({ address: deployment.lpLocker, abi: lpLockerAbi, functionName: "collect", args: [token] }),
                   );
+                  // run() reddedilen/başarısız işlemde undefined döner (hata tx.error'da); kalanlar için cüzdan istemini tekrar açma
+                  if (receipt?.status !== "success") break;
                 }
               }}
               className="rounded-xl border border-line px-4 py-2 text-sm disabled:opacity-40"
