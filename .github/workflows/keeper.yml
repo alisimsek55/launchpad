@@ -25,7 +25,7 @@ jobs:
         run: echo "enabled=${{ env.KEEPER_PRIVATE_KEY != '' }}" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v5
         if: steps.check.outputs.enabled == 'true'
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         if: steps.check.outputs.enabled == 'true'
       - uses: actions/setup-node@v5
         if: steps.check.outputs.enabled == 'true'
