@@ -52,15 +52,41 @@ export function buyFeeBps(secondsSinceLaunch: bigint): bigint {
   return SNIPER_FEE_START_BPS - (range * secondsSinceLaunch) / SNIPER_WINDOW;
 }
 
+/// Curve'de satılmayı bekleyen token. Sözleşmede her alım/satım `virtualToken` ile `tokensSold`'u
+/// aynı miktarda ters yönde değiştirir ve başlangıçta virtualToken = VIRTUAL_TOKEN, tokensSold = 0'dır;
+/// yani tokensSold = VIRTUAL_TOKEN - virtualToken her zaman tam olarak geçerlidir (iki ağda da).
+export function remainingCurveSupply(state: CurveState): bigint {
+  const tokensSold = VIRTUAL_TOKEN - state.virtualToken;
+  if (tokensSold < 0n || tokensSold >= CURVE_SUPPLY) {
+    // Sözleşmede ulaşılamaz durum ya da graduation olmuş curve (orada AlreadyGraduated ile revert eder).
+    throw new RangeError("Geçersiz veya graduation olmuş curve durumu");
+  }
+  return CURVE_SUPPLY - tokensSold;
+}
+
 /// ETH ile alım: fee düşülür, kalan ETH curve'e girer. Token aşağı yuvarlanır (protokol lehine).
+/// BondingCurve._buy ile birebir: eşiği aşan (veya tam eşiğe gelen) son alım kalan token'la sınırlanır,
+/// curve'e yalnızca gereken ETH girer, fee bu brüt tutar üzerinden alınır, fazlası `refund` olarak iade edilir.
 export function quoteBuy(state: CurveState, ethIn: bigint, feeBps: bigint = TRADE_FEE_BPS) {
-  const fee = (ethIn * feeBps) / BPS;
-  const ethToCurve = ethIn - fee;
-  const k = state.virtualEth * state.virtualToken;
-  const newX = state.virtualEth + ethToCurve;
-  const newY = ceilDiv(k, newX);
-  const tokenOut = state.virtualToken - newY;
-  return { tokenOut, fee, next: { virtualEth: newX, virtualToken: newY } };
+  const x = state.virtualEth;
+  const y = state.virtualToken;
+  const remaining = remainingCurveSupply(state);
+
+  let fee = (ethIn * feeBps) / BPS;
+  let ethToCurve = ethIn - fee;
+  let tokenOut = y - ceilDiv(x * y, x + ethToCurve);
+  let refund = 0n;
+  // Sözleşmedeki gibi `>=`: tam eşiğe gelen alım da bu daldan geçer (sonuç aynı, refund 0 olabilir).
+  const graduates = tokenOut >= remaining;
+  if (graduates) {
+    tokenOut = remaining;
+    ethToCurve = ceilDiv(x * y, y - remaining) - x;
+    let gross = ceilDiv(ethToCurve * BPS, BPS - feeBps);
+    if (gross > ethIn) gross = ethIn;
+    fee = gross - ethToCurve;
+    refund = ethIn - gross;
+  }
+  return { tokenOut, fee, refund, graduates, next: { virtualEth: x + ethToCurve, virtualToken: y - tokenOut } };
 }
 
 /// Token satışı: curve'den çıkan ETH'den fee düşülür. ETH aşağı yuvarlanır (protokol lehine).
