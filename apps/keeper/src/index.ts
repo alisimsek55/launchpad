@@ -2,7 +2,8 @@
 ///   LAUNCHPAD_NETWORK=local|testnet|mainnet  adresler packages/shared/deployments'tan (boşsa testnet)
 ///   KEEPER_PRIVATE_KEY                keeper hesabı (DCAVault.setKeeper ile yetkilendirilmiş olmalı)
 ///   KEEPER_RPC_URL                    (isteğe bağlı) RPC
-///   POLL_MS=30000  SLIPPAGE_BPS=300   döngü aralığı ve keeper'ın teklif üstüne uyguladığı slippage
+///   POLL_MS=30000  SLIPPAGE_BPS=300   döngü aralığı (tam sayı, >= 1000 ms) ve keeper'ın teklif üstüne uyguladığı
+///                                     slippage (tam sayı, 0-9999); geçersiz değerde keeper başlamaz, boşsa varsayılan
 /// `--once`: tek tur çalışıp çıkar (GitHub Actions cron bu modu kullanır, bkz. .github/workflows/keeper.yml).
 import { bondingCurveAbi, chainFor, dcaVaultAbi, getDeployment } from "@launchpad/shared";
 import { createPublicClient, createWalletClient, formatEther, http, parseAbi, type Hex } from "viem";
@@ -10,8 +11,18 @@ import { privateKeyToAccount } from "viem/accounts";
 
 const deployment = getDeployment(process.env.LAUNCHPAD_NETWORK);
 const chain = chainFor(deployment.chainId, process.env.KEEPER_RPC_URL ?? deployment.rpcUrl);
-const POLL_MS = Number(process.env.POLL_MS ?? 30_000);
-const SLIPPAGE_BPS = BigInt(process.env.SLIPPAGE_BPS ?? 300);
+/// Ortam değişkenini tam sayı olarak okur; boş/tanımsızsa varsayılan, geçersizse veya aralık dışıysa hata.
+function envInt(name: string, def: number, min: number, max: number): number {
+  const raw = process.env[name]?.trim();
+  if (!raw) return def;
+  const n = /^\d+$/.test(raw) ? Number(raw) : NaN;
+  if (!Number.isSafeInteger(n) || n < min || n > max) {
+    throw new Error(`${name} ${min} ile ${max} arasında bir tam sayı olmalı (verilen: "${raw}")`);
+  }
+  return n;
+}
+const POLL_MS = envInt("POLL_MS", 30_000, 1_000, 86_400_000); // en az 1 sn: RPC'yi boğmasın
+const SLIPPAGE_BPS = BigInt(envInt("SLIPPAGE_BPS", 300, 0, 9_999)); // 10000 ve üstü minTokensOut'u negatif yapar
 const BACKOFF_MS = 10 * 60_000; // başarısız plan 10 dk dinlenir (ör. maxPrice aşıldı)
 
 if (/^0x0+$/.test(deployment.dcaVault)) {
@@ -109,6 +120,8 @@ async function tick() {
       const gas = await publicClient.estimateContractGas(request);
       const hash = await wallet.writeContract({ ...request, gas: (gas * 12n) / 10n });
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      // Blokta yer alıp revert olan işlem de makbuz döndürür; başarısız sayıp backoff'a sok (gaz yakmaya devam etmesin).
+      if (receipt.status !== "success") throw new Error(`işlem revert oldu (${receipt.status}) — tx ${hash}`);
       log(`plan ${id}: ${formatEther(ethIn)} ETH alım → ${receipt.status} (${hash})`);
     } catch (e) {
       failedUntil.set(id, now + BACKOFF_MS);
