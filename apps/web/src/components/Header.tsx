@@ -15,11 +15,12 @@ export function Header() {
 
   return (
     <header className="border-b border-line">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4">
+      {/* Mobilde (<sm) nav ikinci satıra iner (logo + cüzdan üstte); sm ve üstü tek satır, eskisi gibi */}
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-1 px-4 py-2 sm:h-16 sm:flex-nowrap sm:py-0">
         <Link href="/" className="text-lg font-semibold tracking-tight">
           Launchpad
         </Link>
-        <nav className="flex items-center gap-5 text-sm text-muted">
+        <nav className="order-last flex w-full items-center gap-4 overflow-x-auto whitespace-nowrap text-sm text-muted sm:order-none sm:w-auto sm:gap-5 sm:overflow-visible">
           <Link href="/create" className="hover:text-foreground">
             + Create a token
           </Link>
@@ -35,7 +36,7 @@ export function Header() {
             </Link>
           )}
         </nav>
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex shrink-0 items-center gap-3">
           {ethUsd !== undefined && (
             <span className="hidden text-xs text-muted sm:inline" title={USD_NOTE}>
               ETH {fmtUsd(ethUsd)}
