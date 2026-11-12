@@ -19,6 +19,8 @@ jobs:
     env:
       KEEPER_PRIVATE_KEY: ${{ secrets.KEEPER_PRIVATE_KEY }}
       LAUNCHPAD_NETWORK: testnet
+      # Backoff + tarama imleci çalıştırmalar arası actions/cache ile taşınır
+      KEEPER_STATE_FILE: ${{ github.workspace }}/.keeper-state.json
     steps:
       - name: Secret kontrolü
         id: check
@@ -34,5 +36,18 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile --filter @launchpad/keeper...
         if: steps.check.outputs.enabled == 'true'
+      # Cache anahtarları değişmez; her çalıştırma benzersiz anahtarla kaydeder (run_id), restore-keys en yenisini getirir.
+      # Durum isteğe bağlıdır: cache yoksa/bozuksa keeper sıfırdan başlar.
+      - uses: actions/cache/restore@v5
+        if: steps.check.outputs.enabled == 'true'
+        with:
+          path: .keeper-state.json
+          key: keeper-state-${{ github.run_id }}
+          restore-keys: keeper-state-
       - run: pnpm --filter @launchpad/keeper once
         if: steps.check.outputs.enabled == 'true'
+      - uses: actions/cache/save@v5
+        if: always() && steps.check.outputs.enabled == 'true'
+        with:
+          path: .keeper-state.json
+          key: keeper-state-${{ github.run_id }}
