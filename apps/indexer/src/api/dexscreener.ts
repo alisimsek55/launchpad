@@ -1,6 +1,6 @@
 import { db } from "ponder:api";
 import schema from "ponder:schema";
-import { and, between, eq, sql } from "ponder";
+import { and, asc, between, eq, sql } from "ponder";
 import { CURVE_SUPPLY, TOTAL_SUPPLY, TRADE_FEE_BPS, getDeployment } from "@launchpad/shared";
 import { Hono } from "hono";
 import { formatEther, getAddress, isAddress } from "viem";
@@ -19,6 +19,13 @@ const WETH = getAddress(d.weth);
 const DEAD = "0x000000000000000000000000000000000000dEaD";
 const FEE_BPS = Number(TRADE_FEE_BPS); // curve %1, Uniswap pool %1 (10000 fee tier)
 const PRICE_DECIMALS = 50;
+// /events sınırları (herkese açık uç nokta; tek istekle tüm geçmişi belleğe çekmek DoS olurdu).
+// Blok numarası Ponder'ın RPC'den aldığı L2 blok numarasıdır (Solidity'deki block.number gibi L1 değil);
+// testnet saniyede ~7 blok ürettiğinden 10.000 blok ≈ 25 dk. DexScreener zincirin ucunu takip ederken
+// birkaç blokluk aralıklar sorar. Satır sınırı aşılırsa yanıt kesilmez (kesik yanıt, DexScreener her
+// bloğu bir kez sorduğu için kalıcı veri kaybı olurdu); 400 döner ve istemci aralığı daraltır.
+const MAX_BLOCK_RANGE = 10_000n;
+const MAX_EVENTS = 5_000;
 
 const amount = (wei: bigint) => formatEther(wei);
 
@@ -143,6 +150,9 @@ app.get("/events", async (c) => {
   const fromBlock = BigInt(fromStr);
   const toBlock = BigInt(toStr);
   if (fromBlock > toBlock) return c.json({ error: "fromBlock > toBlock" }, 400);
+  if (toBlock - fromBlock + 1n > MAX_BLOCK_RANGE) {
+    return c.json({ error: `block range too large: at most ${MAX_BLOCK_RANGE} blocks per request` }, 400);
+  }
   // Henüz indekslenmemiş bloklar istenirse boş dönmek yerine hata ver: DexScreener her bloğu bir kez
   // sorar, eksik veri kalıcı olarak kaçar. Hata alırsa bekleyip tekrar dener.
   const latest = await latestBlock();
@@ -154,12 +164,19 @@ app.get("/events", async (c) => {
     .select({ trade: schema.trade, tokenIsToken0: schema.token.tokenIsToken0 })
     .from(schema.trade)
     .innerJoin(schema.token, eq(schema.trade.token, schema.token.address))
-    .where(between(schema.trade.blockNumber, fromBlock, toBlock));
+    .where(between(schema.trade.blockNumber, fromBlock, toBlock))
+    .orderBy(asc(schema.trade.blockNumber), asc(schema.trade.txIndex), asc(schema.trade.logIndex))
+    .limit(MAX_EVENTS + 1);
   const liquidity = await db
     .select({ ev: schema.liquidityEvent, tokenIsToken0: schema.token.tokenIsToken0 })
     .from(schema.liquidityEvent)
     .innerJoin(schema.token, eq(schema.liquidityEvent.token, schema.token.address))
-    .where(between(schema.liquidityEvent.blockNumber, fromBlock, toBlock));
+    .where(between(schema.liquidityEvent.blockNumber, fromBlock, toBlock))
+    .orderBy(asc(schema.liquidityEvent.blockNumber), asc(schema.liquidityEvent.txIndex), asc(schema.liquidityEvent.logIndex))
+    .limit(MAX_EVENTS + 1);
+  if (trades.length + liquidity.length > MAX_EVENTS) {
+    return c.json({ error: `too many events in range (more than ${MAX_EVENTS}); request a smaller block range` }, 400);
+  }
 
   type Sortable = { blockNumber: bigint; txIndex: number; logIndex: number; json: Record<string, unknown> };
   const rows: Sortable[] = [];

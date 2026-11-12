@@ -57,6 +57,7 @@ type token {
   createdBlock: BigInt!
   createdTxHash: String!
   graduated: Boolean!
+  graduationPending: Boolean!
   priceEth: Float!
   volumeWei: BigInt!
   tradeCount: Int!
@@ -185,6 +186,10 @@ input tokenFilter {
   graduated_not: Boolean
   graduated_in: [Boolean]
   graduated_not_in: [Boolean]
+  graduationPending: Boolean
+  graduationPending_not: Boolean
+  graduationPending_in: [Boolean]
+  graduationPending_not_in: [Boolean]
   priceEth: Float
   priceEth_not: Float
   priceEth_in: [Float]
@@ -231,6 +236,8 @@ type poolToken {
   pool: String!
   token: String!
   tokenIsToken0: Boolean!
+  ethBalanceWei: BigInt!
+  tokenBalanceWei: BigInt!
 }
 
 type poolTokenPage {
@@ -266,6 +273,22 @@ input poolTokenFilter {
   tokenIsToken0_not: Boolean
   tokenIsToken0_in: [Boolean]
   tokenIsToken0_not_in: [Boolean]
+  ethBalanceWei: BigInt
+  ethBalanceWei_not: BigInt
+  ethBalanceWei_in: [BigInt]
+  ethBalanceWei_not_in: [BigInt]
+  ethBalanceWei_gt: BigInt
+  ethBalanceWei_lt: BigInt
+  ethBalanceWei_gte: BigInt
+  ethBalanceWei_lte: BigInt
+  tokenBalanceWei: BigInt
+  tokenBalanceWei_not: BigInt
+  tokenBalanceWei_in: [BigInt]
+  tokenBalanceWei_not_in: [BigInt]
+  tokenBalanceWei_gt: BigInt
+  tokenBalanceWei_lt: BigInt
+  tokenBalanceWei_gte: BigInt
+  tokenBalanceWei_lte: BigInt
 }
 
 type trade {

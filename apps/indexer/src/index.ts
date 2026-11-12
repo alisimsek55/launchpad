@@ -70,6 +70,30 @@ async function bumpDay(
     }));
 }
 
+/// Pool'un izlenen bakiyelerini değiştirir ve güncel pool kaydıyla döner.
+/// amount0/amount1: pool açısından imzalı tutarlar (pozitif = pool'a giren).
+async function addPoolBalances(context: Context, pool: Address, amount0: bigint, amount1: bigint) {
+  const p = await context.db.find(schema.poolToken, { pool });
+  if (!p) return null;
+  const ethDelta = p.tokenIsToken0 ? amount1 : amount0;
+  const tokenDelta = p.tokenIsToken0 ? amount0 : amount1;
+  if (ethDelta === 0n && tokenDelta === 0n) return p;
+  return context.db
+    .update(schema.poolToken, { pool })
+    .set({ ethBalanceWei: p.ethBalanceWei + ethDelta, tokenBalanceWei: p.tokenBalanceWei + tokenDelta });
+}
+
+/// Pool'un rezervleri (DexScreener). İki taraf da pool event'lerinden izlenen muhasebe bakiyesidir.
+/// WETH tarafını balanceOf ile birebir tutmak için tüm WETH Transfer'larını dinlemek gerekirdi: Ponder
+/// 0.18 event argümanını factory adres kümesiyle süzemiyor (topic filtresi yalnız sabit değer alır),
+/// sınırsız WETH trafiği ise ücretsiz sunucuya sığmaz. Bu yüzden token tarafı da Transfer yerine aynı
+/// event'lerden izlenir; doğrudan transferler (bağış) iki tarafta da sayılmaz ve rezervler tutarlı kalır.
+/// v3'te aktif likidite (L) pool bakiyesi değildir: dar aralıklı pozisyonlar varken L/√P, L·√P
+/// formülü rezervleri yanlış gösterir; bu yüzden bakiyeler kullanılır.
+function poolReserves(p: { ethBalanceWei: bigint; tokenBalanceWei: bigint }) {
+  return { reserveEthWei: p.ethBalanceWei, reserveTokenWei: p.tokenBalanceWei };
+}
+
 /// Curve ve Uniswap işlemleri için ortak kayıt: trade + token toplamları + mumlar + günlük veriler.
 async function recordTrade(
   context: Context,
@@ -183,13 +207,14 @@ ponder.on("TokenFactory:TokenCreated", async ({ event, context }) => {
     createdBlock: event.block.number,
     createdTxHash: event.transaction.hash,
     graduated: false,
+    graduationPending: false,
     priceEth: INITIAL_PRICE,
     volumeWei: 0n,
     tradeCount: 0,
     realEthWei: 0n,
     creatorFeesWei: 0n,
   });
-  await context.db.insert(schema.poolToken).values({ pool, token, tokenIsToken0 });
+  await context.db.insert(schema.poolToken).values({ pool, token, tokenIsToken0, ethBalanceWei: 0n, tokenBalanceWei: 0n });
   await bumpProtocol(context, { tokens: 1 });
   await bumpDay(context, timestamp, { launches: 1 });
 });
@@ -220,9 +245,20 @@ ponder.on("BondingCurve:Trade", async ({ event, context }) => {
   });
 });
 
+// Fiyat düzeltmesi tek adımda bitmedi: varlıklar Graduator'da bekliyor, LP henüz yok. `graduated` bayrağı
+// değişmez (Swap guard'ı yalnız Graduated'a bağlı kalır), böylece bekleme sırasındaki düzeltme swap'ları
+// (continueGraduation) kullanıcı işlemi olarak kaydedilmez.
+ponder.on("Graduator:GraduationPending", async ({ event, context }) => {
+  await context.db.update(schema.token, { address: event.args.token }).set({ graduationPending: true });
+});
+
 ponder.on("Graduator:Graduated", async ({ event, context }) => {
   const { token, pool, ethLiquidity, tokenLiquidity } = event.args;
-  await context.db.update(schema.token, { address: token }).set({ graduated: true });
+  await context.db.update(schema.token, { address: token }).set({ graduated: true, graduationPending: false });
+  // Graduated aynı tx'in son log'u: düzeltme swap'ı, mint ve token transferleri işlenmiş durumda.
+  // Rezervler pool'un izlenen bakiyeleri (graduation öncesi eklenmiş üçüncü taraf likiditesi dahil).
+  const p = await context.db.find(schema.poolToken, { pool });
+  const reserves = p ? poolReserves(p) : { reserveEthWei: ethLiquidity, reserveTokenWei: tokenLiquidity };
   // Uniswap pool'una ilk likidite girişi (DexScreener "join")
   await context.db.insert(schema.liquidityEvent).values({
     id: `${event.transaction.hash}-${event.log.logIndex}`,
@@ -232,8 +268,7 @@ ponder.on("Graduator:Graduated", async ({ event, context }) => {
     maker: event.transaction.from,
     ethWei: ethLiquidity,
     tokenWei: tokenLiquidity,
-    reserveEthWei: ethLiquidity,
-    reserveTokenWei: tokenLiquidity,
+    ...reserves,
     blockNumber: event.block.number,
     timestamp: event.block.timestamp,
     txHash: event.transaction.hash,
@@ -245,26 +280,24 @@ ponder.on("Graduator:Graduated", async ({ event, context }) => {
 });
 
 ponder.on("UniswapPool:Swap", async ({ event, context }) => {
-  const p = await context.db.find(schema.poolToken, { pool: event.log.address });
+  const { amount0, amount1, sqrtPriceX96 } = event.args;
+  // Tutarlar pool açısından: pozitif = pool'a giren. Bakiye her swap'ta güncellenir (graduation
+  // öncesi olanlar dahil); işlem kaydı ise aşağıdaki guard'a bağlıdır.
+  const p = await addPoolBalances(context, event.log.address, amount0, amount1);
   if (!p) return;
   // Graduation öncesi swap'lar kullanıcı işlemi değildir: Graduator, Graduated'dan ÖNCE aynı tx'te
-  // fiyat düzeltme swap'ı yapabilir; saldırganın boş pool'da fiyat itmesi de aynı blokta olabilir.
-  // Ponder factory child log'larını blok bazında eşler (log sırasına bakmaz), yani bunlar da gelir.
+  // fiyat düzeltme swap'ı yapabilir; saldırganın boş pool'da fiyat itmesi de graduation'dan önce olur.
   // Event'ler log sırasıyla işlendiğinden graduated bayrağı yalnızca Graduated log'undan sonra true olur.
   const info = await context.db.find(schema.token, { address: p.token });
   if (!info?.graduated) return;
-  const { amount0, amount1, sqrtPriceX96, liquidity } = event.args;
-  // Tutarlar pool açısından: pozitif = pool'a giren
   const tokenDelta = p.tokenIsToken0 ? amount0 : amount1;
   const ethDelta = p.tokenIsToken0 ? amount1 : amount0;
   const abs = (v: bigint) => (v < 0n ? -v : v);
   const sqrt = Number(sqrtPriceX96) / 2 ** 96;
   const price1Per0 = sqrt * sqrt; // ikisi de 18 ondalık
-  // Kesin oran: price1Per0 = sqrtP² / 2^192. Tam aralık pozisyonda rezervler x = L/√P, y = L·√P.
+  // Kesin oran: price1Per0 = sqrtP² / 2^192
   const sq = sqrtPriceX96 * sqrtPriceX96;
   const Q192 = Q96 * Q96;
-  const reserve0 = (liquidity * Q96) / sqrtPriceX96;
-  const reserve1 = (liquidity * sqrtPriceX96) / Q96;
   await recordTrade(context, {
     id: `${event.transaction.hash}-${event.log.logIndex}`,
     token: p.token,
@@ -282,9 +315,30 @@ ponder.on("UniswapPool:Swap", async ({ event, context }) => {
     logIndex: event.log.logIndex,
     priceNum: p.tokenIsToken0 ? sq : Q192,
     priceDen: p.tokenIsToken0 ? Q192 : sq,
-    reserveEthWei: p.tokenIsToken0 ? reserve1 : reserve0,
-    reserveTokenWei: p.tokenIsToken0 ? reserve0 : reserve1,
+    ...poolReserves(p),
   });
+});
+
+// Pool bakiyelerini değiştiren diğer event'ler (rezervler için; bkz. poolReserves)
+ponder.on("UniswapPool:Mint", async ({ event, context }) => {
+  const { amount0, amount1 } = event.args;
+  await addPoolBalances(context, event.log.address, amount0, amount1);
+});
+
+ponder.on("UniswapPool:Collect", async ({ event, context }) => {
+  const { amount0, amount1 } = event.args;
+  await addPoolBalances(context, event.log.address, -amount0, -amount1);
+});
+
+ponder.on("UniswapPool:CollectProtocol", async ({ event, context }) => {
+  const { amount0, amount1 } = event.args;
+  await addPoolBalances(context, event.log.address, -amount0, -amount1);
+});
+
+ponder.on("UniswapPool:Flash", async ({ event, context }) => {
+  // Borç geri ödendi; pool'da net kalan yalnızca ödenen ücret
+  const { paid0, paid1 } = event.args;
+  await addPoolBalances(context, event.log.address, paid0, paid1);
 });
 
 ponder.on("FeeVault:FeesDeposited", async ({ event, context }) => {

@@ -6,10 +6,10 @@ import {
   launchTokenAbi,
   lpLockerAbi,
   tokenFactoryAbi,
-  uniswapV3PoolAbi,
 } from "@launchpad/shared";
 import { createConfig, factory } from "ponder";
 import { getAbiItem } from "viem";
+import { uniswapV3PoolEventsAbi } from "./abis/uniswapV3Pool";
 
 // Adresler packages/shared/deployments/<ağ>.json'dan. LAUNCHPAD_NETWORK = local | testnet | mainnet
 // (boşsa testnet). PONDER_RPC_URL_<chainId> RPC'yi ezer.
@@ -43,13 +43,17 @@ export default createConfig({
       }),
       startBlock,
     },
-    // Graduation sonrası her token'ın Uniswap v3 pool'u (trades/mumlar devam eder)
+    // Her token'ın Uniswap v3 pool'u. Pool launch'ta (TokenCreated) oluşturulur; graduation'dan önceki
+    // event'ler de dinlenir, çünkü üçüncü taraflar graduation'dan önce pool'a WETH likiditesi ekleyebilir
+    // ve pool'un WETH/token bakiyeleri (DexScreener rezervleri) bu event'lerden izlenir. Graduation öncesi Swap'lar
+    // işlem olarak kaydedilmez (src/index.ts). Likiditesiz pool'da event neredeyse hiç olmadığından
+    // ek RPC yükü yok denecek kadar azdır.
     UniswapPool: {
-      abi: uniswapV3PoolAbi,
+      abi: uniswapV3PoolEventsAbi,
       chain: "robinhood",
       address: factory({
-        address: d.graduator,
-        event: getAbiItem({ abi: graduatorAbi, name: "Graduated" }),
+        address: d.tokenFactory,
+        event: getAbiItem({ abi: tokenFactoryAbi, name: "TokenCreated" }),
         parameter: "pool",
       }),
       startBlock,

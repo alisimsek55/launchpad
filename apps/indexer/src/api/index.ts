@@ -1,6 +1,6 @@
 import { db } from "ponder:api";
 import schema from "ponder:schema";
-import { and, asc, desc, eq, graphql, gt, gte, sql } from "ponder";
+import { and, desc, eq, graphql, gt, gte, sql } from "ponder";
 import { getDeployment } from "@launchpad/shared";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -35,6 +35,7 @@ const tokenJson = (t: TokenRow) => ({
   pool: getAddress(t.pool),
   createdAt: Number(t.createdAt),
   graduated: t.graduated,
+  graduationPending: t.graduationPending,
   priceEth: t.priceEth,
   marketCapEth: t.priceEth * 1e9,
   volumeEth: eth(t.volumeWei),
@@ -100,12 +101,15 @@ app.get("/tokens/:address/candles", async (c) => {
   const token = addr(c.req.param("address"));
   if (!token) return c.json({ error: "invalid address" }, 400);
   const interval = int(c.req.query("interval"), 300, 86400);
-  const rows = await db
-    .select()
-    .from(schema.candle)
-    .where(and(eq(schema.candle.token, token), eq(schema.candle.interval, interval)))
-    .orderBy(asc(schema.candle.time))
-    .limit(1000);
+  // En yeni 1000 mum (artan sırada). asc + limit en ESKİ 1000'i döndürür, grafik güncel kısmı kaybederdi.
+  const rows = (
+    await db
+      .select()
+      .from(schema.candle)
+      .where(and(eq(schema.candle.token, token), eq(schema.candle.interval, interval)))
+      .orderBy(desc(schema.candle.time))
+      .limit(1000)
+  ).reverse();
   return c.json(
     rows.map((r) => ({ time: r.time, open: r.open, high: r.high, low: r.low, close: r.close, volumeEth: eth(r.volumeWei) })),
   );
@@ -158,7 +162,8 @@ app.get("/users/:address/tokens", async (c) => {
     .select()
     .from(schema.token)
     .where(eq(schema.token.creator, user))
-    .orderBy(desc(schema.token.createdAt));
+    .orderBy(desc(schema.token.createdAt))
+    .limit(int(c.req.query("limit"), 200, 500));
   return c.json(rows.map(tokenJson));
 });
 
@@ -170,7 +175,8 @@ app.get("/users/:address/balances", async (c) => {
     .select()
     .from(schema.balance)
     .where(and(eq(schema.balance.holder, user), gt(schema.balance.balance, 0n)))
-    .orderBy(desc(schema.balance.balance));
+    .orderBy(desc(schema.balance.balance))
+    .limit(int(c.req.query("limit"), 200, 500));
   return c.json({
     holder: user,
     balances: rows.map((r) => ({ token: getAddress(r.token), balance: r.balance.toString() })),
@@ -191,10 +197,12 @@ app.get("/protocol", async (c) => {
   });
 });
 
-/// GET /protocol/days?since=<unix>
+/// GET /protocol/days?since=<unix> — en fazla son 1000 gün (since=0 ile tüm tabloyu çekmek sınırsızdı)
 app.get("/protocol/days", async (c) => {
   const since = int(c.req.query("since"), 0, 4_000_000_000) - 86400;
-  const rows = await db.select().from(schema.dayStat).where(gte(schema.dayStat.date, since)).orderBy(asc(schema.dayStat.date));
+  const rows = (
+    await db.select().from(schema.dayStat).where(gte(schema.dayStat.date, since)).orderBy(desc(schema.dayStat.date)).limit(1000)
+  ).reverse();
   return c.json(
     rows.map((r) => ({
       date: r.date,

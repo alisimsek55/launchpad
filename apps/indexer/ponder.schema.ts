@@ -16,6 +16,9 @@ export const token = onchainTable(
     createdBlock: t.bigint().notNull(),
     createdTxHash: t.hex().notNull(),
     graduated: t.boolean().notNull(),
+    // Graduation bekliyor: GraduationPending ile true, Graduated ile false. Curve kapandı ama LP henüz açılmadı;
+    // herkes Graduator.continueGraduation(token) ile tamamlayabilir.
+    graduationPending: t.boolean().notNull(),
     priceEth: t.doublePrecision().notNull(),
     volumeWei: t.bigint().notNull(),
     tradeCount: t.integer().notNull(),
@@ -29,11 +32,16 @@ export const token = onchainTable(
   }),
 );
 
-/// Graduation sonrası Uniswap Swap event'inden token'a ulaşmak için
+/// Uniswap pool event'lerinden token'a ulaşmak için
 export const poolToken = onchainTable("pool_token", (t) => ({
   pool: t.hex().primaryKey(),
   token: t.hex().notNull(),
   tokenIsToken0: t.boolean().notNull(),
+  // Pool'un muhasebesindeki WETH ve token bakiyeleri (DexScreener rezervleri); iki taraf da aynı
+  // pool event'lerinden izlenir (Mint/Flash +, Collect/CollectProtocol −, Swap ±). Event'siz doğrudan
+  // transferler (bağış) iki tarafta da sayılmaz: v3 pool bunları hiçbir zaman likiditeye katmaz.
+  ethBalanceWei: t.bigint().notNull(),
+  tokenBalanceWei: t.bigint().notNull(),
 }));
 
 export const trade = onchainTable(
@@ -57,7 +65,7 @@ export const trade = onchainTable(
     // İşlem sonrası spot fiyat (token başına ETH) = priceNum / priceDen; kesin oran, yuvarlamasız
     priceNum: t.bigint().notNull(),
     priceDen: t.bigint().notNull(),
-    // İşlem sonrası rezervler. Curve: gerçek (sanal değil) rezervler; v3: tam aralık L/√P, L·√P
+    // İşlem sonrası rezervler. Curve: gerçek (sanal değil) rezervler; v3: pool'un gerçek token/WETH bakiyesi
     reserveEthWei: t.bigint().notNull(),
     reserveTokenWei: t.bigint().notNull(),
   }),
