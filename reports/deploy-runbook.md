@@ -23,6 +23,14 @@ Sırayla uygulanacak adımlar. **[SEN]** işaretli adımlar hesap/anahtar/para g
 
 Tüm gizli değerler sadece `.env`'ye ve hosting panellerine girilir; repoya asla.
 
+## Sonraki deploy: tüm protokol yeniden (2026-11-13 çapraz kontrol düzeltmeleri)
+Graduator (sınırlı/devam ettirilebilir graduation, `continueGraduation`), BondingCurve (`quoteBuy` düzeltmesi, `quoteBuyDetailed`), DCAVault (TWAP koruması, `cancelPlan(id, recipient)`) ve FeeVault (`claimCreatorFees(recipient)`) değişti. Kontratlar birbirine `initialize()` ile bir kez bağlandığı için tek tek değiştirilemez: testnet ve mainnet'te **Factory, Curve, Locker, Graduator, DCAVault, FeeVault'un hepsi** yeniden deploy edilir (testnet: `DeployTestnet.s.sol`, bkz. [testnet-deploy.md](testnet-deploy.md); mainnet: aşağıdaki 2. adım). Ardından:
+- [ ] `packages/shared/deployments/{testnet,mainnet}.json` yeni adresler ve `startBlock` (L2 bloğu) ile güncellenir; `const.md` ve `subgraph.yaml` de.
+- [ ] Indexer yeni start block'tan baştan indeksler (şema da değişti: `token.graduationPending`, `pool_token.ethBalanceWei`; yeni `DATABASE_SCHEMA` ya da boş şema kullan).
+- [ ] `pnpm --filter @launchpad/contracts abis` ile ABI'ler yeniden üretilir (`packages/shared/src/abis.ts`, `packages/subgraph/abis/`).
+- [ ] Keeper durum dosyası (`.keeper-state.json`) vault adresine bağlı olduğundan kendiliğinden sıfırlanır.
+- [ ] Mainnet'te 4. adımdaki Safe `setKeeper` işlemi yeni DCAVault için tekrar yapılır.
+
 ## 2. Sözleşmeleri deploy et
 ```bash
 cd packages/contracts

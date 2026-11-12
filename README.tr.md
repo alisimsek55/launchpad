@@ -22,10 +22,10 @@
 | **Analytics:** protokol hacmi, fee'ler, lansmanlar, graduation'lar, en iyi tokenlar | **Token oluşturma:** iki adımlı lansman; görsel ve metadata **tamamen zincir üstünde** |
 
 - **Bonding curve:** sanal rezervli `x·y=k`; arzın %80'i curve'de satılır, %20'si Uniswap pool'unu besler. Graduation fiyatı Uniswap açılış fiyatına birebir eşittir, taşınma anında fiyat sıçraması olmaz.
-- **Tek işlemde graduation:** Curve'ü tamamlayan alım, full-range Uniswap v3 pozisyonunu da oluşturur ve LP NFT'sini `LPLocker`'a kilitler. Creator likiditeyi çekemez (rug pull yok).
+- **Tek işlemde graduation:** Curve'ü tamamlayan alım, full-range Uniswap v3 pozisyonunu da oluşturur ve LP NFT'sini `LPLocker`'a kilitler. Creator likiditeyi çekemez (rug pull yok). Saldırgan pool fiyatını sınırlı tek adımda düzeltilemeyecek kadar uzaklaştırdıysa graduation *bekleyen* duruma geçer: curve kapanır, varlıklar `Graduator`'da bekler ve LP açılana kadar herkes `continueGraduation(token)` çağırabilir (token sayfasında "Graduation'ı tamamla" düğmesi).
 - **Adil başlangıç:** ilk 60 saniyede sniper fee'si %20'den %1'e düşer; creator'ın lansman alımı arzın %5'iyle sınırlıdır.
-- **Fee:** işlem başına %1, protokol ve creator arasında yarı yarıya. Graduation sonrası Uniswap LP fee'leri de aynı şekilde bölünür.
-- **DCA:** kullanıcılar periyodik alım planlar; bir keeper (GitHub Actions cron) bunları curve'de veya Uniswap'te çalıştırır.
+- **Fee:** işlem başına %1, protokol ve creator arasında yarı yarıya. Graduation sonrası Uniswap LP fee'leri de aynı şekilde bölünür. Creator kazancını başka bir adrese çekebilir (`claimCreatorFees(recipient)`).
+- **DCA:** kullanıcılar periyodik alım planlar; bir keeper (GitHub Actions cron) bunları curve'de veya Uniswap'te çalıştırır. Uniswap'te pool fiyatı 5 dakikalık TWAP'ın ~%5'ten fazla üstündeyse alım yapılmaz; pool'un fiyat geçmişi yetersizse tek koruma planın `maxPrice`'ıdır (`maxPrice` yoksa alım yok). Plan iptalinde iade başka adrese gönderilebilir (`cancelPlan(id, recipient)`).
 - **Entegrasyonlar:** USD fiyatları (Coinbase, yedek CoinGecko) ve agregatörler için bir [DEX Screener Adapter](#dexscreener-entegrasyonu) API'si.
 
 ## Mimari
@@ -57,7 +57,7 @@
 Dokümantasyonu okumanın yetmediği problemler:
 
 - **Arbitrum'da `block.number` sandığın şey değil.** Robinhood Chain'de Solidity'nin `block.number`'ı *L1* bloğunu döndürür. Bunu indexer'ın başlangıç bloğu olarak kaydeden bir deploy script'i, indexer'a başka bir zincirin blok numarasını verirdi. Script'ler L2 bloğunu RPC'den (`eth_blockNumber`) okuyor.
-- **Graduation'ı sonsuza kadar engelleyebilecek bir saldırı.** Uniswap pool'u lansmanda oluşturulduğu için bir saldırgan, graduation'dan önce fiyatını hedeften uzaklaştırabilir. Graduator fiyatı bir swap ile düzeltir. Ama tek taraflı derin likidite koyan bir saldırgan, bu swap'ın bütün token'ları tüketip revert etmesine yol açabiliyordu. Çözüm: düzeltme swap'ı bakiyenin en fazla yarısını kullanır. Bir fuzz testi (`Manipulation.t.sol`) rastgele manipülasyonlarla bunu sınar. Graduation'a kadar pool'a token transferi de engellidir.
+- **Graduation'ı sonsuza kadar engelleyebilecek bir saldırı.** Uniswap pool'u lansmanda oluşturulduğu için bir saldırgan, graduation'dan önce fiyatını hedeften uzaklaştırabilir. Graduator fiyatı bir swap ile düzeltir. Ama tek taraflı derin likidite koyan bir saldırgan, bu swap'ın bütün token'ları tüketip revert etmesine yol açabiliyordu. Çözüm: düzeltme swap'ı bakiyenin en fazla yarısını kullanır. Bir fuzz testi (`Manipulation.t.sol`) rastgele manipülasyonlarla bunu sınar. İkinci bir varyant, fiyat aralığını çok sayıda initialized tick ile doldurup düzeltme swap'ını blok gas limitinin üstüne çıkarabiliyordu; düzeltme artık işlem başına en fazla 200 tick geçer ve `continueGraduation` ile kaldığı yerden sürer (`GraduationDos.t.sol`). Graduation'a kadar pool'a token transferi de engellidir.
 - **Saniyede 7 blok üreten bir zincirin gerisinde kalan indexer.** Canlı indexer zincirin giderek daha gerisine düşüyordu: Oregon'daki servis her blokta Londra'daki veritabanına yazıyordu (üretilen ~7 bloğa karşı saniyede ~2 blok). Yerelde ölçtüm (saniyede 9 blok), servisi veritabanının yanına (Frankfurt) taşıdım ve her bloktaki RPC önbellek yazmalarını kapattım. Artık her şeyi başlangıç bloğundan ~3 dakikada yeniden indeksliyor.
 - **Tek curve, iki dil.** Fiyat matematiği hem Solidity'de (zincir üstü) hem TypeScript'te (arayüz teklifleri) var. İkisi aynı yuvarlamayı kullanır ve Solidity testleri TypeScript sonuçlarını referans değer olarak kontrol eder. Böylece ikisi birbirinden sapamaz.
 - **Uniswap olmayan bir ağa Uniswap v3 kurmak.** Robinhood testnet'inde Uniswap yok. Testnet deploy script'i v3'ü resmi npm bytecode artefaktlarından kuruyor. Pool init code hash'i resmi olanla aynı olduğu için pool adresleri standart yöntemle hesaplanabiliyor.
@@ -109,16 +109,16 @@ Indexer, [DEX Screener Adapter spesifikasyonunu (v1.1)](https://dexscreener.noti
 | `GET /dexscreener/latest-block` | Ponder'ın tamamen işlediği son blok |
 | `GET /dexscreener/asset?id=<adres>` | Token (ad, sembol, toplam ve dolaşımdaki arz) veya WETH |
 | `GET /dexscreener/pair?id=<adres>` | Curve veya Uniswap v3 pair'i |
-| `GET /dexscreener/events?fromBlock=&toBlock=` | `swap`, `join` ve `exit` event'leri (iki sınır da dahil) |
+| `GET /dexscreener/events?fromBlock=&toBlock=` | `swap`, `join` ve `exit` event'leri (iki sınır da dahil; istek başına en fazla 10.000 blok ve 5.000 event, aşılırsa 400) |
 
 Testnet adresi: `https://launchpad-indexer-nzgy.onrender.com/dexscreener/latest-block`
 
 Kararlar:
 - **Pair id:** Bonding curve aşamasında pair id **token adresidir**. Bütün curve'ler tek bir `BondingCurve` kontratında yaşar, curve'e özel kontrat adresi yoktur; token adresi her curve'ü tekil ve kalıcı olarak tanımlar (`dexKey: "launchpad"`). Graduation sonrası pair id **Uniswap v3 pool adresidir** (`dexKey: "uniswap"`). İkisi DexScreener'da aynı token'ın iki ayrı pair'i olarak görünür.
 - **Sıra:** `asset0` Uniswap kuralıyla küçük adrestir (token veya WETH), iki pair'de de aynı. `priceNative` = 1 asset0'ın asset1 cinsinden fiyatı (işlem sonrası spot), 50 ondalığa kadar kesin.
-- **Rezervler:** Curve'de **gerçek** rezervler (curve'deki ETH ve satılmamış curve arzı); sanal rezervler likiditeyi şişirirdi. v3 pool'unda likidite tam aralıkta olduğundan rezervler `L/√P` ve `L·√P` ile kesin hesaplanır.
+- **Rezervler:** Curve'de **gerçek** rezervler (curve'deki ETH ve satılmamış curve arzı); sanal rezervler likiditeyi şişirirdi. v3 pool'unda rezervler pool'un **muhasebe bakiyeleridir**: iki taraf da pool'un `Mint`/`Collect`/`Swap`/`Flash` event'lerinden izlenir. Pool'a event'siz doğrudan gönderilen token/WETH (bağış) sayılmaz; v3 bunları likiditeye katmaz ve WETH tarafında bunu görmek için tüm WETH Transfer'larını dinlemek gerekirdi. Tam aralık `L/√P`, `L·√P` formülü kullanılmaz; üçüncü taraflar dar aralıklı likidite eklediğinde aktif likidite (L) pool bakiyesini göstermez.
 - **Graduation:** Curve pair'i için `exit` (rezervler 0'a iner), pool için `join` (ilk likidite) event'i yayınlanır. Spec bir blokta `(txnIndex, eventIndex)` çiftinin tekil olmasını istediği için ikisi aynı tx'in farklı log'larına bağlanır.
-- `/events`, henüz indekslenmemiş bir `toBlock` için 400 döner. DexScreener her bloğu bir kez sorduğu için boş yanıt veri kaybı olurdu.
+- `/events`, henüz indekslenmemiş bir `toBlock` için 400 döner. DexScreener her bloğu bir kez sorduğu için boş yanıt veri kaybı olurdu. Aynı sebeple satır sınırı aşılınca yanıt kesilmez, 400 döner ve istemci aralığı daraltır.
 
 **Listeleme:** Testnet zincirleri DexScreener'da listelenmez. Başvuru (DexScreener'a adapter adresini bildirmek) mainnet'e geçince yapılacak.
 

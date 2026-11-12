@@ -22,10 +22,10 @@ A bonding-curve token launchpad on **Robinhood Chain** (an Arbitrum Orbit L2), i
 | **Analytics:** protocol volume, fees, launches, graduations, top coins | **Create:** two-step launch; image and metadata stored **fully on-chain** |
 
 - **Bonding curve:** virtual-reserve `x·y=k`; 80% of supply is sold on the curve, 20% seeds the Uniswap pool. The graduation price equals the Uniswap opening price exactly, so there is no price jump at migration.
-- **One-transaction graduation:** the buy that completes the curve also creates the full-range Uniswap v3 position and locks the LP NFT in `LPLocker`, so the creator cannot pull the liquidity (no rug pull).
+- **One-transaction graduation:** the buy that completes the curve also creates the full-range Uniswap v3 position and locks the LP NFT in `LPLocker`, so the creator cannot pull the liquidity (no rug pull). If an attacker has moved the pool price too far to fix in one bounded step, graduation goes *pending*: the curve closes, the assets wait in `Graduator`, and anyone can call `continueGraduation(token)` (a button on the token page) until the LP opens.
 - **Fair launch:** a sniper fee decays from 20% to 1% over the first 60 seconds, and the creator's launch buy is capped at 5% of supply.
-- **Fees:** 1% per trade, split 50/50 between protocol and creator; after graduation the Uniswap LP fees are split the same way.
-- **DCA:** users schedule recurring buys; a keeper (GitHub Actions cron) executes them on the curve or on Uniswap.
+- **Fees:** 1% per trade, split 50/50 between protocol and creator; after graduation the Uniswap LP fees are split the same way. Creators can claim to another address (`claimCreatorFees(recipient)`).
+- **DCA:** users schedule recurring buys; a keeper (GitHub Actions cron) executes them on the curve or on Uniswap. On Uniswap a buy is refused if the pool price is more than ~5% above its 5-minute TWAP; if the pool has too little price history, the plan's `maxPrice` is the only guard (no `maxPrice`, no buy). Plans can be cancelled with the refund sent to another address (`cancelPlan(id, recipient)`).
 - **Integrations:** USD prices (Coinbase, CoinGecko fallback) and a [DEX Screener Adapter](#dex-screener-adapter) API for aggregators.
 
 ## Architecture
@@ -57,7 +57,7 @@ A bonding-curve token launchpad on **Robinhood Chain** (an Arbitrum Orbit L2), i
 Problems that took more than reading the docs:
 
 - **`block.number` is not what you think on Arbitrum.** On Robinhood Chain, Solidity's `block.number` returns the *L1* block, so a deploy script that saved it as the indexer's start block would hand the indexer a block number from a different chain. The scripts read the L2 head over RPC (`eth_blockNumber`) instead.
-- **A griefing attack that could block graduation forever.** The Uniswap pool is created at launch, so an attacker can push its price away from the target before graduation. The graduator corrects the price with a swap, but an attacker with deep one-sided liquidity could make that swap consume every token and revert. The fix caps the correction swap at half the balance, and a fuzz test (`Manipulation.t.sol`) throws random manipulations at it. Token transfers into the pool are also blocked until graduation.
+- **A griefing attack that could block graduation forever.** The Uniswap pool is created at launch, so an attacker can push its price away from the target before graduation. The graduator corrects the price with a swap, but an attacker with deep one-sided liquidity could make that swap consume every token and revert. The fix caps the correction swap at half the balance, and a fuzz test (`Manipulation.t.sol`) throws random manipulations at it. A second variant filled the price range with many initialized ticks so the correction swap would exceed the block gas limit; the correction now crosses at most 200 ticks per transaction and resumes through `continueGraduation` (`GraduationDos.t.sol`). Token transfers into the pool are also blocked until graduation.
 - **Indexer falling behind a 7-blocks-per-second chain.** The live indexer kept slipping further behind: the service in Oregon wrote to a database in London on every block (~2 blocks/s against ~7 produced). I measured it locally (9 blocks/s), moved the service next to the database (Frankfurt), and turned off per-block RPC cache writes. It now re-indexes everything from its start block in about 3 minutes.
 - **One curve, two languages.** The pricing math exists in Solidity (on-chain) and TypeScript (UI quotes). Both use the same rounding, and the Solidity tests check the TypeScript results as reference values, so the two cannot drift apart.
 - **Deploying Uniswap v3 where there is none.** Robinhood testnet has no Uniswap, so the testnet deploy script installs v3 from the official npm bytecode artifacts. Its pool init code hash matches the canonical one, so pool addresses can be computed the standard way.
@@ -72,7 +72,9 @@ The indexer implements the [DEX Screener Adapter spec](https://dexscreener.notio
 | `GET /dexscreener/latest-block` | Latest fully indexed block |
 | `GET /dexscreener/asset?id=` | Token or WETH |
 | `GET /dexscreener/pair?id=` | Curve pair (id = token address) or Uniswap v3 pool |
-| `GET /dexscreener/events?fromBlock=&toBlock=` | `swap`, `join`, `exit` events |
+| `GET /dexscreener/events?fromBlock=&toBlock=` | `swap`, `join`, `exit` events (at most 10,000 blocks and 5,000 events per request, otherwise 400) |
+
+Uniswap pool reserves are the pool's accounted balances (both sides), tracked from its `Mint`/`Collect`/`Swap`/`Flash` events; direct transfers (donations) are ignored on both sides, so narrow-range third-party liquidity cannot distort them.
 
 Live: https://launchpad-indexer-nzgy.onrender.com/dexscreener/latest-block (testnet chains are not listed on DEX Screener; listing would follow a mainnet launch). The design decisions are in the [Turkish README](README.tr.md#dexscreener-entegrasyonu).
 

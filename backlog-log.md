@@ -11,6 +11,30 @@ Format:
 
 ---
 
+## 2026-11-13 — Testnet/mainnet redeploy: çapraz kontrol düzeltmeleri
+- Olay: EKLENDİ
+- Not: Sözleşme düzeltmeleri kodda; zincirdekiler eski sürüm. `initialize()` tek seferlik olduğundan tüm protokol (Factory, Curve, Locker, Graduator, DCAVault, FeeVault) yeniden deploy edilmeli; ardından deploy JSON'ları, indexer start block'u ve yeni şemayla reindex, ABI üretimi, mainnet'te Safe `setKeeper`. Adımlar: reports/deploy-runbook.md "Sonraki deploy".
+
+## 2026-11-13 — Çapraz kontrol: sözleşme bulguları (mainnet öncesi)
+- Olay: TAMAMLANDI
+- Not: Kodda çözüldü, redeploy bekliyor (ayrı iş olarak eklendi). (1) Graduation gas-DoS: düzeltme işlem başına en fazla 200 tick geçer, bitmezse `GraduationPending` + herkesin çağırabildiği `continueGraduation` (GraduationDos.t.sol); (2) DCAVault'a 5 dk TWAP koruması (`DCA_TWAP_MAX_DEVIATION_TICKS = 488` ≈ %5; const.md, Constants.sol, packages/shared/src/curve.ts); (3) on-chain `quoteBuy` düzeltildi + `quoteBuyDetailed`; (4) DCA `maxPrice` iade sonrası harcanan ETH üzerinden; (5) `claimCreatorFees(recipient)`, `cancelPlan(id, recipient)`. ABI'ler yeniden üretildi. Web: bekleyen graduation paneli ("Graduation'ı tamamla"), yeni revert hataları için Türkçe mesajlar (apps/web/src/lib/useTx.ts). Indexer: `token.graduationPending` (şema değişti). Keeper: bekleyen graduation'daki planları atlar, TWAP revert'lerini açıklar. Sözleşme testleri 73/73.
+
+## 2026-11-13 — Keeper ölçeği: plan taraması ve kalıcı backoff
+- Olay: TAMAMLANDI
+- Not: Keeper planları parçalı multicall ile tarıyor (`KEEPER_SCAN_BATCH`), bitmiş planları imleçle atlıyor; backoff ve imleç `.keeper-state.json`'da kalıcı, cron'da actions/cache ile taşınıyor (apps/keeper/src/state.ts, .github/workflows/keeper.yml).
+
+## 2026-11-13 — Çapraz kontrol: subgraph mumları ve metadata gizliliği
+- Olay: TAMAMLANDI
+- Not: Subgraph mumları işlem öncesi/sonrası spot fiyat kullanıyor (packages/subgraph/src/helpers.ts); web artık yalnız zincir üstü `data:` metadata ve `data:image/(png|jpeg|webp|gif)` görselleri kabul ediyor, https adresleri ziyaretçi IP'si sızdırmasın diye düşüyor (apps/web/src/data/metadata.ts, TokenImage.tsx). `graph build` ile doğrulandı.
+
+## 2026-11-13 — Indexer Swap guard'ı uçtan uca doğrula
+- Olay: TAMAMLANDI
+- Not: Guard değişmedi (`graduated` yalnız `Graduated` ile true); pool event'leri artık TokenCreated'tan dinleniyor ve graduation öncesi/bekleme sırasındaki düzeltme swap'ları yalnız pool bakiyesini günceller, işlem olarak kaydedilmez. Kalan anvil koşusu redeploy işine eklendi.
+
+## 2026-11-13 — DexScreener listeleme başvurusu
+- Olay: GÜNCELLENDİ
+- Not: İki kod ön koşulu çözüldü: v3 rezervleri pool'un gerçek bakiyesi (Mint/Collect/Swap/Flash event'lerinden), `/dexscreener/events` istek başına en fazla 10.000 blok ve 5.000 event (aşılırsa 400). Başvuru işi mainnet'i bekliyor.
+
 ## 2026-11-12 — Canlı token listesinin yükleme ve hata akışı
 - Olay: TAMAMLANDI
 - Not: Testnet production build'i için herkese açık Render indexer fallback'i eklendi; token isteği en geç 25 saniyede zaman aşımına uğrayıp açık Türkçe hata ve manuel "Tekrar dene" düğmesi gösteriyor. Böylece eksik env veya erişilemeyen indexer listede süresiz "Yükleniyor…" bırakmıyor.
