@@ -11,6 +11,10 @@ Format:
 
 ---
 
+## 2026-11-12 — Canlı token listesinin yükleme ve hata akışı
+- Olay: TAMAMLANDI
+- Not: Testnet production build'i için herkese açık Render indexer fallback'i eklendi; token isteği en geç 25 saniyede zaman aşımına uğrayıp açık Türkçe hata ve manuel "Tekrar dene" düğmesi gösteriyor. Böylece eksik env veya erişilemeyen indexer listede süresiz "Yükleniyor…" bırakmıyor.
+
 ## 2026-11-12 — Ana sayfa hero bölümü
 - Olay: TAMAMLANDI
 - Not: Ana sayfaya arka plan görselli hero bölümü eklendi (apps/web/src/components/Hero.tsx, page.tsx). Görsel Codex/gpt-image-2 ile üretildi, 1672×941 WebP'ye (~18 KB) çevrildi: apps/web/public/hero-bg.webp. typecheck/lint/build geçti, masaüstü ve 375 px mobilde görsel kontrol yapıldı. Değişiklikler commit edilmedi.

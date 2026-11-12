@@ -4,7 +4,7 @@ import type { CandleRow, DataSource, DayStat, ProtocolStats, TokenInfo, TokenVol
 
 /// Tüm veri Ponder indexer'ının REST API'sinden (apps/indexer/src/api/index.ts).
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${INDEXER_URL}${path}`);
+  const res = await fetch(`${INDEXER_URL}${path}`, { signal: AbortSignal.timeout(25_000) });
   if (!res.ok) throw new Error(`Indexer ${res.status}: ${path}`);
   return (await res.json()) as T;
 }

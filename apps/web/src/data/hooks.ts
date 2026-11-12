@@ -11,7 +11,12 @@ const source: DataSource = indexerSource;
 const LIVE = { refetchInterval: 5_000 };
 
 export const useTokens = (sort: TokenSort, limit = 60) =>
-  useQuery({ queryKey: ["tokens", sort, limit], queryFn: () => source.tokens(sort, limit), ...LIVE });
+  useQuery({
+    queryKey: ["tokens", sort, limit],
+    queryFn: () => source.tokens(sort, limit),
+    retry: false,
+    ...LIVE,
+  });
 
 export const useTokensByCreator = (creator: Address | undefined) =>
   useQuery({

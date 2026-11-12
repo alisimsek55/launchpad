@@ -13,14 +13,20 @@ export const chain = chainFor(deployment.chainId, deployment.rpcUrl);
 export const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "";
 /// Ponder indexer (tüm veri: tokenlar, işlemler, mumlar, holders, analytics).
 /// Boş/boşluk değer "yok" sayılır (env.example boş bırakır; "" olsaydı istekler Next'in kendi
-/// /tokens yollarına giderdi). localhost varsayılanı yalnızca yerel ağda veya `next dev`'de kullanılır.
-/// Diğer durumlarda build kırılmasın diye (değişken build anında olmayabilir) çözülmesi garanti
-/// olmayan `.invalid` adresine (RFC 2606) düşer: istekler hızlıca hata verir, arayüz hata durumunu
-/// gösterir ve konsola açık bir mesaj yazılır.
+/// /tokens yollarına giderdi). Herkese açık testnet demosu için Render adresi güvenli varsayılandır;
+/// localhost yalnızca yerel ağda veya `next dev`'de kullanılır. Diğer production ağlarında eksik
+/// adres `.invalid` sentinel'ına düşer ve arayüz açık bir yapılandırma hatası gösterir.
 const indexerEnv = process.env.NEXT_PUBLIC_INDEXER_URL?.trim().replace(/\/+$/, "") ?? "";
-export const INDEXER_URL_MISSING = !indexerEnv && !isLocal && process.env.NODE_ENV !== "development";
+const TESTNET_INDEXER_URL = "https://launchpad-indexer-nzgy.onrender.com";
+export const INDEXER_URL_MISSING =
+  !indexerEnv && !isLocal && !isTestnet && process.env.NODE_ENV !== "development";
 export const INDEXER_URL =
-  indexerEnv || (INDEXER_URL_MISSING ? "https://indexer-url-missing.invalid" : "http://localhost:42069");
+  indexerEnv ||
+  (isTestnet
+    ? TESTNET_INDEXER_URL
+    : INDEXER_URL_MISSING
+      ? "https://indexer-url-missing.invalid"
+      : "http://localhost:42069");
 if (INDEXER_URL_MISSING && typeof window !== "undefined") {
   console.error(`NEXT_PUBLIC_INDEXER_URL tanımlı değil (ağ: ${network}); indexer verisi yüklenemez.`);
 }

@@ -4,6 +4,7 @@ import { nameFromAddress } from "@launchpad/shared";
 import Link from "next/link";
 import { useState } from "react";
 import { useTokens } from "@/data/hooks";
+import { INDEXER_URL_MISSING } from "@/config";
 import type { TokenSort } from "@/data/types";
 import { timeAgo } from "@/lib/format";
 import { GraduationBar } from "./GraduationBar";
@@ -18,7 +19,7 @@ const SORTS: { key: TokenSort; label: string }[] = [
 
 export function TokenList() {
   const [sort, setSort] = useState<TokenSort>("new");
-  const { data, isLoading, error } = useTokens(sort);
+  const { data, isLoading, isError, isFetching, refetch } = useTokens(sort);
 
   return (
     <div className="space-y-4">
@@ -34,7 +35,23 @@ export function TokenList() {
         ))}
       </div>
 
-      {error && <p className="text-sm text-danger">Veri alınamadı: {(error as Error).message}</p>}
+      {isError && (
+        <div className="space-y-2 rounded-xl border border-danger/40 bg-danger/5 p-4 text-sm">
+          <p className="text-danger">
+            {INDEXER_URL_MISSING
+              ? "Indexer adresi yapılandırılmamış. Tokenlar şu anda yüklenemiyor."
+              : "Tokenlar yüklenemedi. Indexer geçici olarak erişilemiyor olabilir."}
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="rounded-lg border border-line px-3 py-1.5 text-foreground transition hover:border-muted disabled:opacity-50"
+          >
+            {isFetching ? "Yeniden deneniyor…" : "Tekrar dene"}
+          </button>
+        </div>
+      )}
       {isLoading && <p className="text-sm text-muted">Yükleniyor…</p>}
       {data && data.length === 0 && <p className="text-sm text-muted">Henüz token yok. İlkini sen oluştur.</p>}
 
