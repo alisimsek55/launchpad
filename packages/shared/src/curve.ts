@@ -14,6 +14,8 @@ export const PROTOCOL_FEE_BPS = 50n;
 export const CREATOR_FEE_BPS = 50n;
 export const SNIPER_WINDOW = 60n;
 export const SNIPER_FEE_START_BPS = 2_000n;
+/// DCA (graduation sonrası): swap öncesi pool fiyatı 5 dk TWAP'tan en fazla bu kadar tick pahalı olabilir (≈ %5).
+export const DCA_TWAP_MAX_DEVIATION_TICKS = 488;
 
 export type CurveState = {
   virtualEth: bigint; // x

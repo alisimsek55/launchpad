@@ -4,9 +4,11 @@ pragma solidity ^0.8.28;
 import {Ownable, Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {BondingCurve} from "./BondingCurve.sol";
 import {Constants as C} from "./Constants.sol";
+import {LaunchToken} from "./LaunchToken.sol";
 
 interface ISwapRouter02 {
     struct ExactInputSingleParams {
@@ -20,6 +22,29 @@ interface ISwapRouter02 {
     }
 
     function exactInputSingle(ExactInputSingleParams calldata params) external payable returns (uint256 amountOut);
+}
+
+/// Uniswap v3 pool'unun TWAP (oracle) için gereken kısmı.
+interface IUniswapV3PoolOracle {
+    function slot0()
+        external
+        view
+        returns (
+            uint160 sqrtPriceX96,
+            int24 tick,
+            uint16 observationIndex,
+            uint16 observationCardinality,
+            uint16 observationCardinalityNext,
+            uint8 feeProtocol,
+            bool unlocked
+        );
+
+    function observe(uint32[] calldata secondsAgos)
+        external
+        view
+        returns (int56[] memory tickCumulatives, uint160[] memory secondsPerLiquidityCumulativeX128s);
+
+    function increaseObservationCardinalityNext(uint16 observationCardinalityNext) external;
 }
 
 /// @notice Periyodik alım (DCA). Kullanıcı ETH yatırıp plan açar; keeper zamanı gelince alım yapar.
@@ -42,6 +67,11 @@ contract DCAVault is Ownable2Step, ReentrancyGuard {
 
     uint32 public constant MIN_INTERVAL = 5 minutes;
     uint32 public constant MAX_BUYS = 1_000;
+    /// Graduation sonrası alımlarda fiyatın karşılaştırıldığı TWAP penceresi (const.md: 5 dakika).
+    uint32 public constant TWAP_WINDOW = 5 minutes;
+    /// Bir token'a plan açılırken pool'un oracle kapasitesi en az buna çıkarılır. Pencere içinde bundan
+    /// fazla swap'lı blok olursa 5 dk geriye bakılamaz (bkz. _checkTwap: TwapUnavailable).
+    uint16 public constant ORACLE_CARDINALITY = 60;
 
     BondingCurve public immutable curve;
     ISwapRouter02 public immutable router;
@@ -71,6 +101,9 @@ contract DCAVault is Ownable2Step, ReentrancyGuard {
     error TooEarly();
     error PlanFinished();
     error ZeroAddress();
+    error PriceTooHigh();
+    error PriceManipulated();
+    error TwapUnavailable();
 
     constructor(address owner_, BondingCurve curve_, ISwapRouter02 router_, address weth_) Ownable(owner_) {
         if (address(curve_) == address(0) || address(router_) == address(0) || weth_ == address(0)) {
@@ -109,21 +142,36 @@ contract DCAVault is Ownable2Step, ReentrancyGuard {
         });
         planIdsOf[msg.sender].push(planId);
         emit DCAPlanCreated(planId, msg.sender, token, ethPerBuy, interval, count, maxPrice);
+        _growOracle(token);
     }
 
-    function cancelPlan(uint256 planId) external nonReentrant {
+    /// Kalan ETH'yi plan sahibine (çağırana) iade eder.
+    function cancelPlan(uint256 planId) external {
+        _cancelPlan(planId, payable(msg.sender));
+    }
+
+    /// Kalan ETH'yi plan sahibinin seçtiği alıcıya iade eder (ör. ETH alamayan sözleşme sahipleri için).
+    function cancelPlan(uint256 planId, address payable recipient) external {
+        if (recipient == address(0)) revert ZeroAddress();
+        _cancelPlan(planId, recipient);
+    }
+
+    function _cancelPlan(uint256 planId, address payable recipient) private nonReentrant {
         Plan storage p = plans[planId];
         if (p.owner != msg.sender) revert NotOwner();
         uint256 refund = p.balance;
         p.balance = 0;
         emit DCAPlanCancelled(planId, refund);
-        if (refund > 0) Address.sendValue(payable(msg.sender), refund);
+        // forge-lint: disable-next-line(arbitrary-send-eth) -- plan sahibi kendi bakiyesini kendi seçtiği adrese çeker
+        if (refund > 0) Address.sendValue(recipient, refund);
     }
 
     // ---------------------------------------------------------------- keeper
 
     /// minTokensOut: keeper'ın güncel teklif + slippage ile hesapladığı alt sınır.
-    /// Kullanıcının maxPrice'ı ayrıca zincir üzerinde uygulanır.
+    /// Kullanıcının maxPrice'ı ayrıca zincir üzerinde, gerçekten harcanan ETH üzerinden uygulanır.
+    /// Graduation sonrası (Uniswap) alımda swap öncesi pool fiyatı 5 dk TWAP'tan en fazla
+    /// DCA_TWAP_MAX_DEVIATION_TICKS (≈ %5) pahalı olabilir; keeper fiyatı itip planı kötü fiyattan çalıştıramaz.
     function execute(uint256 planId, uint256 minTokensOut) external nonReentrant returns (uint256 tokensOut) {
         if (!isKeeper[msg.sender]) revert NotKeeper();
         Plan storage p = plans[planId];
@@ -134,10 +182,6 @@ contract DCAVault is Ownable2Step, ReentrancyGuard {
 
         // Son alım: iadelerden kalan küsurat da harcanır
         uint256 ethIn = p.balance < p.ethPerBuy ? p.balance : p.ethPerBuy;
-        if (p.maxPrice > 0) {
-            uint256 userMin = (ethIn * 1e18) / p.maxPrice;
-            if (userMin > minTokensOut) minTokensOut = userMin;
-        }
 
         p.balance -= ethIn.toUint128();
         p.lastExecuted = block.timestamp.toUint40();
@@ -147,6 +191,7 @@ contract DCAVault is Ownable2Step, ReentrancyGuard {
         // forge-lint: disable-next-line(unused-return) -- sadece graduated alanı gerekli
         (,,,,,, bool graduated) = curve.curves(p.token);
         if (graduated) {
+            _checkTwap(p.token, p.maxPrice > 0);
             tokensOut = router.exactInputSingle{value: ethIn}(
                 ISwapRouter02.ExactInputSingleParams({
                     tokenIn: weth,
@@ -165,9 +210,18 @@ contract DCAVault is Ownable2Step, ReentrancyGuard {
         uint256 refunded = address(this).balance - (before - ethIn);
         if (refunded > 0) p.balance += refunded.toUint128();
 
+        // maxPrice, iade sonrası gerçekten harcanan ETH ile kontrol edilir; yoksa geçerli bir terminal
+        // (graduation) alımı, harcanmayıp iade edilen ETH yüzünden reddedilirdi.
+        uint256 spent = ethIn - refunded;
+        // Gereken token miktarı yukarı yuvarlanır: aşağı yuvarlansaydı tokensOut * maxPrice < spent * 1e18
+        // olan (ör. 0 token dönen çok küçük) bir alım sınırdan geçebilirdi.
+        if (p.maxPrice > 0 && tokensOut < Math.mulDiv(spent, 1e18, p.maxPrice, Math.Rounding.Ceil)) {
+            revert PriceTooHigh();
+        }
+
         // Alınan miktar harici çağrının sonucu; execute nonReentrant ve sadece izinli keeper çağırabilir.
         // forge-lint: disable-next-line(reentrancy-events)
-        emit DCAExecuted(planId, ethIn - refunded, tokensOut, graduated);
+        emit DCAExecuted(planId, spent, tokensOut, graduated);
     }
 
     // ---------------------------------------------------------------- görünümler
@@ -182,6 +236,47 @@ contract DCAVault is Ownable2Step, ReentrancyGuard {
         if (p.owner == address(0) || p.balance == 0) return false;
         // forge-lint: disable-next-line(block-timestamp)
         return p.lastExecuted == 0 || block.timestamp >= uint256(p.lastExecuted) + p.interval;
+    }
+
+    // ---------------------------------------------------------------- iç
+
+    /// Pool'un oracle kapasitesini ORACLE_CARDINALITY'ye çıkarır (token başına bir kez; sonra no-op).
+    /// Pool launch'ta oluşturulduğu için graduation öncesinde de çağrılabilir.
+    function _growOracle(address token) private {
+        IUniswapV3PoolOracle pool = IUniswapV3PoolOracle(LaunchToken(token).pool());
+        // forge-lint: disable-next-line(unused-return) -- sadece observationCardinalityNext gerekli
+        (,,,, uint16 next,,) = pool.slot0();
+        if (next < ORACLE_CARDINALITY) pool.increaseObservationCardinalityNext(ORACLE_CARDINALITY);
+    }
+
+    /// Swap öncesi pool fiyatı, TWAP_WINDOW TWAP'ından token aleyhine DCA_TWAP_MAX_DEVIATION_TICKS'ten fazla
+    /// sapmışsa revert eder. Pool'da 5 dk geriye yetecek gözlem yoksa (az kapasite + yakın zamanda swap; aynı
+    /// bloktaki manipülasyon dahil) TWAP hesaplanamaz: kullanıcı maxPrice koyduysa ona güvenilir, koymadıysa
+    /// TwapUnavailable ile revert edilir (keeper daha sonra tekrar dener).
+    function _checkTwap(address token, bool hasMaxPrice) private view {
+        IUniswapV3PoolOracle pool = IUniswapV3PoolOracle(LaunchToken(token).pool());
+        // forge-lint: disable-next-line(unused-return) -- sadece güncel tick gerekli
+        (, int24 spotTick,,,,,) = pool.slot0();
+
+        uint32[] memory secondsAgos = new uint32[](2);
+        secondsAgos[0] = TWAP_WINDOW; // secondsAgos[1] = 0 (şimdi)
+        int56[] memory cumulatives;
+        try pool.observe(secondsAgos) returns (int56[] memory tc, uint160[] memory) {
+            cumulatives = tc;
+        } catch {
+            if (!hasMaxPrice) revert TwapUnavailable();
+            return;
+        }
+
+        // Uniswap OracleLibrary.consult: ortalama tick, eksi sonsuza doğru yuvarlanır.
+        int56 delta = cumulatives[1] - cumulatives[0];
+        int56 window = int56(uint56(TWAP_WINDOW));
+        int256 twapTick = delta / window;
+        if (delta < 0 && delta % window != 0) twapTick--;
+
+        // tick = log_1.0001(token1/token0). Token token0 ise yüksek tick = pahalı token; token1 ise tersi.
+        int256 overTwap = token < weth ? int256(spotTick) - twapTick : twapTick - int256(spotTick);
+        if (overTwap > C.DCA_TWAP_MAX_DEVIATION_TICKS) revert PriceManipulated();
     }
 
     // ---------------------------------------------------------------- admin

@@ -91,7 +91,7 @@ contract DCATest is BaseTest {
         // Başlangıç fiyatı ~1.31e-9 ETH; sınırı bunun altına koy → alım geri dönmeli
         uint256 id = _plan(t, 0.1 ether, 1 hours, 1, 1e9); // 1e-9 ETH/token
         vm.prank(keeper);
-        vm.expectRevert(); // BondingCurve.Slippage
+        vm.expectRevert(DCAVault.PriceTooHigh.selector);
         d.dca.execute(id, 0);
         assertEq(_balance(id), 0.1 ether);
     }
@@ -113,6 +113,8 @@ contract DCATest is BaseTest {
         LaunchToken t = _launchAndSettle();
         _buy(bob, t, 6 ether); // graduate
         uint256 id = _plan(t, 0.2 ether, 1 hours, 1, 0);
+        // TWAP için pool'da 5 dk'lık geçmiş gerekir (bkz. DCATwap.t.sol)
+        vm.warp(block.timestamp + 5 minutes);
         vm.prank(keeper);
         uint256 got = d.dca.execute(id, 1);
         assertGt(got, 0);
@@ -138,5 +140,25 @@ contract DCATest is BaseTest {
         vm.prank(keeper);
         d.dca.execute(id, 0);
         assertEq(_balance(id), 0);
+    }
+
+    /// maxPrice kontrolü gereken token miktarını yukarı yuvarlar: 1 wei'lik Uniswap alımı 0 token döndürür
+    /// (fee sonrası girdi 0). maxPrice = 2 ETH/token ile gereken 1e18 / 2e18 = 0.5 token; aşağı
+    /// yuvarlansaydı (0) alım geçerdi, yukarı yuvarlanınca (1) PriceTooHigh ile döner.
+    function test_MaxPriceRoundsRequiredTokensUp() public {
+        LaunchToken t = _launchAndSettle();
+        _buy(bob, t, 6 ether); // graduate
+        vm.warp(block.timestamp + 5 minutes); // TWAP geçmişi
+
+        // Sınırsız planda aynı alım gerçekten 0 token döndürüyor (kenar durumu)
+        uint256 free = _plan(t, 1, 1 hours, 1, 0);
+        vm.prank(keeper);
+        assertEq(d.dca.execute(free, 0), 0);
+
+        uint256 id = _plan(t, 1, 1 hours, 1, 2e18);
+        vm.prank(keeper);
+        vm.expectRevert(DCAVault.PriceTooHigh.selector);
+        d.dca.execute(id, 0);
+        assertEq(_balance(id), 1);
     }
 }

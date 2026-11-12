@@ -132,5 +132,7 @@ Bunlar tasarım kararlarıdır (gerekçeler notes.md §9-10'da). Bir token'ın p
 ### DCA
 | Ad | Değer |
 |---|---|
-| TWAP penceresi | `5` dakika |
+| TWAP penceresi | `5` dakika (graduation sonrası Uniswap alımlarında; `DCAVault.TWAP_WINDOW`) |
+| TWAP sapma sınırı | `488` tick ≈ %5 (`DCA_TWAP_MAX_DEVIATION_TICKS`): swap öncesi pool fiyatı TWAP'tan en fazla bu kadar pahalı olabilir |
+| Oracle kapasitesi | `60` gözlem (`DCAVault.ORACLE_CARDINALITY`; token'a ilk plan açılırken pool büyütülür). 5 dk geriye bakılamazsa: maxPrice varsa ona güvenilir, yoksa alım revert olur |
 | v1 keeper | Sadece whitelist (kendi servisimiz) |

@@ -37,6 +37,10 @@ library Constants {
     int24 internal constant MIN_TICK = -887_200;
     int24 internal constant MAX_TICK = 887_200;
 
+    // DCA (graduation sonrası): swap öncesi pool fiyatı 5 dk TWAP'tan en fazla bu kadar pahalı olabilir.
+    // 1.0001^488 ≈ 1.0500 → ≈ %5
+    int256 internal constant DCA_TWAP_MAX_DEVIATION_TICKS = 488;
+
     // Graduation'da artan token'ların yakıldığı adres (OZ ERC20 address(0)'a transferi reddeder)
     address internal constant DEAD = 0x000000000000000000000000000000000000dEaD;
 }

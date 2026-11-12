@@ -17,6 +17,7 @@ contract FeeVault is Ownable2Step, ReentrancyGuard {
     error AmountMismatch();
     error NothingToClaim();
     error InsufficientBalance();
+    error ZeroAddress();
 
     constructor(address owner_) Ownable(owner_) {}
 
@@ -32,12 +33,26 @@ contract FeeVault is Ownable2Step, ReentrancyGuard {
         emit FeesDeposited(creator, protocolAmount, creatorAmount);
     }
 
-    function claimCreatorFees() external nonReentrant returns (uint256 amount) {
+    /// Fee'yi çağırana (creator) öder. Creator, payable receive'i olmayan bir sözleşmeyse
+    /// `claimCreatorFees(recipient)` kullanmalıdır.
+    function claimCreatorFees() external returns (uint256 amount) {
+        return _claimCreatorFees(payable(msg.sender));
+    }
+
+    /// Creator'ın biriken fee'sini kendi seçtiği alıcıya gönderir (ör. ETH alamayan creator sözleşmeleri için).
+    function claimCreatorFees(address payable recipient) external returns (uint256 amount) {
+        if (recipient == address(0)) revert ZeroAddress();
+        return _claimCreatorFees(recipient);
+    }
+
+    function _claimCreatorFees(address payable recipient) private nonReentrant returns (uint256 amount) {
         amount = creatorBalance[msg.sender];
         if (amount == 0) revert NothingToClaim();
         creatorBalance[msg.sender] = 0;
+        // Event imzası değişmedi (indexer/subgraph uyumu): creator = msg.sender.
         emit CreatorFeesClaimed(msg.sender, amount);
-        Address.sendValue(payable(msg.sender), amount);
+        // forge-lint: disable-next-line(arbitrary-send-eth) -- creator yalnızca kendi bakiyesini kendi seçtiği adrese çeker
+        Address.sendValue(recipient, amount);
     }
 
     function withdrawProtocolFees(address payable to, uint256 amount) external nonReentrant onlyOwner {

@@ -163,16 +163,19 @@ contract BondingCurve is ReentrancyGuard {
 
     // ---------------------------------------------------------------- görünümler
 
+    /// `buy` ile birebir aynı sonucu verir (eşiği aşan son alımda kalan token'la sınırlama ve iade dahil).
+    /// fee: gerçekten alınacak fee (terminal alımda yalnızca harcanan brüt tutar üzerinden).
     function quoteBuy(address token, uint256 ethIn) external view returns (uint256 tokensOut, uint256 fee) {
-        Curve storage c = curves[token];
-        if (c.creator == address(0)) revert UnknownToken();
-        if (c.graduated) revert AlreadyGraduated();
-        uint256 feeBps = PriceMath.buyFeeBps(block.timestamp - c.launchTime);
-        fee = (ethIn * feeBps) / C.BPS;
-        tokensOut =
-            c.virtualToken - Math.mulDiv(c.virtualEth, c.virtualToken, c.virtualEth + ethIn - fee, Math.Rounding.Ceil);
-        uint256 remaining = C.CURVE_SUPPLY - c.tokensSold;
-        if (tokensOut > remaining) tokensOut = remaining;
+        (tokensOut, fee,) = _quoteBuyView(token, ethIn);
+    }
+
+    /// `quoteBuy` + iade edilecek ETH. Harcanan brüt tutar = ethIn - refund.
+    function quoteBuyDetailed(address token, uint256 ethIn)
+        external
+        view
+        returns (uint256 tokensOut, uint256 fee, uint256 refund)
+    {
+        return _quoteBuyView(token, ethIn);
     }
 
     function quoteSell(address token, uint256 tokenIn) external view returns (uint256 ethOut, uint256 fee) {
@@ -210,23 +213,10 @@ contract BondingCurve is ReentrancyGuard {
 
         uint256 x = c.virtualEth;
         uint256 y = c.virtualToken;
-        uint256 remaining = C.CURVE_SUPPLY - c.tokensSold;
-
-        uint256 fee = (ethIn * feeBps) / C.BPS;
-        uint256 ethToCurve = ethIn - fee;
-        tokensOut = y - Math.mulDiv(x, y, x + ethToCurve, Math.Rounding.Ceil);
-        if (tokensOut > maxTokens) revert DevBuyTooLarge();
-
-        // Eşiği aşan son alım: kalan token'la sınırlanır, fazla ETH iade edilir.
-        uint256 refund = 0;
-        if (tokensOut >= remaining) {
-            tokensOut = remaining;
-            ethToCurve = Math.mulDiv(x, y, y - remaining, Math.Rounding.Ceil) - x;
-            uint256 gross = Math.mulDiv(ethToCurve, C.BPS, C.BPS - feeBps, Math.Rounding.Ceil);
-            if (gross > ethIn) gross = ethIn;
-            fee = gross - ethToCurve;
-            refund = ethIn - gross;
-        }
+        uint256 ethToCurve;
+        uint256 fee;
+        uint256 refund;
+        (tokensOut, ethToCurve, fee, refund) = _buyMath(x, y, c.tokensSold, ethIn, feeBps, maxTokens);
         if (tokensOut < minTokensOut) revert Slippage();
 
         uint256 newX = x + ethToCurve;
@@ -242,6 +232,42 @@ contract BondingCurve is ReentrancyGuard {
         if (c.tokensSold == C.CURVE_SUPPLY) _graduate(token, c);
         // forge-lint: disable-next-line(arbitrary-send-eth) -- fazla ETH ödeyene iade, son adım, nonReentrant
         if (refund > 0) Address.sendValue(payable(msg.sender), refund);
+    }
+
+    function _quoteBuyView(address token, uint256 ethIn)
+        private
+        view
+        returns (uint256 tokensOut, uint256 fee, uint256 refund)
+    {
+        Curve storage c = _active(token);
+        uint256 feeBps = PriceMath.buyFeeBps(block.timestamp - c.launchTime);
+        (tokensOut,, fee, refund) =
+            _buyMath(c.virtualEth, c.virtualToken, c.tokensSold, ethIn, feeBps, type(uint256).max);
+    }
+
+    /// Alım matematiği; `_buy` ve quote görünümleri bunu paylaşır (packages/shared/src/curve.ts quoteBuy ile birebir).
+    /// maxTokens kontrolü, eski davranışla aynı olsun diye sınırlamadan ÖNCEKİ token miktarına uygulanır.
+    function _buyMath(uint256 x, uint256 y, uint256 tokensSold, uint256 ethIn, uint256 feeBps, uint256 maxTokens)
+        private
+        pure
+        returns (uint256 tokensOut, uint256 ethToCurve, uint256 fee, uint256 refund)
+    {
+        uint256 remaining = C.CURVE_SUPPLY - tokensSold;
+
+        fee = (ethIn * feeBps) / C.BPS;
+        ethToCurve = ethIn - fee;
+        tokensOut = y - Math.mulDiv(x, y, x + ethToCurve, Math.Rounding.Ceil);
+        if (tokensOut > maxTokens) revert DevBuyTooLarge();
+
+        // Eşiği aşan son alım: kalan token'la sınırlanır, fazla ETH iade edilir.
+        if (tokensOut >= remaining) {
+            tokensOut = remaining;
+            ethToCurve = Math.mulDiv(x, y, y - remaining, Math.Rounding.Ceil) - x;
+            uint256 gross = Math.mulDiv(ethToCurve, C.BPS, C.BPS - feeBps, Math.Rounding.Ceil);
+            if (gross > ethIn) gross = ethIn;
+            fee = gross - ethToCurve;
+            refund = ethIn - gross;
+        }
     }
 
     function _graduate(address token, Curve storage c) private {
