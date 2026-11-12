@@ -24,6 +24,10 @@ export default createConfig({
       // Testnet saniyede ~7 blok üretiyor. RPC önbelleği her blokta veritabanına yazar; ücretsiz
       // sunucuda (0.1 CPU, uzak Postgres) bu yazmalar indexer'ı zincirin gerisinde bırakıyordu.
       cacheRpcRequests: false,
+      // Public RPC eth_getLogs'ta en fazla 100000 blok aralığına izin verir ve bunu Ponder'ın tanıdığı
+      // bir hata mesajıyla bildirmez; otomatik aralık büyümesi sınırı aşınca indexer çöküyordu
+      // (unhandledRejection, çıkış kodu 75). Aralığı sabitle.
+      ethGetLogsBlockRange: 100_000,
     },
   },
   contracts: {

@@ -11,6 +11,12 @@ Format:
 
 ---
 
+## 2026-11-13 — Indexer Render'da çöküyordu (502 no-deploy)
+- Olay: TAMAMLANDI
+- Not: Public RPC eth_getLogs'ta 100000 blok sınırı koyuyor ve Ponder'ın tanımadığı bir mesajla bildiriyor; otomatik aralık büyümesi sınırı aşınca unhandledRejection ile süreç çıkış kodu 75'le düşüyordu (yerelde birebir yeniden üretildi). `ponder.config.ts`'de `ethGetLogsBlockRange: 100_000` sabitlendi; yerelde backfill 26 sn'de bitti, /ready ve /tokens çalışıyor.
+
+---
+
 ## 2026-11-13 — Testnet/mainnet redeploy: çapraz kontrol düzeltmeleri
 - Olay: EKLENDİ
 - Not: Sözleşme düzeltmeleri kodda; zincirdekiler eski sürüm. `initialize()` tek seferlik olduğundan tüm protokol (Factory, Curve, Locker, Graduator, DCAVault, FeeVault) yeniden deploy edilmeli; ardından deploy JSON'ları, indexer start block'u ve yeni şemayla reindex, ABI üretimi, mainnet'te Safe `setKeeper`. Adımlar: reports/deploy-runbook.md "Sonraki deploy".
