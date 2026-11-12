@@ -22,7 +22,7 @@ Durum etiketleri:
 |---|---|---|
 | GitHub | `https://github.com/alisimsek55/launchpad` (private) | ✅ |
 | Varsayılan dal | `main` | ✅ |
-| Yerel klasör | `C:\Users\alisi\Documents\launchpad` | ✅ |
+| Yerel klasör | `C:\Users\alisi\projeler\launchpad` | ✅ |
 
 ## Ağ: Robinhood Chain
 
