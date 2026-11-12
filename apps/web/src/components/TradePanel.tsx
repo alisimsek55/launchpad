@@ -11,6 +11,7 @@ import { ADDRESS_THIS, UNI_FEE_TIER, quoterV2Abi, swapRouter02Abi } from "@/lib/
 import { useTx, useWrite } from "@/lib/useTx";
 import { useWalletUI } from "@/wallet/context";
 import { DcaPanel } from "./DcaPanel";
+import { PendingGraduation } from "./PendingGraduation";
 import { Usd } from "./Usd";
 
 // Ağın WETH/Uniswap adresleri deploy dosyasından (testnet'te kendi Uniswap deploy'umuz)
@@ -31,7 +32,18 @@ function parseAmount(s: string): bigint {
 }
 
 /// Alım-satım paneli. Graduation öncesi curve, sonrası Uniswap v3 (SwapRouter02) üzerinden.
-export function TradePanel({ token, symbol, graduated }: { token: Address; symbol: string; graduated: boolean }) {
+/// `pending`: graduation sürüyor (curve kapalı, LP henüz açık değil); işlem formu yerine tamamlama paneli gösterilir.
+export function TradePanel({
+  token,
+  symbol,
+  graduated,
+  pending = false,
+}: {
+  token: Address;
+  symbol: string;
+  graduated: boolean;
+  pending?: boolean;
+}) {
   const { address } = useAccount();
   const wallet = useWalletUI();
   const [mode, setMode] = useState<"market" | "dca">("market");
@@ -65,7 +77,7 @@ export function TradePanel({ token, symbol, graduated }: { token: Address; symbo
     abi: bondingCurveAbi,
     functionName: side === "buy" ? "quoteBuy" : "quoteSell",
     args: [token, amount],
-    query: { enabled: !graduated && amount > 0n, refetchInterval: 5_000 },
+    query: { enabled: !graduated && !pending && amount > 0n, refetchInterval: 5_000 },
   });
   const uniQuote = useReadContract({
     address: UNI.uniQuoterV2,
@@ -201,6 +213,15 @@ export function TradePanel({ token, symbol, graduated }: { token: Address; symbo
       <div className="space-y-4 rounded-2xl border border-line bg-surface p-4">
         {modeTabs}
         <DcaPanel token={token} symbol={symbol} />
+      </div>
+    );
+  }
+
+  if (pending) {
+    return (
+      <div className="space-y-4 rounded-2xl border border-line bg-surface p-4">
+        {modeTabs}
+        <PendingGraduation token={token} />
       </div>
     );
   }

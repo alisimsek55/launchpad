@@ -2,7 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { BaseError, type Abi, type Address, type Hash, type TransactionReceipt } from "viem";
+import { BaseError, ContractFunctionRevertedError, type Abi, type Address, type Hash, type TransactionReceipt } from "viem";
 import { useAccount, usePublicClient, useSwitchChain, useWriteContract } from "wagmi";
 import { chain } from "@/config";
 
@@ -30,6 +30,36 @@ export function useWrite() {
   };
 }
 
+/// Kontrat revert hatalarının kullanıcıya gösterilen Türkçe karşılıkları (hata adı → mesaj).
+/// Listede olmayan hata viem'in kısa mesajıyla gösterilir.
+const REVERT_MESSAGES: Record<string, string> = {
+  AlreadyGraduated: "Bu token'ın curve'ü kapandı (graduation); işlem artık Uniswap üzerinden yapılır.",
+  Expired: "İşlemin süresi doldu, tekrar dene.",
+  Slippage: "Fiyat beklenenden fazla oynadı (slippage); tekrar dene ya da slippage'ı artır.",
+  ZeroAmount: "Tutar sıfır olamaz.",
+  DevBuyTooLarge: "İlk alım (dev buy) üst sınırı aşıyor.",
+  InsufficientLaunchFee: "Launch ücreti eksik gönderildi.",
+  NothingToClaim: "Çekilecek ücret yok.",
+  NotOwner: "Bu plan sana ait değil.",
+  PlanFinished: "Bu DCA planı zaten bitmiş.",
+  TooEarly: "Bir sonraki DCA alımının zamanı henüz gelmedi.",
+  NotPending: "Bekleyen bir graduation yok; büyük ihtimalle az önce tamamlandı.",
+  PriceTooHigh: "Fiyat, planın en yüksek fiyat (maxPrice) sınırının üstünde; alım bekletiliyor.",
+  PriceManipulated: "Pool fiyatı 5 dakikalık ortalamadan (TWAP) çok saptı; olası manipülasyona karşı alım yapılmadı.",
+  TwapUnavailable: "Pool'un fiyat geçmişi (TWAP) henüz yetersiz; bu planda en yüksek fiyat (maxPrice) yoksa alım yapılamaz.",
+};
+
+/// Hatayı okunabilir Türkçe mesaja çevirir; bilinen kontrat revert'leri için REVERT_MESSAGES kullanılır.
+export function txErrorMessage(e: unknown): string {
+  if (e instanceof BaseError) {
+    const revert = e.walk((err) => err instanceof ContractFunctionRevertedError);
+    const name = revert instanceof ContractFunctionRevertedError ? revert.data?.errorName : undefined;
+    if (name && REVERT_MESSAGES[name]) return REVERT_MESSAGES[name];
+    return e.shortMessage;
+  }
+  return (e as Error).message;
+}
+
 type Status = "idle" | "pending" | "confirming" | "success" | "error";
 
 /// İşlem gönder → onay bekle → verileri tazele. Kullanıcıya okunabilir hata mesajı döner.
@@ -54,7 +84,7 @@ export function useTx() {
       return receipt;
     } catch (e) {
       setStatus("error");
-      setError(e instanceof BaseError ? e.shortMessage : (e as Error).message);
+      setError(txErrorMessage(e));
     }
   }
 

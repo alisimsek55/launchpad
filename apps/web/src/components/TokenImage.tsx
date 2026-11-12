@@ -18,9 +18,9 @@ export function TokenImage({
   const { data } = useMetadata(metadataURI);
   const [a, b] = colorsFromAddress(address);
   if (data?.image) {
-    // Görsel saldırgan kontrolündeki bir https adresi olabilir: referer gönderilmez (ziyaretçi sayfası sızmaz)
+    // Görsel yalnızca zincir üstü data:image (metadata.ts doğrular); harici istek yapılmaz
     return (
-      // eslint-disable-next-line @next/next/no-img-element -- kullanıcı görselleri zincir üstü data: URI veya harici adres
+      // eslint-disable-next-line @next/next/no-img-element -- kullanıcı görselleri zincir üstü data: URI
       <img
         src={data.image}
         alt={symbol}

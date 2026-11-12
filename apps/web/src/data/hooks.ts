@@ -87,8 +87,8 @@ export const useMetadata = (uri: string | undefined) =>
     queryKey: ["metadata", uri],
     // Doğrulama ve boyut sınırı ./metadata.ts'de (içerik güvenilmez: kontrata herkes yazabilir)
     queryFn: () => fetchMetadata(uri!),
-    // Zincir üstü data: URI (token oluşturma formu böyle yazar) veya https
+    // Yalnızca zincir üstü data: URI (token oluşturma formu böyle yazar); harici adres çekilmez
     enabled: isSupportedMetadataURI(uri),
-    // data: URI değişmez; https içeriği değişebilir ve geçici hatalar yeniden denenmeli
-    staleTime: uri?.startsWith("data:") ? Infinity : 5 * 60_000,
+    // data: URI değişmez
+    staleTime: Infinity,
   });

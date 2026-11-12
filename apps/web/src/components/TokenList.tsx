@@ -77,7 +77,7 @@ export function TokenList() {
                 <UsdFirst eth={t.marketCapEth} digits={2} />
               </span>
             </div>
-            <GraduationBar realEth={t.realEth} graduated={t.graduated} />
+            <GraduationBar realEth={t.realEth} graduated={t.graduated} pending={t.graduationPending} />
           </Link>
         ))}
       </div>

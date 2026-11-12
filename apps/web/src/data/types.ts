@@ -10,6 +10,8 @@ export type TokenInfo = {
   pool: Address;
   createdAt: number;
   graduated: boolean;
+  /// Graduation sürüyor (curve kapandı, LP henüz açılmadı). Eski indexer yanıtlarında yok.
+  graduationPending?: boolean;
   priceEth: number;
   marketCapEth: number;
   volumeEth: number;

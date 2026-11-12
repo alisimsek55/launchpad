@@ -159,6 +159,7 @@ function MyPlans({ owner, token }: { owner: Address; token: Address }) {
               <button
                 disabled={tx.busy}
                 onClick={() =>
+                  // cancelPlan overload'lu (recipient'li sürüm de var); tek argüman [id] tek parametreli sürümü seçtirir
                   tx.run(() => write({ address: deployment.dcaVault, abi: dcaVaultAbi, functionName: "cancelPlan", args: [id] }))
                 }
                 className="rounded-full border border-line px-3 py-1 text-muted hover:text-foreground disabled:opacity-40"

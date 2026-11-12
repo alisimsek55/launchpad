@@ -21,11 +21,13 @@ const MAX_DESCRIPTION = 1_000;
 const MAX_URL = 2_048;
 const MAX_DATA_IMAGE = 48_000;
 
-/// Desteklenen URI'ler: zincir üstü data: JSON (formun yazdığı) veya https
+/// Yalnızca zincir üstü data: JSON (formun yazdığı) desteklenir. https:// metadata kabul edilmez:
+/// token yaratıcısı kontrata saldırgan bir adres yazarsa her ziyaretçinin tarayıcısı o sunucuya
+/// bağlanır (IP/zamanlama sızıntısı).
 export const isSupportedMetadataURI = (uri: string | undefined): uri is string =>
-  !!uri && /^(data:application\/json[;,]|https:\/\/)/i.test(uri);
+  !!uri && /^data:application\/json[;,]/i.test(uri);
 
-/// Ziyaretçi tarayıcısından harici adrese gidilir: çerez ve referer gönderilmez.
+/// data: URI yereldir, ağa çıkmaz; yine de çerez ve referer gönderilmez.
 export async function fetchMetadata(uri: string): Promise<TokenMetadata | null> {
   const res = await fetch(uri, { credentials: "omit", referrerPolicy: "no-referrer" });
   // Geçici 429/503 gibi hatalar React Query tarafından yeniden denensin diye fırlatılır
@@ -72,7 +74,7 @@ async function readCapped(res: Response, max: number): Promise<string | null> {
 const str = (v: unknown, max: number): string | undefined =>
   typeof v === "string" && v.trim() ? v.trim().slice(0, max) : undefined;
 
-/// Yalnızca https:// bağlantılar (javascript:, data:, http: vb. düşer)
+/// Sosyal bağlantılar: yalnızca https:// (tıklanınca açılır, otomatik istek yok; javascript:, data:, http: vb. düşer)
 function httpsUrl(v: unknown): string | undefined {
   if (typeof v !== "string" || v.length > MAX_URL) return undefined;
   try {
@@ -83,12 +85,13 @@ function httpsUrl(v: unknown): string | undefined {
   }
 }
 
-/// Görsel: data:image/... (zincir üstü) veya https:// adres
+/// Görsel: yalnızca zincir üstü data:image/(png|jpeg|webp|gif). https:// ve svg düşer
+/// (harici adres ziyaretçiyi izletir; svg betik/harici kaynak taşıyabilir). Düşünce yedek avatar çıkar.
 function imageUrl(v: unknown): string | undefined {
   if (typeof v !== "string") return undefined;
   const s = v.trim();
-  if (/^data:image\//i.test(s)) return s.length <= MAX_DATA_IMAGE ? s : undefined;
-  return httpsUrl(s);
+  if (!/^data:image\/(png|jpeg|webp|gif)[;,]/i.test(s)) return undefined;
+  return s.length <= MAX_DATA_IMAGE ? s : undefined;
 }
 
 export function sanitizeMetadata(raw: unknown): TokenMetadata | null {

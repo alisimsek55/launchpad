@@ -10,6 +10,7 @@ import { useMetadata, useToken, useHolders } from "@/data/hooks";
 import { fmtEth, fmtPrice, shortAddr } from "@/lib/format";
 import { Avatar } from "./Avatar";
 import { GraduationBar } from "./GraduationBar";
+import { useGraduationPending } from "./PendingGraduation";
 import { PriceChart } from "./PriceChart";
 import { TokenImage } from "./TokenImage";
 import { TokenTabs } from "./TokenTabs";
@@ -26,6 +27,8 @@ function TokenViewInner({ token }: { token: Address }) {
   const { data: t, isLoading, isError, isFetching, refetch } = useToken(token);
   const { data: meta } = useMetadata(t?.metadataURI);
   const { data: holders } = useHolders(token);
+  // Token yüklenene kadar zincir okuması kapalı (graduated: true okuma yapmaz)
+  const pending = useGraduationPending(token, t ?? { graduated: true });
   if (isLoading) return <p className="text-muted">Yükleniyor…</p>;
   // Indexer 404 değil `null` döner (bulunamadı); hata ise ulaşılamadı demektir, ikisi ayrı gösterilir.
   // Önceden yüklenmiş veri varken arka plan yenilemesi hata verirse sayfa olduğu gibi kalır.
@@ -104,7 +107,7 @@ function TokenViewInner({ token }: { token: Address }) {
             </div>
           ))}
           <div className="col-span-2 sm:col-span-5">
-            <GraduationBar realEth={t.realEth} graduated={t.graduated} />
+            <GraduationBar realEth={t.realEth} graduated={t.graduated} pending={pending} />
           </div>
           <div className="col-span-2 flex gap-6 text-xs text-muted sm:col-span-5">
             <span>
@@ -127,7 +130,7 @@ function TokenViewInner({ token }: { token: Address }) {
       </div>
 
       <div className="lg:sticky lg:top-6 lg:self-start">
-        <TradePanel token={token} symbol={t.symbol} graduated={t.graduated} />
+        <TradePanel token={token} symbol={t.symbol} graduated={t.graduated} pending={pending} />
       </div>
     </div>
   );
