@@ -84,6 +84,9 @@ export function recordTrade(
   trade.txHash = event.transaction.hash;
   trade.save();
 
+  // Mumlar spot fiyatla çizilir: işlem öncesi spot → işlem sonrası spot. Ortalama işlem fiyatı
+  // (`price`) yalnızca Trade.priceEth'te kalır; mumda kullanılırsa tek işlemlik mum open = close olur.
+  const before = token.priceEth;
   token.priceEth = spotPrice;
   token.marketCapEth = spotPrice.times(TOTAL_SUPPLY);
   token.volumeEth = token.volumeEth.plus(ethAmount);
@@ -106,7 +109,7 @@ export function recordTrade(
 
   updateTokenDay(token.id, event.block.timestamp, ethAmount);
   for (let i = 0; i < CANDLE_INTERVALS.length; i++) {
-    updateCandle(token.id, CANDLE_INTERVALS[i], event.block.timestamp, price, ethAmount);
+    updateCandle(token.id, CANDLE_INTERVALS[i], event.block.timestamp, before, spotPrice, ethAmount);
   }
 }
 
@@ -126,7 +129,14 @@ function updateTokenDay(token: Bytes, timestamp: BigInt, ethAmount: BigDecimal):
   d.save();
 }
 
-function updateCandle(token: Bytes, interval: i32, timestamp: BigInt, price: BigDecimal, ethAmount: BigDecimal): void {
+function updateCandle(
+  token: Bytes,
+  interval: i32,
+  timestamp: BigInt,
+  before: BigDecimal,
+  after: BigDecimal,
+  ethAmount: BigDecimal,
+): void {
   const start = (timestamp.toI32() / interval) * interval;
   const id = token.concatI32(interval).concatI32(start);
   let c = Candle.load(id);
@@ -135,15 +145,15 @@ function updateCandle(token: Bytes, interval: i32, timestamp: BigInt, price: Big
     c.token = token;
     c.interval = interval;
     c.timestamp = BigInt.fromI32(start);
-    c.open = price;
-    c.high = price;
-    c.low = price;
+    c.open = before;
+    c.high = before;
+    c.low = before;
     c.volumeEth = ZERO_BD;
     c.tradeCount = 0;
   }
-  if (price.gt(c.high)) c.high = price;
-  if (price.lt(c.low)) c.low = price;
-  c.close = price;
+  if (after.gt(c.high)) c.high = after;
+  if (after.lt(c.low)) c.low = after;
+  c.close = after;
   c.volumeEth = c.volumeEth.plus(ethAmount);
   c.tradeCount = c.tradeCount + 1;
   c.save();
